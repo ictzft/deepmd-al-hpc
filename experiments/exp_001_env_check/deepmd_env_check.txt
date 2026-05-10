@@ -1,0 +1,94 @@
+========== GPU ==========
+Sun May 10 10:30:39 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.183.01             Driver Version: 535.183.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla V100-SXM2-16GB           Off | 00000000:21:01.0 Off |                    0 |
+| N/A   33C    P0              27W / 300W |      0MiB / 16384MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   1  Tesla V100-SXM2-16GB           Off | 00000000:21:02.0 Off |                    0 |
+| N/A   33C    P0              30W / 300W |      0MiB / 16384MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+========== Python ==========
+/opt/deepmd-kit/bin/python
+Python 3.11.15
+========== DeePMD-kit dp ==========
+/opt/deepmd-kit/bin/dp
+usage: dp [-h]
+          [-b {jax,pytorch-exportable,pt-expt,tensorflow,tf,paddle,pd,pytorch,pt} | --jax | --pytorch-exportable | --tensorflow | --paddle | --pytorch]
+          [--version]
+          {transfer,train,freeze,test,eval-desc,compress,doc-train-input,model-devi,convert-from,neighbor-stat,change-bias,train-nvnmd,gui,convert-backend,show,pretrained}
+          ...
+
+DeePMD-kit: A deep learning package for many-body potential energy representation and molecular dynamics
+
+options:
+  -h, --help            show this help message and exit
+  -b {jax,pytorch-exportable,pt-expt,tensorflow,tf,paddle,pd,pytorch,pt}, --backend {jax,pytorch-exportable,pt-expt,tensorflow,tf,paddle,pd,pytorch,pt}
+                        The backend of the model. Default can be set by environment variable DP_BACKEND. (default: tensorflow)
+  --jax                 Alias for --backend jax (default: None)
+  --pytorch-exportable, --pt-expt
+                        Alias for --backend pytorch-exportable (default: None)
+  --tensorflow, --tf    Alias for --backend tensorflow (default: None)
+  --paddle, --pd        Alias for --backend paddle (default: None)
+  --pytorch, --pt       Alias for --backend pytorch (default: None)
+  --version             show program's version number and exit
+
+Valid subcommands:
+  {transfer,train,freeze,test,eval-desc,compress,doc-train-input,model-devi,convert-from,neighbor-stat,change-bias,train-nvnmd,gui,convert-backend,show,pretrained}
+    transfer            (Supported backend: TensorFlow) pass parameters to another model
+    train               train a model
+    freeze              freeze the model
+    test                test the model
+    eval-desc           evaluate descriptors using the model
+    compress            Compress a model
+    doc-train-input     print the documentation (in rst format) of input training parameters.
+    model-devi          calculate model deviation
+========== LAMMPS lmp ==========
+/opt/deepmd-kit/bin/lmp
+
+Large-scale Atomic/Molecular Massively Parallel Simulator - 22 Jul 2025 - Update 2
+Git info (HEAD / stable_22Jul2025_update2)
+
+Usage example: /opt/deepmd-kit/lib/python3.11/site-packages/lammps/lmp -var t 300 -echo screen -in in.alloy
+
+List of command-line options supported by this LAMMPS executable:
+
+-echo none/screen/log/both  : echoing of input script (-e)
+-help                       : print this help message (-h)
+-in none/filename           : read input from file or stdin (default) (-i)
+-kokkos on/off ...          : turn KOKKOS mode on or off (-k)
+-log none/filename          : where to send log output (-l)
+-mdi '<mdi flags>'          : pass flags to the MolSSI Driver Interface
+-mpicolor color             : which exe in a multi-exe mpirun cmd (-m)
+-cite                       : select citation reminder style (-c)
+-nocite                     : disable citation reminder (-nc)
+-nonbuf                     : disable screen/logfile buffering (-nb)
+-package style ...          : invoke package command (-pk)
+-partition size1 size2 ...  : assign partition sizes (-p)
+-plog basename              : basename for partition logs (-pl)
+-pscreen basename           : basename for partition screens (-ps)
+-restart2data rfile dfile ... : convert restart to data file (-r2data)
+-restart2dump rfile dgroup dstyle dfile ... 
+                            : convert restart to dump file (-r2dump)
+-restart2info rfile         : print info about restart rfile (-r2info)
+-reorder topology-specs     : processor reordering (-r)
+-screen none/filename       : where to send screen output (-sc)
+-skiprun                    : skip loops in run and minimize (-sr)
+-suffix gpu/intel/kk/opt/omp: style suffix to apply (-sf)
+========== Python import deepmd ==========
+deepmd import ok
