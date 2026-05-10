@@ -1,0 +1,68 @@
+# =========================
+# Python cache
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# =========================
+# Python / Conda environments
+# =========================
+.conda/
+.env/
+.venv/
+venv/
+env/
+
+# =========================
+# Data files
+# =========================
+data/
+datasets/
+raw_data/
+processed_data/
+
+# =========================
+# DeePMD / model files
+# =========================
+model.ckpt*
+checkpoint
+*.pb
+*.pth
+*.pt
+*.onnx
+*.h5
+*.hdf5
+
+# =========================
+# Large numerical files
+# =========================
+*.npy
+*.npz
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+runs/
+wandb/
+
+# =========================
+# LAMMPS / MD outputs
+# =========================
+dump.*
+traj.*
+log.lammps
+*.lammpstrj
+*.xyz
+*.xtc
+*.dcd
+
+# =========================
+# System files
+# =========================
+.DS_Store
+Thumbs.db
