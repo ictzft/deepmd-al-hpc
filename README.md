@@ -4,7 +4,7 @@
 
 项目不直接训练大语言模型，也不是直接复现 Megatron-LM，而是借鉴 Megatron 系列大规模训练框架中的 **多 GPU 并行、micro-batch、混合精度、批量推理、流水线调度和分布式实验管理思想**，将这些高性能训练思想迁移到 DeePMD / DeepMD-kit 机器学习势函数主动学习场景中。
 
-当前阶段主要在 **2×V100 GPU** 平台上跑通原型流程，包括单模型训练、committee models 并行训练、model deviation 计算、候选构型筛选和简化主动学习闭环；后续计划迁移到 H100 多 GPU 平台，开展更完整的训练加速、推理加速和主动学习闭环性能优化实验。
+当前阶段主要在 **2×V100 GPU** 平台上跑通原型流程，包括 Docker 环境验证、DeepMD-kit 环境验证、主动学习框架 skeleton、committee models 调度逻辑、model deviation 计算和 top-K 候选构型筛选。后续计划迁移到 H100 多 GPU 平台，开展更完整的训练加速、推理加速和主动学习闭环性能优化实验。
 
 ---
 
@@ -111,7 +111,7 @@ Megatron 面对的问题：
 进入下一轮主动学习
 ```
 
-其中，当前阶段优先实现 offline active learning：
+当前阶段优先实现 **offline active learning**：
 
 ```text
 已有完整 DFT 数据集
@@ -129,7 +129,7 @@ Megatron 面对的问题：
 
 ## 五、系统框架设计
 
-本项目整体分为四层：
+本项目整体分为四层。
 
 ### 1. 模型训练层
 
@@ -149,8 +149,6 @@ Megatron 面对的问题：
 - 训练日志；
 - loss 曲线；
 - 能量、力和 virial 误差。
-
----
 
 ### 2. 多模型并行层
 
@@ -176,8 +174,6 @@ GPU 1 → model_seed_002
 GPU 2 → model_seed_003
 GPU 3 → model_seed_004
 ```
-
----
 
 ### 3. 批量推理与不确定性评估层
 
@@ -207,8 +203,6 @@ batch_002
 - virial deviation；
 - combined uncertainty score。
 
----
-
 ### 4. 主动学习调度层
 
 负责组织完整闭环：
@@ -235,90 +229,194 @@ Round 2:
 
 ---
 
-## 六、当前阶段
-
-当前处于：
-
-```text
-第 1 周：环境与仓库初始化
-```
-
-本周目标：
-
-- [ ] 初始化 GitHub 仓库；
-- [ ] 创建项目目录结构；
-- [ ] 编写中文 README；
-- [ ] 编写 `.gitignore`；
-- [ ] 搭建 DeepMD-kit 环境；
-- [ ] 检查 2×V100 是否可用；
-- [ ] 验证 `dp`、`lmp` 和 Python 环境；
-- [ ] 保存第一次环境检查日志；
-- [ ] 完成首次 commit 并 push 到 GitHub。
-
----
-
-## 七、项目目录结构
+## 六、项目目录结构
 
 ```text
 deepmd-al-hpc/
 ├── README.md
 ├── .gitignore
-├── environment/              # 环境安装与配置说明
 ├── configs/                  # DeepMD、主动学习和体系配置文件
-│   ├── deepmd/
+│   └── active_learning/
+├── scripts/                  # Docker、训练、推理、主动学习和性能分析脚本
 │   ├── active_learning/
-│   └── systems/
-├── scripts/                  # 数据处理、训练、推理、主动学习和性能分析脚本
-│   ├── data/
-│   ├── train/
-│   ├── inference/
-│   ├── active_learning/
-│   └── profiling/
-├── slurm/                    # Slurm 作业提交脚本
+│   └── docker/
 ├── src/                      # 自己实现的 Python 源代码
 │   ├── al/
 │   ├── metrics/
 │   └── utils/
 ├── experiments/              # 实验记录
-├── notebooks/                # 绘图和分析 notebook
-├── docs/                     # 项目计划、实验日志、论文想法
-├── results/                  # 小型结果摘要
-└── logs/                     # 本地日志，不上传 GitHub
+│   ├── exp_001_env_check/
+│   └── exp_002_framework_check/
+└── docs/                     # 后续项目计划、实验日志、论文想法
+```
+
+后续会逐步补充：
+
+```text
+configs/deepmd/              # DeePMD input.json 配置
+scripts/train/               # 单模型和 committee models 训练脚本
+scripts/inference/           # 多模型推理脚本
+scripts/eval/                # freeze、test、误差统计脚本
+slurm/                       # Slurm 作业脚本
+results/                     # 小型结果摘要
+notebooks/                   # 绘图和分析 notebook
 ```
 
 ---
 
-## 八、初始硬件平台
+## 七、运行环境
 
-当前前期开发平台：
+### 1. Torch 基础开发环境
+
+用于运行主动学习框架 skeleton。
 
 ```text
-GPU：2×V100
+镜像：cuda-torch:cuda11.3-cudnn8-ubuntu18.04-torch2.4
 用途：
-- DeePMD baseline 训练；
-- committee model 原型验证；
-- offline active learning；
-- model deviation 计算；
-- 初步 profiling。
+- 运行 Python 主动学习框架；
+- 测试 force model deviation；
+- 测试 top-K 构型筛选；
+- 验证 2×V100 调度逻辑。
 ```
 
-后续正式实验计划迁移到：
+进入容器：
+
+```bash
+bash scripts/docker/enter_torch_container.sh
+```
+
+### 2. DeepMD-kit 训练环境
+
+用于后续真实 DeePMD 训练、测试和 LAMMPS 调用。
 
 ```text
-4×A100 / 4×H100 或 8×H100
+镜像：ghcr.io/deepmodeling/deepmd-kit:master
+Python：/opt/deepmd-kit/bin/python
+dp：/opt/deepmd-kit/bin/dp
+lmp：/opt/deepmd-kit/bin/lmp
 ```
 
-用于：
+进入容器：
 
-- 多模型并行训练；
-- 大规模候选构型批量推理；
-- 多 GPU scaling；
-- 主动学习闭环端到端加速；
-- CCF-B 标准实验验证。
+```bash
+bash scripts/docker/enter_deepmd_container.sh
+```
+
+已验证命令：
+
+```bash
+dp -h
+lmp -h
+python -c "import deepmd; print('deepmd import ok')"
+```
+
+环境验证日志：
+
+```text
+experiments/exp_001_env_check/deepmd_env_check.txt
+```
 
 ---
 
-## 九、项目不上传的内容
+## 八、Docker 目录同步方式
+
+本项目采用宿主机代码目录挂载到 Docker 容器中的方式运行：
+
+```bash
+cd /data/zft
+
+docker run --rm -it \
+  --gpus all \
+  -v /data/zft:/data/zft \
+  -w /data/zft \
+  <docker-image> \
+  bash
+```
+
+实现效果：
+
+```text
+宿主机 /data/zft
+  ↕ 实时同步
+Docker 容器 /data/zft
+```
+
+因此可以在宿主机中修改代码，在 Docker 容器中运行代码，并将实验结果同步保存回宿主机目录。
+
+为避免 Docker 生成 root 权限文件，容器启动脚本中默认使用：
+
+```bash
+--user $(id -u):$(id -g)
+-e PYTHONDONTWRITEBYTECODE=1
+```
+
+---
+
+## 九、当前已完成内容
+
+截至目前，项目已经完成第 1 周“环境与仓库初始化”阶段。
+
+### 1. 已完成任务
+
+- [x] 初始化 GitHub 仓库；
+- [x] 将仓库 clone 到 shared-v100 服务器 `/data/zft`；
+- [x] 配置 GitHub SSH 推送；
+- [x] 创建项目基础目录结构；
+- [x] 编写中文 README；
+- [x] 创建 `.gitignore`，避免提交缓存、日志、模型和数据文件；
+- [x] 清理并移除已被 Git 跟踪的 `__pycache__` 和 `.pyc` 文件；
+- [x] 验证 Docker 可以调用 2×V100 GPU；
+- [x] 打通宿主机 `/data/zft` 与 Docker 容器 `/data/zft` 的目录同步；
+- [x] 跑通主动学习 framework check；
+- [x] 验证 force model deviation 与 top-K 构型筛选逻辑；
+- [x] 验证 DeepMD-kit Docker 环境；
+- [x] 验证 `dp -h`、`lmp -h` 和 `python import deepmd`；
+- [x] 完成代码 commit 并 push 到 GitHub。
+
+### 2. 主动学习 skeleton 验证结果
+
+当前已经跑通最小主动学习框架：
+
+```text
+模拟 4 个 committee models 的 force prediction
+  ↓
+计算 force model deviation
+  ↓
+按照不确定性分数排序
+  ↓
+选择 top-K 高不确定性构型
+  ↓
+保存筛选结果
+```
+
+运行命令：
+
+```bash
+PYTHONPATH=. python scripts/active_learning/run_framework_check.py \
+  --config configs/active_learning/framework_check.json
+```
+
+输出文件：
+
+```text
+experiments/exp_002_framework_check/result.json
+```
+
+当前 2×V100 上的 committee model 调度方式为：
+
+```text
+第一批：
+GPU 0 → model_id 0
+GPU 1 → model_id 1
+
+第二批：
+GPU 0 → model_id 2
+GPU 1 → model_id 3
+```
+
+---
+
+## 十、项目不上传的内容
 
 以下内容不应提交到 GitHub：
 
@@ -330,38 +428,56 @@ GPU：2×V100
 - 大规模实验结果；
 - 轨迹文件；
 - LAMMPS 输出文件；
-- 大型图片和中间结果。
+- 大型图片和中间结果；
+- Python 缓存文件；
+- Docker 临时文件。
 
 这些内容应保存在服务器本地或单独的数据目录中。
 
 ---
 
-## 十、阶段性计划
+## 十一、阶段性计划
 
 ### 第 1 周：环境与仓库初始化
 
+状态：已完成。
+
+完成内容：
+
 - 建立 GitHub 仓库；
 - 搭建项目目录；
-- 安装 DeepMD-kit；
-- 检查 2×V100；
+- 配置 Docker 运行环境；
+- 验证 2×V100；
+- 验证 DeepMD-kit；
+- 跑通主动学习 skeleton；
 - 保存环境检查日志。
 
 ### 第 2 周：单模型 DeePMD baseline
 
+计划内容：
+
 - 选择一个小体系数据集；
 - 准备 DeepMD 数据格式；
+- 编写 DeePMD input.json；
 - 训练单个 DeePMD 模型；
+- 执行 dp freeze；
+- 执行 dp test；
 - 评估 Energy MAE 和 Force RMSE；
 - 记录训练时间和 GPU 利用率。
 
 ### 第 3 周：committee models 与 model deviation
 
+计划内容：
+
 - 训练 4 个不同随机种子的模型；
 - 实现 committee prediction；
-- 实现 force model deviation 计算；
-- 绘制 model deviation 分布。
+- 实现真实 force model deviation 计算；
+- 绘制 model deviation 分布；
+- 比较随机采样与 model deviation 采样。
 
 ### 第 4 周：简化主动学习闭环
+
+计划内容：
 
 - 实现 offline active learning；
 - 比较 random sampling 和 model deviation sampling；
@@ -370,7 +486,7 @@ GPU：2×V100
 
 ---
 
-## 十一、预期研究贡献
+## 十二、预期研究贡献
 
 本项目后续希望形成以下几个方面的贡献：
 
@@ -388,7 +504,7 @@ GPU：2×V100
 
 ---
 
-## 十二、最终研究主线
+## 十三、最终研究主线
 
 本项目最终希望形成如下研究主线：
 
@@ -407,64 +523,3 @@ GPU / H100 加速训练、推理和主动学习闭环
   ↓
 形成面向 AI for Science 的高性能主动学习势函数训练框架
 ```
-
----
-
-## 十三、当前进展记录
-
-截至当前阶段，本项目已经完成了主动学习基础框架的最小原型验证。
-
-### 1. Docker 运行环境验证
-
-当前项目采用宿主机代码目录挂载到 Docker 容器中的方式运行：
-
-```bash
-cd /data/zft
-
-docker run --rm -it \
-  --gpus all \
-  -v /data/zft:/data/zft \
-  -w /data/zft \
-  cuda-torch:cuda11.3-cudnn8-ubuntu18.04-torch2.4 \
-  bash
-
----
-
-## 十四、第 1 周完成情况
-
-截至目前，本项目第 1 周“环境与仓库初始化”阶段已经完成。
-
-### 1. 已完成内容
-
-- [x] 初始化 GitHub 仓库；
-- [x] 将仓库 clone 到 shared-v100 服务器 `/data/zft`；
-- [x] 配置 GitHub SSH 推送；
-- [x] 创建项目基础目录结构；
-- [x] 编写中文 README；
-- [x] 创建 `.gitignore`，避免提交缓存、日志、模型和数据文件；
-- [x] 清理并移除已被 Git 跟踪的 `__pycache__` 和 `.pyc` 文件；
-- [x] 验证 Docker 可以调用 2×V100 GPU；
-- [x] 打通宿主机 `/data/zft` 与 Docker 容器 `/data/zft` 的目录同步；
-- [x] 跑通主动学习 framework check；
-- [x] 验证 force model deviation 与 top-K 构型筛选逻辑；
-- [x] 验证 DeepMD-kit Docker 环境；
-- [x] 验证 `dp -h`、`lmp -h` 和 `python import deepmd`；
-- [x] 完成代码 commit 并 push 到 GitHub。
-
----
-
-### 2. Docker 环境验证结果
-
-当前已经验证两个 Docker 环境：
-
-#### 2.1 Torch 基础开发环境
-
-用于运行主动学习框架 skeleton：
-
-```text
-镜像：cuda-torch:cuda11.3-cudnn8-ubuntu18.04-torch2.4
-用途：
-- 运行 Python 主动学习框架；
-- 测试 force model deviation；
-- 测试 top-K 构型筛选；
-- 验证 2×V100 调度逻辑。
