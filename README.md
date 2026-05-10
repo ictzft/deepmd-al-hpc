@@ -427,3 +427,44 @@ docker run --rm -it \
   -w /data/zft \
   cuda-torch:cuda11.3-cudnn8-ubuntu18.04-torch2.4 \
   bash
+
+---
+
+## 十四、第 1 周完成情况
+
+截至目前，本项目第 1 周“环境与仓库初始化”阶段已经完成。
+
+### 1. 已完成内容
+
+- [x] 初始化 GitHub 仓库；
+- [x] 将仓库 clone 到 shared-v100 服务器 `/data/zft`；
+- [x] 配置 GitHub SSH 推送；
+- [x] 创建项目基础目录结构；
+- [x] 编写中文 README；
+- [x] 创建 `.gitignore`，避免提交缓存、日志、模型和数据文件；
+- [x] 清理并移除已被 Git 跟踪的 `__pycache__` 和 `.pyc` 文件；
+- [x] 验证 Docker 可以调用 2×V100 GPU；
+- [x] 打通宿主机 `/data/zft` 与 Docker 容器 `/data/zft` 的目录同步；
+- [x] 跑通主动学习 framework check；
+- [x] 验证 force model deviation 与 top-K 构型筛选逻辑；
+- [x] 验证 DeepMD-kit Docker 环境；
+- [x] 验证 `dp -h`、`lmp -h` 和 `python import deepmd`；
+- [x] 完成代码 commit 并 push 到 GitHub。
+
+---
+
+### 2. Docker 环境验证结果
+
+当前已经验证两个 Docker 环境：
+
+#### 2.1 Torch 基础开发环境
+
+用于运行主动学习框架 skeleton：
+
+```text
+镜像：cuda-torch:cuda11.3-cudnn8-ubuntu18.04-torch2.4
+用途：
+- 运行 Python 主动学习框架；
+- 测试 force model deviation；
+- 测试 top-K 构型筛选；
+- 验证 2×V100 调度逻辑。
