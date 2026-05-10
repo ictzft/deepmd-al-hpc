@@ -3,13 +3,18 @@
 set -e
 
 EXP_DIR=${1:-experiments/exp_003_single_model_baseline}
-INPUT_JSON=${2:-configs/deepmd/input.json}
+INPUT_JSON=${2:-configs/deepmd/toy_h2_input.json}
 
-mkdir -p "${EXP_DIR}"
+PROJECT_ROOT=$(pwd)
+EXP_DIR_ABS="${PROJECT_ROOT}/${EXP_DIR}"
+INPUT_JSON_ABS="${PROJECT_ROOT}/${INPUT_JSON}"
+
+mkdir -p "${EXP_DIR_ABS}"
 
 echo "========== Single DeePMD Model Training =========="
-echo "Experiment directory: ${EXP_DIR}"
-echo "Input config: ${INPUT_JSON}"
+echo "Project root: ${PROJECT_ROOT}"
+echo "Experiment directory: ${EXP_DIR_ABS}"
+echo "Input config: ${INPUT_JSON_ABS}"
 echo "Start time: $(date)"
 
 export PATH=/opt/deepmd-kit/bin:$PATH
@@ -21,8 +26,10 @@ python --version
 which dp
 dp --version || true
 
+cd "${EXP_DIR_ABS}"
+
 echo "========== Start dp train =========="
-dp train "${INPUT_JSON}" 2>&1 | tee "${EXP_DIR}/train.log"
+dp --tf train "${INPUT_JSON_ABS}" 2>&1 | tee train.log
 
 echo "========== Training Finished =========="
 echo "End time: $(date)"
