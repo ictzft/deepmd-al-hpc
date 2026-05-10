@@ -407,3 +407,23 @@ GPU / H100 加速训练、推理和主动学习闭环
   ↓
 形成面向 AI for Science 的高性能主动学习势函数训练框架
 ```
+
+---
+
+## 十三、当前进展记录
+
+截至当前阶段，本项目已经完成了主动学习基础框架的最小原型验证。
+
+### 1. Docker 运行环境验证
+
+当前项目采用宿主机代码目录挂载到 Docker 容器中的方式运行：
+
+```bash
+cd /data/zft
+
+docker run --rm -it \
+  --gpus all \
+  -v /data/zft:/data/zft \
+  -w /data/zft \
+  cuda-torch:cuda11.3-cudnn8-ubuntu18.04-torch2.4 \
+  bash
