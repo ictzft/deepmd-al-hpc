@@ -244,6 +244,7 @@ deepmd-al-hpc/
 │   └── deepmd/                # DeePMD input.json 配置
 ├── scripts/
 │   ├── active_learning/       # 主动学习框架检查脚本
+│   ├── data/                  # 数据生成与转换脚本
 │   ├── docker/                # Docker 运行脚本
 │   ├── eval/                  # freeze、test、误差评估脚本
 │   └── train/                 # 单模型训练脚本
@@ -261,7 +262,6 @@ deepmd-al-hpc/
 后续计划补充：
 
 ```text
-scripts/data/                 # 数据生成与转换脚本
 scripts/inference/            # committee models 推理脚本
 scripts/train/train_committee_models.sh
 slurm/                        # Slurm 作业脚本
@@ -463,9 +463,13 @@ GPU 1 → model_id 3
 /data/zft/data/toy_h2/valid
 ```
 
-训练配置：
+数据生成脚本：
 
 ```text
+scripts/data/make_toy_h2_deepmd.py
+
+训练配置：
+
 configs/deepmd/toy_h2_input.json
 ```
 
