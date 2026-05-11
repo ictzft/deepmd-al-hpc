@@ -4,7 +4,9 @@
 
 项目不直接训练大语言模型，也不是直接复现 Megatron-LM，而是借鉴 Megatron 系列大规模训练框架中的 **多 GPU 并行、micro-batch、混合精度、批量推理、流水线调度和分布式实验管理思想**，将这些高性能训练思想迁移到 DeePMD / DeepMD-kit 机器学习势函数主动学习场景中。
 
-当前阶段主要在 **2×V100 GPU** 平台上完成项目原型验证，包括 Docker 环境验证、DeepMD-kit 环境验证、主动学习框架 skeleton、单模型 DeePMD baseline、committee models 调度逻辑、model deviation 计算和 top-K 候选构型筛选。后续计划迁移到 H100 多 GPU 平台，开展更完整的训练加速、推理加速和主动学习闭环性能优化实验。
+当前阶段主要在 **2×V100 GPU** 平台上完成项目原型验证，包括 Docker 环境验证、DeepMD-kit 环境验证、主动学习框架 skeleton、toy H2 单模型 DeePMD baseline，以及基于模拟 committee forces 的 model deviation 和 top-K 候选构型筛选。当前项目尚未完成真实 4-model DeePMD committee 训练与真实候选构型推理，下一阶段将重点实现多个不同随机种子 DeePMD 模型的 train / freeze / test，并进一步接入真实 committee prediction 与 offline active learning 闭环。
+
+后续计划迁移到 H100 多 GPU 平台，开展更完整的训练加速、推理加速和主动学习闭环性能优化实验。
 
 ---
 
@@ -154,7 +156,7 @@ Megatron 面对的问题：
 
 负责训练多个 committee models。
 
-在 2×V100 阶段，采用两批训练：
+在 2×V100 阶段，计划采用两批训练：
 
 ```text
 第一批：
@@ -231,6 +233,8 @@ Round 2:
 
 ## 六、项目目录结构
 
+当前仓库结构如下：
+
 ```text
 deepmd-al-hpc/
 ├── README.md
@@ -240,10 +244,9 @@ deepmd-al-hpc/
 │   └── deepmd/                # DeePMD input.json 配置
 ├── scripts/
 │   ├── active_learning/       # 主动学习框架检查脚本
-│   ├── data/                  # 数据生成与转换脚本
 │   ├── docker/                # Docker 运行脚本
 │   ├── eval/                  # freeze、test、误差评估脚本
-│   └── train/                 # 单模型和 committee models 训练脚本
+│   └── train/                 # 单模型训练脚本
 ├── src/
 │   ├── al/                    # 主动学习循环、筛选和调度
 │   ├── metrics/               # model deviation 与误差指标
@@ -255,10 +258,12 @@ deepmd-al-hpc/
 └── docs/
 ```
 
-后续会继续补充：
+后续计划补充：
 
 ```text
+scripts/data/                 # 数据生成与转换脚本
 scripts/inference/            # committee models 推理脚本
+scripts/train/train_committee_models.sh
 slurm/                        # Slurm 作业脚本
 results/                      # 小型结果摘要
 notebooks/                    # 绘图和分析 notebook
@@ -372,7 +377,7 @@ Docker 容器 /data/zft
 - [x] 验证 Docker 可以调用 2×V100 GPU；
 - [x] 打通宿主机 `/data/zft` 与 Docker 容器 `/data/zft` 的目录同步；
 - [x] 跑通主动学习 framework check；
-- [x] 验证 force model deviation 与 top-K 构型筛选逻辑；
+- [x] 基于模拟 committee forces 验证 force model deviation 与 top-K 构型筛选逻辑；
 - [x] 验证 DeepMD-kit Docker 环境；
 - [x] 验证 `dp -h`、`lmp -h` 和 `python import deepmd`；
 - [x] 完成代码 commit 并 push 到 GitHub。
@@ -436,6 +441,8 @@ GPU 0 → model_id 2
 GPU 1 → model_id 3
 ```
 
+需要说明的是：当前 skeleton 中的 committee forces 来自随机数模拟，主要用于验证主动学习流程、deviation 计算和调度逻辑是否打通。下一阶段将接入真实 DeePMD frozen models 的预测结果。
+
 ---
 
 ## 十一、单模型 DeePMD baseline 结果
@@ -454,12 +461,6 @@ GPU 1 → model_id 3
 
 验证集路径：
 /data/zft/data/toy_h2/valid
-```
-
-数据生成脚本：
-
-```text
-scripts/data/make_toy_h2_deepmd.py
 ```
 
 训练配置：
@@ -515,7 +516,20 @@ Force  RMSE        : 7.977260e-02 eV/Å
 
 ---
 
-## 十二、项目不上传的内容
+## 十二、当前已知限制
+
+当前项目仍处于原型验证阶段，主要限制包括：
+
+1. 当前 active learning skeleton 使用随机数模拟 committee forces，尚未接入真实 DeePMD frozen models；
+2. 当前只跑通了单模型 toy H2 baseline，尚未完成 4 个不同随机种子的真实 committee models 训练；
+3. 当前 toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
+4. 当前尚未完成真实 candidate pool 的批量推理脚本；
+5. 当前尚未完成 offline active learning 多轮闭环；
+6. 当前尚未进行 H100 多 GPU 加速实验。
+
+---
+
+## 十三、项目不上传的内容
 
 以下内容不应提交到 GitHub：
 
@@ -536,7 +550,7 @@ Force  RMSE        : 7.977260e-02 eV/Å
 
 ---
 
-## 十三、阶段性计划
+## 十四、阶段性计划
 
 ### 第 1 周：环境与仓库初始化
 
@@ -551,30 +565,69 @@ Force  RMSE        : 7.977260e-02 eV/Å
 - [ ] 记录训练日志摘要；
 - [ ] 整理 `metrics_summary.md`；
 - [ ] 检查 `.gitignore` 是否覆盖所有 DeePMD 中间文件；
-- [ ] 固化 toy H2 baseline 的运行命令。
+- [ ] 固化 toy H2 baseline 的运行命令；
+- [ ] 补充 toy H2 数据生成脚本或说明数据生成方式。
 
 ### 第 3 周：committee models 与 model deviation
 
-计划内容：
-
-- 训练 4 个不同随机种子的模型；
-- 实现 committee prediction；
-- 实现真实 force model deviation 计算；
-- 绘制 model deviation 分布；
-- 比较 random sampling 与 model deviation sampling。
-
-### 第 4 周：简化主动学习闭环
+下一阶段重点从单模型 baseline 推进到真实 committee models。
 
 计划内容：
 
-- 实现 offline active learning；
-- 比较 random sampling 和 model deviation sampling；
-- 输出初步 learning curve；
-- 完成第一版技术报告。
+- [ ] 新建 `experiments/exp_004_committee_models/`；
+- [ ] 新增 `scripts/train/train_committee_models.sh`；
+- [ ] 基于 4 个不同随机种子生成 4 份 DeePMD input 配置；
+- [ ] 在 2×V100 上分两批训练 4 个 DeePMD 模型；
+- [ ] 分别执行 `dp freeze` 得到 4 个 frozen models；
+- [ ] 分别执行 `dp test`，汇总 Energy / Force MAE 和 RMSE；
+- [ ] 输出 `experiments/exp_004_committee_models/metrics_summary.md`；
+- [ ] 为后续真实 committee prediction 和 model deviation 计算做准备。
+
+### 第 4 周：简化 offline active learning 闭环
+
+计划内容：
+
+- [ ] 实现 committee models 对 candidate pool 的批量推理；
+- [ ] 将预测结果整理为统一张量格式；
+- [ ] 计算真实 force / energy model deviation；
+- [ ] 比较 random sampling 和 model deviation sampling；
+- [ ] 输出初步 learning curve；
+- [ ] 完成第一版技术报告。
 
 ---
 
-## 十四、预期研究贡献
+## 十五、代码与配置检查
+
+在每次重要修改后，建议执行以下检查：
+
+```bash
+wc -l \
+  scripts/active_learning/run_framework_check.py \
+  src/metrics/deviation.py \
+  src/al/scheduler.py \
+  scripts/train/train_single_model.sh \
+  scripts/eval/freeze_model.sh \
+  scripts/eval/test_single_model.sh \
+  .gitignore \
+  configs/deepmd/toy_h2_input.json
+
+python -m py_compile \
+  scripts/active_learning/run_framework_check.py \
+  src/metrics/deviation.py \
+  src/al/scheduler.py \
+  src/al/loop.py
+
+bash -n \
+  scripts/train/train_single_model.sh \
+  scripts/eval/freeze_model.sh \
+  scripts/eval/test_single_model.sh
+
+python -m json.tool configs/deepmd/toy_h2_input.json > /tmp/check_toy_h2_input.json
+```
+
+---
+
+## 十六、预期研究贡献
 
 本项目后续希望形成以下几个方面的贡献：
 
@@ -592,7 +645,7 @@ Force  RMSE        : 7.977260e-02 eV/Å
 
 ---
 
-## 十五、最终研究主线
+## 十七、最终研究主线
 
 本项目最终希望形成如下研究主线：
 
@@ -611,3 +664,35 @@ GPU / H100 加速训练、推理和主动学习闭环
   ↓
 形成面向 AI for Science 的高性能主动学习势函数训练框架
 ```
+
+---
+
+## 十八、当前阶段总结
+
+当前项目已经完成：
+
+```text
+环境验证
+  ↓
+主动学习 skeleton
+  ↓
+toy H2 单模型 DeePMD train / freeze / test
+  ↓
+基于模拟 committee forces 的 deviation 和 top-K 筛选
+```
+
+下一阶段核心目标是：
+
+```text
+4 个真实 DeePMD committee models
+  ↓
+train / freeze / test
+  ↓
+真实 candidate pool 推理
+  ↓
+真实 model deviation
+  ↓
+offline active learning 最小闭环
+```
+
+当前仓库可以视为 **第一阶段工程原型**，但还不能视为完整主动学习框架。项目下一步的关键是从“单模型 baseline + 模拟 skeleton”推进到“真实 4-model committee baseline”。
