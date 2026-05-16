@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# normalized with LF line endings
 from __future__ import annotations
 
 import argparse

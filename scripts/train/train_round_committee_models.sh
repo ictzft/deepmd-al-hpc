@@ -1,4 +1,5 @@
 #!/bin/bash
+# normalized with LF line endings
 set -euo pipefail
 
 ROUND_ID=${1:-001}

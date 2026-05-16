@@ -1135,3 +1135,4 @@ Round 3: train 230, candidate 20
 ```
 
 也就是整理 Round 0–3 的误差、候选池不确定性变化、训练时间和推理时间，并进一步加入 random sampling baseline 与真实 DFT / AIMD 数据验证。
+<!-- README normalized with LF line endings on 2026-05-16. -->
