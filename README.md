@@ -4,9 +4,20 @@
 
 项目不直接训练大语言模型，也不是直接复现 Megatron-LM，而是借鉴 Megatron 系列大规模训练框架中的 **多 GPU 并行、micro-batch、混合精度、批量推理、流水线调度和分布式实验管理思想**，将这些高性能训练思想迁移到 DeePMD / DeepMD-kit 机器学习势函数主动学习场景中。
 
-当前阶段主要在 **2×V100 GPU** 平台上完成项目原型验证，包括 Docker 环境验证、DeepMD-kit 环境验证、主动学习框架 skeleton、toy H2 单模型 DeePMD baseline、4 个真实 DeePMD committee models 训练、真实 committee prediction、model deviation 计算、top-K 高不确定性构型筛选，以及 dataset-level offline active learning 多轮闭环验证。
+当前阶段主要在 **2×Tesla V100 GPU** 平台上完成项目原型验证，包括 Docker 环境验证、DeepMD-kit 环境验证、主动学习框架 skeleton、toy H2 单模型 DeePMD baseline、4 个真实 DeePMD committee models 训练、真实 committee prediction、model deviation 计算、top-K 高不确定性构型筛选，以及 dataset-level offline active learning 多轮闭环验证。
 
-截至 2026-05-16，项目已经从“单模型 baseline + 模拟 committee forces”推进到“真实 committee models + 真实 model deviation + dataset-level offline active learning 闭环”。当前已经完成 Round 0、Round 1 和 Round 2 的数据扩展、committee model 训练、冻结、测试和下一轮候选构型筛选，并已经生成 Round 3 训练集与剩余候选池。后续将训练 Round 3 committee models，整理 learning curve，并进一步迁移到 H100 多 GPU 平台开展训练加速、推理加速和主动学习闭环性能优化实验。
+截至 **2026-05-17**，项目已经从“单模型 baseline + 模拟 committee forces”推进到“真实 committee models + 真实 model deviation + dataset-level offline active learning 多轮闭环 + learning curve 结果分析”。当前已经完成 Round 0、Round 1、Round 2 和 Round 3 的数据扩展、committee model 训练、冻结、测试和候选构型筛选，并已整理 Round 0–3 的主动学习汇总表与 learning curve 图。
+
+当前 toy H2 offline active learning 主线实验已经形成如下闭环：
+
+```text
+Round 0: train 200, candidate 50
+Round 1: train 210, candidate 40
+Round 2: train 220, candidate 30
+Round 3: train 230, candidate 20
+```
+
+随着主动学习轮次推进，top-K 高不确定性构型的平均 force model deviation 从 Round 0 的 `0.440989` 降低到 Round 3 的 `0.170189`，说明 committee models 在候选构型空间上的预测分歧逐步减小。当前结果主要用于验证主动学习闭环和工程流程，不用于评价真实材料体系精度。后续将进一步加入 random sampling baseline、真实 DFT / AIMD 数据集迁移，以及 H100 多 GPU 加速实验。
 
 ---
 
@@ -51,7 +62,7 @@ GPU / H100 高性能加速
 3. 基于 force / energy / virial deviation 计算候选构型的不确定性；
 4. 实现 offline active learning 闭环，模拟 DFT labeling 过程；
 5. 借鉴 Megatron-style 的并行训练思想，实现多模型并行训练和批量推理；
-6. 在 2×V100 平台上完成原型验证和性能 profiling；
+6. 在 2×V100 平台上完成原型验证、结果汇总和初步性能 profiling；
 7. 为后续 H100 多 GPU 平台上的主动学习闭环加速实验做准备。
 
 ---
@@ -231,10 +242,14 @@ Round 2:
   继续重新训练 committee models
   继续推理和筛选
 
-...
+Round 3:
+  继续扩展训练集
+  继续更新 candidate pool
+  继续重新训练 committee models
+  对剩余 candidate pool 进行预测和筛选
 ```
 
-当前已经从 selection-level 记录推进到 dataset-level 多轮闭环，完成了 Round 1 和 Round 2 的 retraining，并生成了 Round 3 数据集。
+当前已经从 selection-level 记录推进到 dataset-level 多轮闭环，完成了 Round 0–3 的 committee retraining、prediction、model deviation 计算和结果汇总。
 
 ---
 
@@ -247,20 +262,25 @@ deepmd-al-hpc/
 ├── README.md
 ├── .gitignore
 ├── configs/
-│   ├── active_learning/       # 主动学习配置
-│   └── deepmd/                # DeePMD input.json 与 committee 配置
+│   ├── active_learning/           # 主动学习配置
+│   └── deepmd/                    # DeePMD input.json 与 committee 配置
+│       ├── committee/
+│       ├── round_001_committee/
+│       ├── round_002_committee/
+│       └── round_003_committee/
 ├── scripts/
-│   ├── active_learning/       # 主动学习框架检查与 offline AL round 脚本
-│   ├── config/                # 多轮 committee 配置生成脚本
-│   ├── data/                  # toy 数据生成、selected frames 合并与 candidate 更新脚本
-│   ├── docker/                # Docker 运行脚本
-│   ├── eval/                  # freeze、test、误差评估脚本
-│   ├── inference/             # committee models 推理脚本
-│   └── train/                 # 单模型、committee models 和 round retraining 脚本
+│   ├── active_learning/           # 主动学习框架检查与 offline AL round 脚本
+│   ├── analysis/                  # 多轮 AL 结果汇总与 learning curve 生成脚本
+│   ├── config/                    # 多轮 committee 配置生成脚本
+│   ├── data/                      # toy 数据生成、selected frames 合并与 candidate 更新脚本
+│   ├── docker/                    # Docker 运行脚本
+│   ├── eval/                      # freeze、test、误差评估脚本
+│   ├── inference/                 # committee models 推理脚本
+│   └── train/                     # 单模型、committee models 和 round retraining 脚本
 ├── src/
-│   ├── al/                    # 主动学习循环、筛选和调度
-│   ├── metrics/               # model deviation 与误差指标
-│   └── utils/                 # IO、日志、随机种子等工具
+│   ├── al/                        # 主动学习循环、筛选和调度
+│   ├── metrics/                   # model deviation 与误差指标
+│   └── utils/                     # IO、日志、随机种子等工具
 ├── experiments/
 │   ├── exp_001_env_check/
 │   ├── exp_002_framework_check/
@@ -271,7 +291,13 @@ deepmd-al-hpc/
 │   ├── exp_007_round001_committee_models/
 │   ├── exp_008_round001_committee_prediction/
 │   ├── exp_009_round002_committee_models/
-│   └── exp_010_round002_committee_prediction/
+│   ├── exp_010_round002_committee_prediction/
+│   ├── exp_011_round003_committee_models/
+│   ├── exp_012_round003_committee_prediction/
+│   ├── figures/
+│   ├── al_model_level_summary.csv
+│   ├── al_rounds_summary.csv
+│   └── al_rounds_summary.md
 └── docs/
 ```
 
@@ -280,7 +306,6 @@ deepmd-al-hpc/
 后续计划补充：
 
 ```text
-scripts/analysis/              # 多轮 AL 结果汇总和 learning curve 生成脚本
 slurm/                         # Slurm 作业脚本
 results/                       # 小型结果摘要
 notebooks/                     # 绘图和分析 notebook
@@ -315,7 +340,7 @@ bash scripts/docker/enter_torch_container.sh
 
 ```text
 镜像：ghcr.io/deepmodeling/deepmd-kit:master
-DeepMD-kit：v3.1.4.dev81+geab341973
+DeepMD-kit：v3.1.3-81-geab34197
 Python：/opt/deepmd-kit/bin/python
 dp：/opt/deepmd-kit/bin/dp
 lmp：/opt/deepmd-kit/bin/lmp
@@ -351,6 +376,7 @@ lmp -h
 python -c "import deepmd; print('deepmd import ok')"
 python -c "from deepmd.infer import DeepPot; print('DeepPot import ok')"
 python -c "import numpy as np; print(np.__version__)"
+nvidia-smi
 ```
 
 环境验证日志：
@@ -402,7 +428,7 @@ Docker 容器 /data/zft
 I have no name!
 ```
 
-通常是因为容器内没有宿主机用户 ID 对应的用户名记录，不影响代码运行和文件写入。
+通常是因为容器内没有宿主机用户 ID 对应的用户名记录，不影响代码运行和文件写入。但由于容器用户可能没有完整 Git 身份和 SSH 环境，建议在 **宿主机** 上执行 `git commit` 和 `git push`。
 
 ---
 
@@ -433,7 +459,7 @@ I have no name!
 
 状态：已完成最小闭环。
 
-当前已经完成：
+已完成任务：
 
 - [x] 补充 toy H2 数据生成脚本；
 - [x] 生成 toy H2 DeepMD 数据集；
@@ -451,7 +477,7 @@ I have no name!
 
 状态：已完成真实 4-model committee baseline、committee prediction 和最小 offline AL selection 记录。
 
-当前已经完成：
+已完成任务：
 
 - [x] 生成 4 份不同随机种子的 DeePMD 配置；
 - [x] 编写 `scripts/train/train_committee_models.sh`；
@@ -471,9 +497,9 @@ I have no name!
 
 ### 4. 第 4 周：dataset-level offline active learning 多轮闭环
 
-状态：已完成 Round 1 与 Round 2 retraining，并已生成 Round 3 数据集。
+状态：已完成 Round 1、Round 2 与 Round 3 数据闭环。
 
-当前已经完成：
+已完成任务：
 
 - [x] 编写 `scripts/data/merge_selected_frames.py`；
 - [x] 编写 `scripts/data/make_remaining_candidate.py`；
@@ -493,7 +519,32 @@ I have no name!
 - [x] 使用 Round 2 committee models 对 30 个剩余候选构型进行真实预测；
 - [x] 选择 Round 3 需要加入训练集的 top-10 高不确定性构型；
 - [x] 生成 `data/toy_h2/round_003_train`，训练集从 220 frames 扩展到 230 frames；
-- [x] 生成 `data/toy_h2/round_003_candidate`，候选池从 30 frames 缩减到 20 frames。
+- [x] 生成 `data/toy_h2/round_003_candidate`，候选池从 30 frames 缩减到 20 frames；
+- [x] 生成 Round 3 的 4 个 DeePMD committee 配置；
+- [x] 在 2×V100 上完成 Round 3 的 4 个 committee models 训练、冻结和测试；
+- [x] 使用 Round 3 committee models 对 20 个剩余候选构型进行真实预测；
+- [x] 计算 Round 3 candidate pool 的 force / energy model deviation；
+- [x] 选择 Round 3 prediction 中的 top-10 高不确定性构型。
+
+### 5. V100 收尾实验：Round 0–3 汇总与 learning curve
+
+状态：已完成。
+
+已完成任务：
+
+- [x] 编写 `scripts/analysis/summarize_al_rounds.py`；
+- [x] 汇总 Round 0–3 的训练集规模；
+- [x] 汇总 Round 0–3 的 candidate pool 规模；
+- [x] 汇总 Round 0–3 的 4-model Energy / Force 测试误差；
+- [x] 汇总每轮 top-K `force_dev_max` 的最大值、均值和最小值；
+- [x] 输出 `experiments/al_rounds_summary.csv`；
+- [x] 输出 `experiments/al_model_level_summary.csv`；
+- [x] 输出 `experiments/al_rounds_summary.md`；
+- [x] 编写 `scripts/analysis/plot_al_rounds.py`；
+- [x] 生成 `experiments/figures/force_model_deviation_rounds.svg`；
+- [x] 生成 `experiments/figures/dataset_size_rounds.svg`；
+- [x] 生成 `experiments/figures/validation_rmse_rounds.svg`；
+- [x] 将 Round 3 配置、轻量结果、summary 和 analysis 脚本 commit 并 push 到 GitHub。
 
 ---
 
@@ -511,6 +562,9 @@ I have no name!
 | exp_008 | round001_committee_prediction | 已完成 | 使用 Round 1 models 对 40 个剩余 candidate 进行预测和 top-K 筛选 |
 | exp_009 | round002_committee_models | 已完成 | 合并 Round 1 selected frames 后，重新训练 Round 2 的 4 个 committee models |
 | exp_010 | round002_committee_prediction | 已完成 | 使用 Round 2 models 对 30 个剩余 candidate 进行预测和 top-K 筛选 |
+| exp_011 | round003_committee_models | 已完成 | 合并 Round 2 selected frames 后，重新训练 Round 3 的 4 个 committee models |
+| exp_012 | round003_committee_prediction | 已完成 | 使用 Round 3 models 对 20 个剩余 candidate 进行预测和 top-K 筛选 |
+| figures | learning curve figures | 已完成 | 生成 Round 0–3 的 deviation、dataset size 和 RMSE 曲线 |
 
 ---
 
@@ -839,7 +893,7 @@ Round 2 top-10 选择结果基于 `round_002_candidate` 的 frame index：
 
 ### 3. Round 2 → Round 3
 
-Round 3 数据集已经生成，但 Round 3 committee models 尚未训练。
+Round 3 数据扩展结果：
 
 | 项目 | 数值 |
 |---|---:|
@@ -856,6 +910,39 @@ data/toy_h2/round_003_train       # 230 frames
 data/toy_h2/round_003_candidate   # 20 frames
 ```
 
+Round 3 committee 配置：
+
+```text
+configs/deepmd/round_003_committee/
+```
+
+Round 3 committee models：
+
+```text
+experiments/exp_011_round003_committee_models/
+```
+
+Round 3 prediction：
+
+```text
+experiments/exp_012_round003_committee_prediction/
+```
+
+Round 3 top-10 选择结果基于 `round_003_candidate` 的 frame index：
+
+| Rank | Frame index | force_dev_max | energy_dev |
+|---:|---:|---:|---:|
+| 1 | 5 | 2.426791e-01 | 1.080004e+00 |
+| 2 | 3 | 1.903137e-01 | 1.079452e+00 |
+| 3 | 0 | 1.664500e-01 | 1.079340e+00 |
+| 4 | 19 | 1.605250e-01 | 1.078957e+00 |
+| 5 | 4 | 1.604581e-01 | 1.079509e+00 |
+| 6 | 14 | 1.594691e-01 | 1.079818e+00 |
+| 7 | 13 | 1.593928e-01 | 1.078720e+00 |
+| 8 | 18 | 1.585817e-01 | 1.080024e+00 |
+| 9 | 8 | 1.535236e-01 | 1.080936e+00 |
+| 10 | 12 | 1.504961e-01 | 1.078207e+00 |
+
 当前多轮 offline active learning 数据闭环状态：
 
 | Round | Training frames | Candidate frames before selection | Selected frames | Candidate frames after selection | Committee retraining |
@@ -863,28 +950,132 @@ data/toy_h2/round_003_candidate   # 20 frames
 | 0 | 200 | 50 | 10 | 40 | completed in exp_004 |
 | 1 | 210 | 40 | 10 | 30 | completed in exp_007 |
 | 2 | 220 | 30 | 10 | 20 | completed in exp_009 |
-| 3 | 230 | 20 | - | - | pending |
+| 3 | 230 | 20 | 10 | - | completed in exp_011 |
 
 说明：当前 toy H2 数据集只用于流程验证。由于训练步数较少、toy 数据规模极小，不同随机种子模型的 Energy / Force 误差仍存在波动，当前结果不用于评价真实材料体系精度。
 
 ---
 
-## 十六、当前已知限制
+## 十六、Round 0–3 learning curve 汇总结果
+
+当前已经完成 Round 0–3 的主动学习结果汇总。
+
+汇总脚本：
+
+```text
+scripts/analysis/summarize_al_rounds.py
+```
+
+绘图脚本：
+
+```text
+scripts/analysis/plot_al_rounds.py
+```
+
+输出文件：
+
+```text
+experiments/al_rounds_summary.csv
+experiments/al_model_level_summary.csv
+experiments/al_rounds_summary.md
+experiments/figures/force_model_deviation_rounds.svg
+experiments/figures/dataset_size_rounds.svg
+experiments/figures/validation_rmse_rounds.svg
+```
+
+### 1. Round-level summary
+
+| Round | Train frames | Candidate frames | Force RMSE mean | force_dev_max mean | force_dev_max max | force_dev_max min |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 200 | 50 | 1.821392e-01 | 4.409891e-01 | 7.891949e-01 | 3.228673e-01 |
+| 1 | 210 | 40 | 1.617669e-01 | 2.693333e-01 | 5.083387e-01 | 1.376306e-01 |
+| 2 | 220 | 30 | 1.938590e-01 | 1.874125e-01 | 2.759882e-01 | 1.514366e-01 |
+| 3 | 230 | 20 | 1.742648e-01 | 1.701889e-01 | 2.426791e-01 | 1.504961e-01 |
+
+### 2. 主要观察
+
+随着主动学习轮次推进，训练集由 200 frames 增加到 230 frames，候选池由 50 frames 缩减到 20 frames。与此同时，top-K 高不确定性构型的平均 force model deviation 从 Round 0 的 `0.440989` 降低到 Round 3 的 `0.170189`。
+
+这说明基于 committee model deviation 的主动学习采样逐步降低了剩余候选池中高不确定性构型的模型分歧。
+
+需要注意的是，验证集 Force RMSE 并没有严格单调下降：
+
+```text
+Round 0: 0.182139
+Round 1: 0.161767
+Round 2: 0.193859
+Round 3: 0.174265
+```
+
+因此当前结果更适合表述为：
+
+> 多轮主动学习后，候选池不确定性呈持续下降趋势；验证集 Force RMSE 整体处于同一量级，但受 toy 数据规模、随机初始化和 committee 模型差异影响，存在一定波动。
+
+---
+
+## 十七、Round 3 committee retraining 与 prediction 结果
+
+Round 3 使用的数据集为：
+
+```text
+Training set:
+data/toy_h2/round_003_train       # 230 frames
+
+Candidate pool:
+data/toy_h2/round_003_candidate   # 20 frames
+
+Validation set:
+data/toy_h2/valid                 # 50 frames
+```
+
+Round 3 committee 配置：
+
+| Model | Seed | Config file |
+|---|---:|---|
+| model_000 | 1301 | configs/deepmd/round_003_committee/toy_h2_round003_model_000.json |
+| model_001 | 1302 | configs/deepmd/round_003_committee/toy_h2_round003_model_001.json |
+| model_002 | 1303 | configs/deepmd/round_003_committee/toy_h2_round003_model_002.json |
+| model_003 | 1304 | configs/deepmd/round_003_committee/toy_h2_round003_model_003.json |
+
+Round 3 测试结果：
+
+| Model | Energy RMSE (eV) | Energy RMSE/Natoms (eV) | Force RMSE (eV/Å) |
+|---|---:|---:|---:|
+| model_000 | 7.858708e-01 | 3.929354e-01 | 3.768867e-01 |
+| model_001 | 6.801369e-01 | 3.400684e-01 | 1.493383e-01 |
+| model_002 | 6.787318e-01 | 3.393659e-01 | 1.070028e-01 |
+| model_003 | 1.851586e+00 | 9.257932e-01 | 6.383155e-02 |
+
+Round 3 prediction 结果：
+
+```text
+n_models: 4
+n_frames: 20
+n_atoms: 2
+top_k: 10
+prediction time: 7 s
+```
+
+说明：Round 3 中 `model_003` 的 Energy RMSE 明显偏高，但 Force RMSE 较低；同时 selected frames 的 energy deviation 基本集中在 1.078–1.081 附近。因此当前主动学习筛选主要按 force-based model deviation 解释，不将 energy deviation 作为主要筛选依据。
+
+---
+
+## 十八、当前已知限制
 
 当前项目仍处于原型验证阶段，主要限制包括：
 
 1. 当前 toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
 2. 当前已经完成 dataset-level offline active learning 多轮闭环，但尚未引入真实 DFT / AIMD 数据集；
-3. 当前已经完成 Round 1 和 Round 2 committee retraining，但 Round 3 committee models 尚未训练；
-4. 当前尚未系统整理 Round 0–3 的 learning curve；
-5. 当前尚未加入 random sampling baseline，因此暂时不能证明 model deviation sampling 一定优于随机采样；
-6. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
-7. 当前尚未进行 H100 多 GPU 加速实验；
-8. 当前尚未进行真实 DFT labeling 或在线主动学习调度，仅使用已有 toy 数据模拟 offline labeling。
+3. 当前已经完成 Round 0–3 committee retraining、prediction 和 learning curve 汇总，但尚未加入 random sampling baseline；
+4. 当前还不能证明 model deviation sampling 一定优于随机采样；
+5. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
+6. 当前尚未进行 H100 多 GPU 加速实验；
+7. 当前尚未进行真实 DFT labeling 或在线主动学习调度，仅使用已有 toy 数据模拟 offline labeling；
+8. 当前 V100 profiling 只记录了 Round 3 的初步训练与预测耗时，尚未系统记录 Round 0–2 的端到端耗时。
 
 ---
 
-## 十七、项目不上传的内容
+## 十九、项目不上传的内容
 
 以下内容不应提交到 GitHub：
 
@@ -904,50 +1095,34 @@ data/toy_h2/round_003_candidate   # 20 frames
 
 这些内容应保存在服务器本地或单独的数据目录中。GitHub 中只保留代码、配置文件和轻量实验摘要。
 
+当前已提交到 GitHub 的轻量结果包括：
+
+```text
+configs/deepmd/round_003_committee/
+experiments/al_rounds_summary.csv
+experiments/al_model_level_summary.csv
+experiments/al_rounds_summary.md
+experiments/figures/
+experiments/exp_012_round003_committee_prediction/selected_topk.json
+experiments/exp_012_round003_committee_prediction/round003_summary.md
+scripts/analysis/
+```
+
+未提交的大型或中间结果包括：
+
+```text
+committee_predictions.npz
+run_round003_prediction.log
+frozen_model.pb
+model.ckpt
+lcurve.out
+```
+
 ---
 
-## 十八、下一阶段计划
+## 二十、下一阶段计划
 
-### 阶段 1：Round 3 committee retraining
-
-下一步需要基于已经生成的 `round_003_train` 继续训练 Round 3 committee models：
-
-```text
-Round 3 training set: 230 frames
-Round 3 candidate pool: 20 frames
-```
-
-计划内容：
-
-- [ ] 生成 Round 3 的 4 份 DeePMD 配置；
-- [ ] 重新训练 4 个 Round 3 committee models；
-- [ ] 分别 freeze 和 test；
-- [ ] 汇总 Round 3 的 Energy / Force 误差；
-- [ ] 使用 Round 3 models 对剩余 20 个 candidate 进行 prediction；
-- [ ] 计算下一轮 model deviation 和 top-K selection。
-
-### 阶段 2：learning curve 整理
-
-进一步形成最小 learning curve：
-
-```text
-Round 0: 200 training frames
-Round 1: 210 training frames
-Round 2: 220 training frames
-Round 3: 230 training frames
-```
-
-计划内容：
-
-- [ ] 编写 `scripts/analysis/summarize_al_rounds.py`；
-- [ ] 记录不同 round 的训练集规模；
-- [ ] 记录不同 round 的 candidate pool 规模；
-- [ ] 记录不同 round 的 4-model Energy / Force 测试误差；
-- [ ] 记录每轮 top-K `force_dev_max` 的最大值、均值和最小值；
-- [ ] 输出 CSV 或 Markdown 汇总表；
-- [ ] 绘制初步 learning curve。
-
-### 阶段 3：random sampling baseline
+### 阶段 1：random sampling baseline
 
 为了验证 model deviation sampling 的意义，需要增加随机采样对照组：
 
@@ -962,9 +1137,18 @@ random sampling
 - [ ] 从相同 candidate pool 中随机选择 top-K 数量的构型；
 - [ ] 构造 random sampling 的 round_001 / round_002 / round_003 train set；
 - [ ] 训练 random baseline committee models；
-- [ ] 比较 Force RMSE、Energy RMSE 和候选池不确定性下降趋势。
+- [ ] 比较 Force RMSE、Energy RMSE 和候选池不确定性下降趋势；
+- [ ] 形成 model deviation sampling 与 random sampling 的对比曲线。
 
-### 阶段 4：真实 DFT / AIMD 数据集迁移
+预期输出：
+
+```text
+experiments/random_baseline/
+experiments/random_vs_deviation_summary.csv
+experiments/figures/random_vs_deviation.svg
+```
+
+### 阶段 2：真实 DFT / AIMD 数据集迁移
 
 在 toy H2 流程验证完成后，迁移到更接近真实应用的数据：
 
@@ -974,7 +1158,25 @@ random sampling
 - [ ] 复用当前 offline AL pipeline；
 - [ ] 分析真实体系上的 model deviation 与构型筛选效果。
 
-### 阶段 5：H100 多 GPU 加速实验
+### 阶段 3：V100 profiling 补充
+
+当前已记录 Round 3 的初步耗时：
+
+```text
+Round 3 committee training elapsed time: 76 s
+Round 3 prediction elapsed time: 7 s
+```
+
+后续需要系统补充：
+
+- [ ] 单模型训练耗时；
+- [ ] 4-model committee 串行训练耗时；
+- [ ] 2×V100 并行训练耗时；
+- [ ] candidate prediction 耗时；
+- [ ] model deviation 计算耗时；
+- [ ] 单个 active learning round 的端到端耗时。
+
+### 阶段 4：H100 多 GPU 加速实验
 
 在 H100 多 GPU 平台上进一步评估：
 
@@ -986,7 +1188,7 @@ random sampling
 
 ---
 
-## 十九、代码与配置检查
+## 二十一、代码与配置检查
 
 在每次重要修改后，建议执行以下检查：
 
@@ -998,6 +1200,8 @@ wc -l \
   scripts/data/merge_selected_frames.py \
   scripts/data/make_remaining_candidate.py \
   scripts/config/make_round_committee_configs.py \
+  scripts/analysis/summarize_al_rounds.py \
+  scripts/analysis/plot_al_rounds.py \
   scripts/train/train_single_model.sh \
   scripts/train/train_committee_models.sh \
   scripts/train/train_round_committee_models.sh \
@@ -1015,6 +1219,8 @@ python -m py_compile \
   scripts/data/merge_selected_frames.py \
   scripts/data/make_remaining_candidate.py \
   scripts/config/make_round_committee_configs.py \
+  scripts/analysis/summarize_al_rounds.py \
+  scripts/analysis/plot_al_rounds.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
   src/al/loop.py
@@ -1028,7 +1234,9 @@ bash -n \
 
 python -m json.tool configs/deepmd/toy_h2_input.json > /tmp/check_toy_h2_input.json
 
-for f in configs/deepmd/round_001_committee/*.json configs/deepmd/round_002_committee/*.json; do
+for f in configs/deepmd/round_001_committee/*.json \
+         configs/deepmd/round_002_committee/*.json \
+         configs/deepmd/round_003_committee/*.json; do
   python -m json.tool "$f" > /tmp/check_round_config.json
 done
 ```
@@ -1037,7 +1245,7 @@ done
 
 ---
 
-## 二十、预期研究贡献
+## 二十二、预期研究贡献
 
 本项目后续希望形成以下几个方面的贡献：
 
@@ -1055,7 +1263,7 @@ done
 
 ---
 
-## 二十一、最终研究主线
+## 二十三、最终研究主线
 
 本项目最终希望形成如下研究主线：
 
@@ -1077,7 +1285,7 @@ GPU / H100 加速训练、推理和主动学习闭环
 
 ---
 
-## 二十二、当前阶段总结
+## 二十四、当前阶段总结
 
 当前项目已经完成：
 
@@ -1108,10 +1316,16 @@ Round 2 committee models 重新训练
   ↓
 Round 2 candidate pool 重新预测与筛选
   ↓
-Round 3 training set 与 candidate pool 生成
+Round 3 committee models 重新训练
+  ↓
+Round 3 candidate pool 重新预测与筛选
+  ↓
+Round 0–3 summary 表格生成
+  ↓
+Round 0–3 learning curve 图生成
 ```
 
-当前仓库已经从 **第一阶段工程原型** 推进到 **dataset-level offline active learning 多轮闭环原型**。项目已经不再停留在 selection-level 记录，而是完成了 selected frames 合并、remaining candidate 更新、下一轮 committee retraining 和下一轮不确定性筛选。
+当前仓库已经从 **第一阶段工程原型** 推进到 **dataset-level offline active learning 多轮闭环原型 + 初步结果分析阶段**。项目已经不再停留在 selection-level 记录，而是完成了 selected frames 合并、remaining candidate 更新、下一轮 committee retraining、下一轮不确定性筛选，以及多轮结果汇总。
 
 当前已经形成如下最小多轮闭环：
 
@@ -1122,17 +1336,30 @@ Round 2: train 220, candidate 30
 Round 3: train 230, candidate 20
 ```
 
+当前最核心的实验现象是：
+
+```text
+force_dev_max_mean:
+Round 0: 0.440989
+Round 1: 0.269333
+Round 2: 0.187412
+Round 3: 0.170189
+```
+
+这说明随着主动学习轮次推进，剩余候选池中的高不确定性构型平均 force model deviation 持续降低，committee models 在候选构型空间中的预测分歧逐步减小。
+
 下一步关键是从：
 
 ```text
-多轮流程跑通
+多轮流程跑通 + learning curve 初步整理
 ```
 
 推进到：
 
 ```text
-实验结果可分析、可比较、可画 learning curve
+有对照实验、真实数据验证和高性能加速证据
 ```
 
-也就是整理 Round 0–3 的误差、候选池不确定性变化、训练时间和推理时间，并进一步加入 random sampling baseline 与真实 DFT / AIMD 数据验证。
-<!-- README normalized with LF line endings on 2026-05-16. -->
+也就是加入 random sampling baseline，迁移到真实 DFT / AIMD 数据集，并进一步在 H100 平台上评估训练、推理和主动学习闭环的端到端加速效果。
+
+<!-- README updated after Round 3 V100 active learning summary on 2026-05-17. -->
