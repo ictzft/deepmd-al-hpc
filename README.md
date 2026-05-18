@@ -1,20 +1,10 @@
 # deepmd-al-hpc
 
-`deepmd-al-hpc` 是一个面向 **第一性原理机器学习势函数主动学习闭环** 的原型系统，重点关注 **多模型 committee 训练**、**基于不确定性的构型筛选**，以及后续面向 **多 GPU / H100 平台** 的高性能加速。
+`deepmd-al-hpc` 是一个面向 **第一性原理机器学习势函数主动学习闭环** 的原型系统，重点关注 **DeePMD / DeepMD-kit 多模型 committee 训练**、**基于不确定性的构型筛选**、**random sampling baseline 对比**，以及后续面向 **多 GPU / H100 平台** 的高性能加速。
 
-本项目属于 **AI for Science × 高性能计算** 交叉方向，目标是构建一个用于 DeePMD / DeepMD-kit 机器学习势函数主动学习的可复现实验框架。
+本项目属于 **AI for Science × 高性能计算** 交叉方向，目标是构建一个用于机器学习势函数主动学习的可复现实验框架。
 
-当前阶段主要验证：
-
-- DeePMD / DeepMD-kit 环境与训练流程；
-- 多个 DeePMD committee models 的训练与预测；
-- 基于 force / energy model deviation 的不确定性评估；
-- 基于 `force_dev_max` 的 high-uncertainty top-K selection；
-- dataset-level offline active learning 多轮闭环；
-- random sampling baseline 的初步对比。
-
-> 当前仓库不是大语言模型训练项目，也不是 Megatron-LM 复现项目。  
-> 本项目借鉴大规模训练系统中的多 GPU 并行、批量推理、micro-batch、混合精度和实验调度思想，并将其迁移到 DeePMD 主动学习场景中。
+当前仓库不是大语言模型训练项目，也不是 Megatron-LM 复现项目。本项目借鉴大规模训练系统中的多 GPU 并行、批量推理、micro-batch、混合精度和实验调度思想，并将其迁移到 DeePMD 主动学习场景中。
 
 ---
 
@@ -35,7 +25,8 @@
 - Round 0–3 summary 与 learning curve 结果分析；
 - random sampling baseline 的 selection-level 对比；
 - random seed0 Round 001 retraining baseline；
-- random seed0 candidate-pool committee prediction 与 uncertainty branch 对比。
+- random seed0 candidate-pool committee prediction 与 uncertainty branch 对比；
+- 初步文档体系整理，包括环境配置、复现实验、结果说明、baseline、profiling 计划和 Git 数据管理规范。
 
 当前项目已经从：
 
@@ -276,8 +267,16 @@ deepmd-al-hpc/
 │       ├── random_seed0_round_001_committee/
 │       └── toy_h2_input.json
 ├── docs/
+│   ├── code_check.md
+│   ├── data_and_git_policy.md
+│   ├── profiling_h100.md
+│   ├── random_baseline.md
 │   ├── reproduce.md
-│   └── week2_single_model_baseline.md
+│   ├── reproduce_legacy.md
+│   ├── results.md
+│   ├── setup.md
+│   ├── toy_h2_pipeline.md
+│   └── uncertainty_rounds.md
 ├── experiments/
 │   ├── baselines/
 │   ├── exp_001_env_check/
@@ -316,13 +315,49 @@ deepmd-al-hpc/
 - `data/` 为服务器本地数据目录，默认不提交到 GitHub；
 - `.pb` 模型、checkpoint、`.npy`、`.npz` 和大型日志文件不提交到 GitHub；
 - `experiments/` 中主要保留轻量 summary、selected JSON 和 learning curve figures；
+- `scripts/data/` 是数据生成与处理脚本目录，应该被 Git 正常跟踪；
 - 完整复现流程见 `docs/reproduce.md`。
 
 ---
 
-## 6. 核心模块
+## 6. 文档说明
 
-### 6.1 模型训练层
+当前文档已经拆分为多个专题文件，便于维护和复现。
+
+| 文档 | 作用 |
+|---|---|
+| `docs/setup.md` | 环境配置、Docker、DeepMD-kit 基础检查 |
+| `docs/toy_h2_pipeline.md` | toy H2 数据生成、单模型训练和基础流程 |
+| `docs/uncertainty_rounds.md` | uncertainty sampling Round 0–3 多轮闭环说明 |
+| `docs/random_baseline.md` | random sampling baseline、seed0 retraining 和后续扩展计划 |
+| `docs/results.md` | 当前实验结果、learning curve 和结果解释 |
+| `docs/reproduce.md` | 当前主复现入口，整合主要实验命令 |
+| `docs/reproduce_legacy.md` | 早期复现记录，作为历史版本保留 |
+| `docs/data_and_git_policy.md` | 数据文件、模型文件、日志文件与 Git 管理规范 |
+| `docs/code_check.md` | 提交前代码检查、状态检查和大文件检查 |
+| `docs/profiling_h100.md` | V100 profiling、H100 迁移和多 GPU scaling 实验计划 |
+
+推荐阅读顺序：
+
+```text
+docs/setup.md
+  ↓
+docs/toy_h2_pipeline.md
+  ↓
+docs/uncertainty_rounds.md
+  ↓
+docs/random_baseline.md
+  ↓
+docs/results.md
+  ↓
+docs/reproduce.md
+```
+
+---
+
+## 7. 核心模块
+
+### 7.1 模型训练层
 
 负责调用 DeepMD-kit 训练 DeePMD 模型，输出 checkpoint、frozen model、训练日志和测试误差。
 
@@ -332,11 +367,12 @@ deepmd-al-hpc/
 single DeePMD model training
 4-model committee training
 round-wise committee retraining
+random baseline committee retraining
 ```
 
 ---
 
-### 6.2 Committee Prediction 层
+### 7.2 Committee Prediction 层
 
 负责让多个 committee models 对 candidate pool 进行预测，并保存：
 
@@ -351,7 +387,7 @@ selected frame indices
 
 ---
 
-### 6.3 主动学习调度层
+### 7.3 主动学习调度层
 
 负责组织完整闭环：
 
@@ -375,7 +411,7 @@ random sampling baseline
 
 ---
 
-### 6.4 结果分析层
+### 7.4 结果分析层
 
 负责生成：
 
@@ -389,7 +425,7 @@ learning curve figures
 
 ---
 
-## 7. 快速开始
+## 8. 快速开始
 
 进入项目目录：
 
@@ -428,7 +464,7 @@ docs/reproduce.md
 
 ---
 
-## 8. 实验概览
+## 9. 实验概览
 
 | 实验 | 状态 | 说明 |
 |---|---|---|
@@ -450,7 +486,7 @@ docs/reproduce.md
 
 ---
 
-## 9. 版本管理原则
+## 10. 版本管理原则
 
 以下内容不应提交到 GitHub：
 
@@ -486,8 +522,8 @@ documentation
 需要注意：
 
 ```text
-/data/         means ignoring only the root-level data directory.
-scripts/data/  contains data-processing scripts and should be tracked by Git.
+/data/          means ignoring only the root-level data directory.
+scripts/data/   contains data-processing scripts and should be tracked by Git.
 ```
 
 因此 `.gitignore` 中应写：
@@ -504,9 +540,26 @@ data/
 
 否则会误伤 `scripts/data/` 下的数据处理脚本。
 
+可以用以下命令检查：
+
+```bash
+# 根目录 data 应该被忽略
+git check-ignore -v data/toy_h2/train/set.000/coord.npy || true
+
+# scripts/data 不应该被忽略
+git check-ignore -v --no-index scripts/data/new_test_file.py || true
+```
+
+期望结果：
+
+```text
+data/toy_h2/... should be ignored.
+scripts/data/... should not be ignored.
+```
+
 ---
 
-## 10. 当前限制
+## 11. 当前限制
 
 当前项目仍处于原型验证阶段，主要限制包括：
 
@@ -521,11 +574,15 @@ data/
 9. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响；
 10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以直接支撑完整 CCF-B 论文实验结论。
 
+一句话概括：
+
+> 当前仓库已经能证明“流程打通了”，但还不能证明“方法在真实体系上稳定有效且优于强基线”。
+
 ---
 
-## 11. 后续计划
+## 12. 后续计划
 
-### 11.1 第一阶段：补完整 Random Sampling Baseline
+### 12.1 第一阶段：补完整 Random Sampling Baseline
 
 下一阶段优先补全 random baseline：
 
@@ -552,7 +609,7 @@ multi-seed random baseline with mean ± std
 
 ---
 
-### 11.2 第二阶段：加入 Uncertainty-Diversity Sampling
+### 12.2 第二阶段：加入 Uncertainty-Diversity Sampling
 
 在 uncertainty top-K 的基础上加入结构多样性约束：
 
@@ -566,7 +623,7 @@ Step 3: Select final top-K configurations.
 
 ---
 
-### 11.3 第三阶段：迁移到真实 DFT / AIMD 数据集
+### 12.3 第三阶段：迁移到真实 DFT / AIMD 数据集
 
 迁移到更接近真实应用的数据集：
 
@@ -582,7 +639,7 @@ model deviation and configuration selection analysis
 
 ---
 
-### 11.4 第四阶段：补充 Profiling 与 H100 实验
+### 12.4 第四阶段：补充 Profiling 与 H100 实验
 
 补充系统性能分析：
 
@@ -598,7 +655,38 @@ H100 speedup and GPU utilization
 
 ---
 
-## 12. 预期贡献
+### 12.5 第五阶段：整理成论文级实验体系
+
+如果以 CCF-B 论文为目标，后续还需要补充：
+
+```text
+stronger baselines:
+  random sampling
+  DP-GEN-style threshold sampling
+  naive retraining
+  uncertainty-diversity sampling
+
+real datasets:
+  real DFT / AIMD configurations
+  multiple molecular or material systems
+
+system evaluation:
+  training throughput
+  inference throughput
+  GPU utilization
+  scaling efficiency
+  end-to-end wall-clock time
+
+scientific validation:
+  force / energy RMSE
+  MD stability
+  trajectory stability
+  physical property consistency
+```
+
+---
+
+## 13. 预期贡献
 
 本项目后续希望形成以下贡献：
 
@@ -616,7 +704,7 @@ H100 speedup and GPU utilization
 
 ---
 
-## 13. 总结
+## 14. 总结
 
 当前项目已经完成 toy H2 上的 DeePMD 主动学习闭环原型：
 
@@ -649,6 +737,8 @@ random seed0 Round 001 retraining baseline
 下一步重点是：
 
 ```text
+fix and keep documentation consistent
+  ↓
 complete multi-seed random baseline
   ↓
 add uncertainty-diversity sampling
@@ -660,4 +750,4 @@ add systematic profiling
 run H100 / multi-GPU scaling experiments
 ```
 
-<!-- README simplified and reorganized with Chinese section titles on 2026-05-18. -->
+<!-- README reorganized and updated on 2026-05-18. -->
