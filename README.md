@@ -2,16 +2,17 @@
 
 `deepmd-al-hpc` 是一个面向 **第一性原理机器学习势函数主动学习闭环** 的多模型并行与高性能训练原型系统。
 
-项目不直接训练大语言模型，也不是直接复现 Megatron-LM，而是借鉴 Megatron 系列大规模训练框架中的 **多 GPU 并行、micro-batch、混合精度、批量推理、流水线调度和分布式实验管理思想**，将这些系统设计思想迁移到 DeePMD / DeepMD-kit 机器学习势函数主动学习场景中。
+本项目不直接训练大语言模型，也不是简单复现 Megatron-LM，而是借鉴大规模训练系统中的 **多 GPU 并行、批量推理、micro-batch、混合精度、流水线调度和分布式实验管理思想**，将这些系统设计方法迁移到 DeePMD / DeepMD-kit 机器学习势函数主动学习场景中。
 
-当前阶段主要在 **2×Tesla V100 GPU** 平台上完成 toy H2 原型验证，包括：
+当前阶段主要在 **2×Tesla V100 GPU** 平台上完成 toy H2 原型验证，已经实现：
 
 - DeepMD-kit Docker 环境验证；
+- toy H2 数据生成脚本；
 - toy H2 单模型 DeePMD baseline；
 - 4-model DeePMD committee training；
 - committee prediction；
 - force / energy model deviation 计算；
-- top-K 高不确定性构型筛选；
+- 基于 `force_dev_max` 的 top-K 高不确定性构型筛选；
 - dataset-level offline active learning 多轮闭环；
 - Round 0–3 summary 与 learning curve 结果分析；
 - random sampling baseline 的 selection-level 对比；
@@ -22,7 +23,7 @@
 
 ---
 
-## 1. Research Direction
+## 1. 项目定位
 
 本项目属于 **AI for Science 与高性能计算交叉方向**，主要关注：
 
@@ -50,26 +51,26 @@ GPU / H100 高性能加速
 
 > A High-Performance Active Learning Framework for First-Principles Machine Learning Potentials
 
-随着 random baseline 和后续 uncertainty-diversity sampling 的加入，论文方向也可以进一步收敛为：
+随着 random baseline、uncertainty-diversity sampling 和 H100 scaling 实验的补充，论文方向可以进一步收敛为：
 
 > A Multi-GPU Uncertainty-Diversity Active Learning Framework for Deep Potential Models
 
 ---
 
-## 2. Motivation
+## 2. 研究背景与动机
 
-第一性原理计算，例如 DFT / AIMD，精度较高但计算代价昂贵。机器学习势函数可以学习第一性原理势能面，从而显著提高分子动力学模拟效率。
+第一性原理计算，例如 DFT / AIMD，具有较高精度，但计算代价昂贵。机器学习势函数可以学习第一性原理势能面，从而显著提高分子动力学模拟效率。
 
-然而，机器学习势函数训练通常依赖大量高质量标注构型，而真实 DFT 标注成本很高。因此，本项目关注：
+然而，机器学习势函数训练通常依赖大量高质量标注构型，而真实 DFT 标注成本很高。因此，本项目关注以下问题：
 
 ```text
 如何用主动学习减少 DFT 标注冗余？
-如何用 committee models 估计构型不确定性？
+如何用 committee models 估计候选构型的不确定性？
 如何通过 random baseline 验证 uncertainty sampling 的有效性？
 如何用多 GPU / H100 加速多轮主动学习闭环？
 ```
 
-本项目当前采用 **offline active learning** 方式进行原型验证：
+当前项目采用 **offline active learning** 方式进行原型验证：
 
 ```text
 已有完整 toy 数据集
@@ -78,14 +79,14 @@ GPU / H100 高性能加速
   ↓
 被选中的构型才加入训练集
   ↓
-用已有数据模拟真实 DFT labeling
+用已有数据模拟真实 DFT labeling 过程
 ```
 
-这样可以先验证主动学习闭环、数据更新逻辑、多模型并行训练框架和 baseline 对比流程是否可行，再迁移到真实 DFT / AIMD 数据集。
+这种方式的好处是：在不真正调用昂贵 DFT 标注程序的前提下，先验证主动学习闭环、数据更新逻辑、多模型并行训练框架和 baseline 对比流程是否可行，再迁移到真实 DFT / AIMD 数据集。
 
 ---
 
-## 3. Core Workflow
+## 3. 核心流程
 
 当前主动学习闭环如下：
 
@@ -123,9 +124,19 @@ random:
   按固定随机种子随机选择构型，用于 random sampling baseline
 ```
 
+后续计划进一步加入：
+
+```text
+uncertainty-diversity sampling:
+  在高不确定性构型中加入结构多样性约束，减少相似构型的重复选择
+
+DP-GEN-style threshold sampling:
+  根据 trust level 将构型划分为 accurate / candidate / failed 区间
+```
+
 ---
 
-## 4. Current Status
+## 4. 当前完成情况
 
 截至 **2026-05-18**，项目已经完成：
 
@@ -133,6 +144,8 @@ random:
 环境验证
   ↓
 主动学习 skeleton
+  ↓
+toy H2 数据生成脚本
   ↓
 toy H2 单模型 DeePMD train / freeze / test
   ↓
@@ -193,9 +206,9 @@ Retraining baseline:
 
 ---
 
-## 5. Main Results
+## 5. 主要实验结果
 
-### 5.1 Uncertainty-sampling multi-round result
+### 5.1 Uncertainty Sampling 多轮结果
 
 当前 toy H2 offline active learning 主线实验中，top-K 高不确定性构型的平均 force model deviation 随轮次推进逐步降低：
 
@@ -209,7 +222,7 @@ Round 3: 0.170189
 
 这说明随着主动学习轮次推进，剩余候选池中的高不确定性构型平均 force model deviation 持续降低，committee models 在候选构型空间中的预测分歧逐步减小。
 
-验证集 Force RMSE 并没有严格单调下降：
+验证集 Force RMSE 没有严格单调下降：
 
 ```text
 Force RMSE mean:
@@ -225,7 +238,7 @@ Round 3: 0.174265
 
 ---
 
-### 5.2 Selection-level random baseline
+### 5.2 Selection-level Random Baseline
 
 当前已经加入 random sampling baseline，并生成 selection-level 对比结果。
 
@@ -251,7 +264,7 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 5.3 Random seed0 Round 001 retraining baseline
+### 5.3 Random seed0 Round 001 Retraining Baseline
 
 当前已经完成 random seed0 的 Round 001 retraining baseline。
 
@@ -290,7 +303,7 @@ Mean Force RMSE : 2.553366e-01 eV/Å
 Std  Force RMSE : 1.729852e-01 eV/Å
 ```
 
-该结果显示 random seed0 committee 的模型间差异较大，因此后续应报告 mean / std，并继续补充 seed1 和 seed2。
+该结果显示 random seed0 committee 的模型间差异较大，因此后续应继续补充 random seed1 和 random seed2，并最终报告 mean ± std。
 
 相关结果文件：
 
@@ -301,7 +314,7 @@ experiments/baselines/random_seed0_round001_metrics_summary.md
 
 ---
 
-### 5.4 Candidate-pool uncertainty comparison
+### 5.4 Candidate Pool Uncertainty 对比
 
 random seed0 Round 001 retraining 后，对剩余 candidate pool 进行 committee prediction，并与 uncertainty branch 的 Round 001 candidate-pool prediction 进行对比。
 
@@ -333,7 +346,7 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 
 ---
 
-## 6. Repository Structure
+## 6. 仓库结构
 
 ```text
 deepmd-al-hpc/
@@ -389,30 +402,45 @@ deepmd-al-hpc/
 │   │   ├── summarize_al_rounds.py
 │   │   └── summarize_selection_baselines.py
 │   ├── config/
+│   │   └── make_round_committee_configs.py
 │   ├── data/
+│   │   ├── make_toy_h2_deepmd.py
+│   │   ├── make_remaining_candidate.py
+│   │   └── merge_selected_frames.py
 │   ├── docker/
+│   │   ├── check_deepmd_env.sh
+│   │   ├── enter_deepmd_container.sh
+│   │   └── enter_torch_container.sh
 │   ├── eval/
+│   │   ├── freeze_model.sh
+│   │   └── test_single_model.sh
 │   ├── inference/
+│   │   └── predict_committee_models.py
 │   └── train/
+│       ├── train_committee_models.sh
+│       ├── train_round_committee_models.sh
+│       └── train_single_model.sh
 └── src/
     ├── al/
     │   ├── loop.py
     │   ├── scheduler.py
     │   └── selector.py
     ├── metrics/
+    │   └── deviation.py
     └── utils/
 ```
 
 说明：
 
 - `data/` 目录为服务器本地数据目录，默认不提交到 GitHub；
-- `experiments/` 中只保留轻量实验摘要和 selected JSON；
+- `.gitignore` 中应使用 `/data/`，只忽略仓库根目录下的数据目录，不误伤 `scripts/data/`；
+- `experiments/` 中只保留轻量实验摘要、summary、selected JSON 和 learning curve figures；
 - `.pb` 模型、checkpoint、`.npy`、`.npz` 和大型日志文件不提交到 GitHub；
 - 完整复现流程见 `docs/reproduce.md`。
 
 ---
 
-## 7. Documentation
+## 7. 文档说明
 
 | 文档 / 文件 | 说明 |
 |---|---|
@@ -427,7 +455,7 @@ deepmd-al-hpc/
 
 ---
 
-## 8. Quick Start
+## 8. 快速开始
 
 进入项目目录：
 
@@ -460,15 +488,17 @@ docs/reproduce.md
 8. candidate pool 更新
 9. Round 1–3 committee retraining
 10. Round 0–3 learning curve 汇总
+11. random sampling baseline 对比
+12. random seed0 Round 001 retraining baseline
 ```
 
 ---
 
-## 9. Random Baseline Reproduction
+## 9. Random Baseline 复现方法
 
-### 9.1 Selection-level baseline
+### 9.1 Selection-level Baseline 复现
 
-从已有 committee prediction 结果生成 uncertainty / random selection JSON：
+从已有 committee prediction 结果生成 random selection JSON：
 
 ```bash
 python scripts/active_learning/select_from_predictions.py \
@@ -496,7 +526,7 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 9.2 Random seed0 Round 001 retraining
+### 9.2 Random seed0 Round 001 Retraining 复现
 
 构造 random seed0 Round 001 train / candidate 数据：
 
@@ -548,7 +578,7 @@ python scripts/inference/predict_committee_models.py \
 
 ---
 
-## 10. Experiment Overview
+## 10. 实验概览
 
 | 实验编号 | 实验名称 | 状态 | 说明 |
 |---|---|---|---|
@@ -570,7 +600,7 @@ python scripts/inference/predict_committee_models.py \
 
 ---
 
-## 11. System Design
+## 11. 系统设计
 
 本项目整体分为四层：
 
@@ -587,6 +617,16 @@ python scripts/inference/predict_committee_models.py \
 ### 11.1 模型训练层
 
 负责调用 DeepMD-kit 训练单个 DeePMD 模型，输出 checkpoint、frozen model、训练日志和测试误差。
+
+当前阶段主要关注：
+
+```text
+单模型训练是否能跑通
+committee models 是否能稳定训练
+不同随机种子的模型是否能形成预测差异
+```
+
+---
 
 ### 11.2 多模型并行层
 
@@ -606,6 +646,8 @@ GPU 1 → model_003
 
 后续在 H100 平台上计划扩展为更多 GPU 上的并行训练与批量推理。
 
+---
+
 ### 11.3 批量推理与不确定性评估层
 
 负责让多个 committee models 对 candidate pool 进行预测，并计算：
@@ -618,6 +660,8 @@ combined uncertainty score
 ```
 
 当前 toy H2 原型中，主要使用 `force_dev_max` 进行 top-K 高不确定性构型筛选。
+
+---
 
 ### 11.4 主动学习调度层
 
@@ -650,12 +694,12 @@ DP-GEN-style threshold sampling
 
 ---
 
-## 12. Version Management
+## 12. 版本管理原则
 
 以下内容不应提交到 GitHub：
 
 ```text
-data/
+/data/
 datasets/
 raw_data/
 processed_data/
@@ -683,9 +727,30 @@ learning curve figures
 文档
 ```
 
+需要注意：
+
+```text
+/data/         表示只忽略仓库根目录下的数据目录
+scripts/data/  表示脚本目录，应该被 Git 跟踪
+```
+
+因此 `.gitignore` 中应写：
+
+```gitignore
+/data/
+```
+
+而不应写：
+
+```gitignore
+data/
+```
+
+否则会误伤 `scripts/data/` 下的数据处理脚本。
+
 ---
 
-## 13. Known Limitations
+## 13. 当前限制
 
 当前项目仍处于原型验证阶段，主要限制包括：
 
@@ -696,15 +761,14 @@ learning curve figures
 5. 当前尚未进行 H100 多 GPU 加速实验；
 6. 当前尚未进行真实 DFT labeling 或在线主动学习调度；
 7. 当前 V100 profiling 只记录了部分训练与预测耗时，尚未系统记录所有 round 的端到端耗时；
-8. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响。
+8. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响；
+9. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以直接支撑完整 CCF-B 论文实验结论。
 
 ---
 
-## 14. Roadmap
+## 14. 后续计划
 
-下一阶段计划包括：
-
-### 14.1 Complete Random Sampling Baseline
+### 14.1 完善 Random Sampling Baseline
 
 继续补充随机采样对照组：
 
@@ -722,7 +786,7 @@ vs.
 Uncertainty sampling
 ```
 
-比较：
+比较指标包括：
 
 ```text
 Force RMSE
@@ -735,7 +799,7 @@ Energy RMSE
 
 ---
 
-### 14.2 Uncertainty-Diversity Sampling
+### 14.2 加入 Uncertainty-Diversity Sampling
 
 在 uncertainty top-K 的基础上加入结构多样性约束：
 
@@ -746,11 +810,11 @@ Step 3: 每个 cluster 内选择 uncertainty 最高的构型
 Step 4: 得到最终 top-K
 ```
 
-目标是避免 uncertainty-only 选中大量相似构型。
+目标是避免 uncertainty-only 选中大量相似构型，提高主动学习采样效率。
 
 ---
 
-### 14.3 Real DFT / AIMD Dataset
+### 14.3 迁移到真实 DFT / AIMD 数据集
 
 迁移到更接近真实应用的数据：
 
@@ -764,9 +828,11 @@ offline active learning pipeline
 model deviation 与构型筛选分析
 ```
 
+目标是从 toy H2 流程验证推进到真实材料或分子体系验证。
+
 ---
 
-### 14.4 V100 Profiling
+### 14.4 补充 V100 Profiling
 
 补充系统性能分析：
 
@@ -781,7 +847,7 @@ model deviation 计算耗时
 
 ---
 
-### 14.5 H100 Acceleration
+### 14.5 进行 H100 加速实验
 
 在 H100 多 GPU 平台上评估：
 
@@ -796,7 +862,7 @@ GPU 利用率与显存占用
 
 ---
 
-## 15. Expected Contributions
+## 15. 预期贡献
 
 本项目后续希望形成以下几个方面的贡献：
 
@@ -814,11 +880,13 @@ GPU 利用率与显存占用
 
 ---
 
-## 16. Summary
+## 16. 当前结论
 
 当前项目已经完成：
 
 ```text
+toy H2 数据生成
+  ↓
 toy H2 单模型 baseline
   ↓
 4-model DeePMD committee training
@@ -877,9 +945,11 @@ uncertainty-diversity sampling
   ↓
 真实 DFT / AIMD 数据集
   ↓
-系统 profiling 与 H100 加速实验
+系统 profiling
+  ↓
+H100 加速实验
 ```
 
 也就是进一步补齐对照实验、真实数据验证和高性能加速证据。
 
-<!-- README updated with random sampling baseline and random seed0 Round 001 results on 2026-05-18. -->
+<!-- README updated with random sampling baseline, random seed0 Round 001 results, and tracked scripts/data/make_toy_h2_deepmd.py on 2026-05-18. -->
