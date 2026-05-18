@@ -21,6 +21,8 @@
 
 当前项目已经从 **selection-level 主动学习记录** 推进到 **dataset-level offline active learning 多轮闭环原型**，并进一步补充了第一版 **random sampling baseline**。
 
+需要说明的是，当前 random sampling baseline 已经有初步结果，但尚未完整完成。现阶段已经完成 selection-level random baseline 和 random seed0 Round 001 retraining baseline；后续仍需补充 random seed1 / seed2、多轮 random retraining、完整 RMSE learning curve 和端到端耗时对比。
+
 ---
 
 ## 1. 项目定位
@@ -204,6 +206,8 @@ Retraining baseline:
   random seed0 Round 001
 ```
 
+需要强调：random baseline 目前属于 **初步补充完成**，还不是完整对照实验。后续仍需完成 random seed1 / seed2 retraining、多轮 random branch learning curve，以及 random mean ± std 统计。
+
 ---
 
 ## 5. 主要实验结果
@@ -261,6 +265,8 @@ experiments/baselines/selection_baseline_runs.csv
 experiments/baselines/selection_baseline_summary.csv
 experiments/baselines/selection_baseline_summary.md
 ```
+
+说明：selection-level baseline 只能说明不同 selection strategy 选出来的构型不确定性不同，不能直接代表 retraining 后模型精度差异。因此还需要进一步比较 retrained committee models 的 Force RMSE、Energy RMSE 和 candidate-pool uncertainty。
 
 ---
 
@@ -342,7 +348,7 @@ experiments/baselines/random_seed0_round001_prediction_summary.md
 experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
 ```
 
-说明：当前该结论仍基于 toy H2 和单个 random seed0，后续需要补充 seed1 / seed2，并报告 random mean ± std。
+说明：当前结论仍基于 toy H2 和单个 random seed0，后续需要补充 seed1 / seed2，并报告 random mean ± std。
 
 ---
 
@@ -756,13 +762,14 @@ data/
 
 1. 当前 toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
 2. 当前已经完成 dataset-level offline active learning 多轮闭环，但尚未引入真实 DFT / AIMD 数据集；
-3. 当前已经加入 random sampling baseline，但 retraining baseline 只完成 random seed0，仍需补充 seed1 / seed2 并报告 mean ± std；
-4. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
-5. 当前尚未进行 H100 多 GPU 加速实验；
-6. 当前尚未进行真实 DFT labeling 或在线主动学习调度；
-7. 当前 V100 profiling 只记录了部分训练与预测耗时，尚未系统记录所有 round 的端到端耗时；
-8. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响；
-9. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以直接支撑完整 CCF-B 论文实验结论。
+3. 当前已经初步加入 random sampling baseline，但 retraining baseline 只完成 random seed0，仍需补充 seed1 / seed2、多轮 random retraining，并报告 random mean ± std；
+4. 当前 selection-level random baseline 只能说明 uncertainty sampling 选出的构型平均不确定性更高，不能直接代表 retraining 后模型精度优势；
+5. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
+6. 当前尚未进行 H100 多 GPU 加速实验；
+7. 当前尚未进行真实 DFT labeling 或在线主动学习调度；
+8. 当前 V100 profiling 只记录了部分训练与预测耗时，尚未系统记录所有 round 的端到端耗时；
+9. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响；
+10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以直接支撑完整 CCF-B 论文实验结论。
 
 ---
 
@@ -929,6 +936,8 @@ force_dev_max_mean = 0.355420
 ```
 
 这说明在当前 toy H2 offline active learning 设置下，uncertainty sampling 比 random seed0 baseline 更有效地降低了剩余 candidate pool 的平均 force model deviation。
+
+但需要谨慎说明：该结论目前仍基于 toy H2 和单个 random seed0，不能直接推广到真实 DFT / AIMD 数据集，也不能直接作为完整论文级结论。下一步需要补齐多 seed random baseline、结构多样性采样、真实数据集验证、系统 profiling 和 H100 scaling 实验。
 
 下一步关键是从：
 
