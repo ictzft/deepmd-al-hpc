@@ -17,7 +17,7 @@ committee prediction
   ↓
 force / energy model deviation
   ↓
-top-K 高不确定性构型筛选
+uncertainty top-K 构型筛选
   ↓
 selected frames 合并进训练集
   ↓
@@ -26,9 +26,15 @@ candidate pool 更新
 下一轮 committee retraining
   ↓
 Round 0–3 summary 与 learning curve 汇总
+  ↓
+random sampling baseline
+  ↓
+random seed0 Round 001 retraining
+  ↓
+random seed0 candidate-pool prediction comparison
 ```
 
-当前 toy H2 主线实验已经形成如下闭环：
+当前 toy H2 主线实验已经形成如下 uncertainty-sampling 多轮闭环：
 
 ```text
 Round 0: train 200, candidate 50
@@ -37,14 +43,37 @@ Round 2: train 220, candidate 30
 Round 3: train 230, candidate 20
 ```
 
-当前最核心的实验现象是：
+当前 random baseline 已完成：
 
 ```text
-force_dev_max_mean:
+Selection-level baseline:
+  Round 0 random seed0 / seed1 / seed2
+  Round 1 random seed0 / seed1 / seed2
+
+Retraining baseline:
+  random seed0 Round 001
+```
+
+当前最核心的实验现象包括：
+
+```text
+Uncertainty branch force_dev_max_mean:
 Round 0: 0.440989
 Round 1: 0.269333
 Round 2: 0.187412
 Round 3: 0.170189
+```
+
+以及：
+
+```text
+Candidate-pool uncertainty after Round 001 retraining:
+
+uncertainty_round001:
+force_dev_max_mean = 0.126442
+
+random_seed0_round001:
+force_dev_max_mean = 0.355420
 ```
 
 说明：本文档中的 toy H2 数据集只用于流程验证，不用于评价真实材料或分子体系上的模型精度。
@@ -66,10 +95,17 @@ git status
 git log --oneline -5
 ```
 
-建议在每次运行实验前确认工作区干净：
+建议在每次运行实验前确认工作区状态：
 
 ```bash
 git status --short
+```
+
+当前主分支已经包含 random baseline 相关提交：
+
+```text
+774b0cb Add selection-level random sampling baseline
+7ccc388 Add random seed0 round001 baseline results
 ```
 
 ---
@@ -83,8 +119,6 @@ git status --short
   ↕ 实时同步
 Docker 容器 /data/zft
 ```
-
-因此可以在宿主机中修改代码，在 Docker 容器中运行代码，并将实验结果同步保存回宿主机目录。
 
 建议分工如下：
 
@@ -101,7 +135,14 @@ Docker 容器：
 - dp freeze
 - dp test
 - DeepPot prediction
-- Python 实验脚本
+- numpy / DeepMD 相关 Python 实验脚本
+```
+
+注意：
+
+```text
+涉及 numpy、DeepMD-kit、DeepPot、dp train、dp freeze、dp test 的命令，
+建议全部在 DeepMD Docker 容器中运行。
 ```
 
 ---
@@ -113,7 +154,15 @@ Docker 容器：
 推荐使用仓库脚本进入容器：
 
 ```bash
+cd /data/zft
 bash scripts/docker/enter_deepmd_container.sh
+```
+
+进入容器后应看到：
+
+```bash
+pwd
+# /data/zft
 ```
 
 如果需要手动启动容器，可以使用：
@@ -140,16 +189,28 @@ DeepMD-kit：v3.1.3-81-geab34197
 Python：/opt/deepmd-kit/bin/python
 dp：/opt/deepmd-kit/bin/dp
 lmp：/opt/deepmd-kit/bin/lmp
+numpy：2.4.4
+GPU：2×Tesla V100-SXM2-16GB
 ```
 
 进入容器后验证：
 
 ```bash
+which python
+which python3
+
+python - <<'PY'
+import sys
+import numpy as np
+print(sys.executable)
+print(sys.version)
+print("numpy:", np.__version__)
+PY
+
 dp -h
 lmp -h
 python -c "import deepmd; print('deepmd import ok')"
 python -c "from deepmd.infer import DeepPot; print('DeepPot import ok')"
-python -c "import numpy as np; print(np.__version__)"
 nvidia-smi
 ```
 
@@ -217,10 +278,12 @@ Python 缓存文件
 ```text
 metrics_summary.md
 selected_topk.json
-round*_summary.md
+selected_random_seed*.json
+selected_uncertainty.json
 summary.csv
 summary.md
 small figures
+config json
 ```
 
 ---
@@ -280,6 +343,22 @@ python scripts/data/make_toy_h2_deepmd.py \
 ```text
 data/toy_h2/train    # 初始训练集，200 frames
 data/toy_h2/valid    # 初始 candidate pool / validation set，50 frames
+```
+
+检查数据形状：
+
+```bash
+python - <<'PY'
+import numpy as np
+from pathlib import Path
+
+for d in [Path("data/toy_h2/train"), Path("data/toy_h2/valid")]:
+    print(f"\n--- {d} ---")
+    for name in ["coord.npy", "box.npy", "energy.npy", "force.npy"]:
+        p = d / "set.000" / name
+        arr = np.load(p)
+        print(name, arr.shape)
+PY
 ```
 
 ---
@@ -411,6 +490,11 @@ scripts/inference/predict_committee_models.py
 ```bash
 python scripts/inference/predict_committee_models.py \
   --data data/toy_h2/valid \
+  --models \
+    experiments/exp_004_committee_models/model_000/frozen_model.pb \
+    experiments/exp_004_committee_models/model_001/frozen_model.pb \
+    experiments/exp_004_committee_models/model_002/frozen_model.pb \
+    experiments/exp_004_committee_models/model_003/frozen_model.pb \
   --output experiments/exp_005_committee_prediction/committee_predictions.npz \
   --selected-json experiments/exp_005_committee_prediction/selected_topk.json \
   --top-k 10
@@ -426,6 +510,11 @@ force_dev_max
 force_dev_mean
 energy_dev
 selected_indices
+coord
+box
+atype
+ref_energy
+ref_force
 ```
 
 对应实验目录：
@@ -459,8 +548,10 @@ committee_predictions.npz
 
 ```bash
 PYTHONPATH=. python scripts/active_learning/run_offline_al_round.py \
-  --prediction-json experiments/exp_005_committee_prediction/selected_topk.json \
-  --output experiments/exp_006_offline_active_learning/round_001_selection.json
+  --selected-json experiments/exp_005_committee_prediction/selected_topk.json \
+  --output experiments/exp_006_offline_active_learning/round_001_selection.json \
+  --initial-train-frames 200 \
+  --round-id 1
 ```
 
 对应实验目录：
@@ -486,10 +577,11 @@ experiments/exp_006_offline_active_learning/metrics_summary.md
 
 ```bash
 python scripts/data/merge_selected_frames.py \
-  --base data/toy_h2/train \
+  --train data/toy_h2/train \
   --candidate data/toy_h2/valid \
-  --selected-json experiments/exp_005_committee_prediction/selected_topk.json \
-  --output data/toy_h2/round_001_train
+  --selection experiments/exp_005_committee_prediction/selected_topk.json \
+  --output data/toy_h2/round_001_train \
+  --overwrite
 ```
 
 生成：
@@ -505,8 +597,9 @@ data/toy_h2/round_001_train       # 210 frames
 ```bash
 python scripts/data/make_remaining_candidate.py \
   --candidate data/toy_h2/valid \
-  --selected-json experiments/exp_005_committee_prediction/selected_topk.json \
-  --output data/toy_h2/round_001_candidate
+  --selection experiments/exp_005_committee_prediction/selected_topk.json \
+  --output data/toy_h2/round_001_candidate \
+  --overwrite
 ```
 
 生成：
@@ -536,8 +629,10 @@ configs/deepmd/round_001_committee/
 
 ```bash
 bash scripts/train/train_round_committee_models.sh \
+  001 \
   configs/deepmd/round_001_committee \
-  experiments/exp_007_round001_committee_models
+  experiments/exp_007_round001_committee_models \
+  /data/zft/data/toy_h2/valid
 ```
 
 对应实验目录：
@@ -557,7 +652,11 @@ experiments/exp_007_round001_committee_models/metrics_summary.md
 ```bash
 python scripts/inference/predict_committee_models.py \
   --data data/toy_h2/round_001_candidate \
-  --model-dir experiments/exp_007_round001_committee_models \
+  --models \
+    experiments/exp_007_round001_committee_models/model_000/frozen_model.pb \
+    experiments/exp_007_round001_committee_models/model_001/frozen_model.pb \
+    experiments/exp_007_round001_committee_models/model_002/frozen_model.pb \
+    experiments/exp_007_round001_committee_models/model_003/frozen_model.pb \
   --output experiments/exp_008_round001_committee_prediction/committee_predictions.npz \
   --selected-json experiments/exp_008_round001_committee_prediction/selected_topk.json \
   --top-k 10
@@ -583,10 +682,11 @@ experiments/exp_008_round001_committee_prediction/selected_topk.json
 
 ```bash
 python scripts/data/merge_selected_frames.py \
-  --base data/toy_h2/round_001_train \
+  --train data/toy_h2/round_001_train \
   --candidate data/toy_h2/round_001_candidate \
-  --selected-json experiments/exp_008_round001_committee_prediction/selected_topk.json \
-  --output data/toy_h2/round_002_train
+  --selection experiments/exp_008_round001_committee_prediction/selected_topk.json \
+  --output data/toy_h2/round_002_train \
+  --overwrite
 ```
 
 ### 13.2 更新 Round 2 candidate pool
@@ -594,8 +694,9 @@ python scripts/data/merge_selected_frames.py \
 ```bash
 python scripts/data/make_remaining_candidate.py \
   --candidate data/toy_h2/round_001_candidate \
-  --selected-json experiments/exp_008_round001_committee_prediction/selected_topk.json \
-  --output data/toy_h2/round_002_candidate
+  --selection experiments/exp_008_round001_committee_prediction/selected_topk.json \
+  --output data/toy_h2/round_002_candidate \
+  --overwrite
 ```
 
 生成：
@@ -620,8 +721,10 @@ python scripts/config/make_round_committee_configs.py \
 
 ```bash
 bash scripts/train/train_round_committee_models.sh \
+  002 \
   configs/deepmd/round_002_committee \
-  experiments/exp_009_round002_committee_models
+  experiments/exp_009_round002_committee_models \
+  /data/zft/data/toy_h2/valid
 ```
 
 对应实验目录：
@@ -641,7 +744,11 @@ experiments/exp_009_round002_committee_models/metrics_summary.md
 ```bash
 python scripts/inference/predict_committee_models.py \
   --data data/toy_h2/round_002_candidate \
-  --model-dir experiments/exp_009_round002_committee_models \
+  --models \
+    experiments/exp_009_round002_committee_models/model_000/frozen_model.pb \
+    experiments/exp_009_round002_committee_models/model_001/frozen_model.pb \
+    experiments/exp_009_round002_committee_models/model_002/frozen_model.pb \
+    experiments/exp_009_round002_committee_models/model_003/frozen_model.pb \
   --output experiments/exp_010_round002_committee_prediction/committee_predictions.npz \
   --selected-json experiments/exp_010_round002_committee_prediction/selected_topk.json \
   --top-k 10
@@ -667,10 +774,11 @@ experiments/exp_010_round002_committee_prediction/selected_topk.json
 
 ```bash
 python scripts/data/merge_selected_frames.py \
-  --base data/toy_h2/round_002_train \
+  --train data/toy_h2/round_002_train \
   --candidate data/toy_h2/round_002_candidate \
-  --selected-json experiments/exp_010_round002_committee_prediction/selected_topk.json \
-  --output data/toy_h2/round_003_train
+  --selection experiments/exp_010_round002_committee_prediction/selected_topk.json \
+  --output data/toy_h2/round_003_train \
+  --overwrite
 ```
 
 ### 14.2 更新 Round 3 candidate pool
@@ -678,8 +786,9 @@ python scripts/data/merge_selected_frames.py \
 ```bash
 python scripts/data/make_remaining_candidate.py \
   --candidate data/toy_h2/round_002_candidate \
-  --selected-json experiments/exp_010_round002_committee_prediction/selected_topk.json \
-  --output data/toy_h2/round_003_candidate
+  --selection experiments/exp_010_round002_committee_prediction/selected_topk.json \
+  --output data/toy_h2/round_003_candidate \
+  --overwrite
 ```
 
 生成：
@@ -704,8 +813,10 @@ python scripts/config/make_round_committee_configs.py \
 
 ```bash
 bash scripts/train/train_round_committee_models.sh \
+  003 \
   configs/deepmd/round_003_committee \
-  experiments/exp_011_round003_committee_models
+  experiments/exp_011_round003_committee_models \
+  /data/zft/data/toy_h2/valid
 ```
 
 对应实验目录：
@@ -725,7 +836,11 @@ experiments/exp_011_round003_committee_models/metrics_summary.md
 ```bash
 python scripts/inference/predict_committee_models.py \
   --data data/toy_h2/round_003_candidate \
-  --model-dir experiments/exp_011_round003_committee_models \
+  --models \
+    experiments/exp_011_round003_committee_models/model_000/frozen_model.pb \
+    experiments/exp_011_round003_committee_models/model_001/frozen_model.pb \
+    experiments/exp_011_round003_committee_models/model_002/frozen_model.pb \
+    experiments/exp_011_round003_committee_models/model_003/frozen_model.pb \
   --output experiments/exp_012_round003_committee_prediction/committee_predictions.npz \
   --selected-json experiments/exp_012_round003_committee_prediction/selected_topk.json \
   --top-k 10
@@ -815,7 +930,371 @@ Round 3: 0.174265
 
 ---
 
-## 16. 当前实验目录说明
+## 16. Step 10：Random sampling selection-level baseline
+
+当前已经加入 random sampling baseline，用于和 uncertainty top-K 做 selection-level 对比。
+
+### 16.1 从已有 committee prediction 生成 selection JSON
+
+Round 0 uncertainty selection：
+
+```bash
+python scripts/active_learning/select_from_predictions.py \
+  --predictions experiments/exp_005_committee_prediction/committee_predictions.npz \
+  --strategy uncertainty \
+  --top-k 10 \
+  --template-json experiments/exp_005_committee_prediction/selected_topk.json \
+  --output experiments/exp_005_committee_prediction/selected_uncertainty.json
+```
+
+Round 0 random seed0：
+
+```bash
+python scripts/active_learning/select_from_predictions.py \
+  --predictions experiments/exp_005_committee_prediction/committee_predictions.npz \
+  --strategy random \
+  --top-k 10 \
+  --seed 0 \
+  --template-json experiments/exp_005_committee_prediction/selected_topk.json \
+  --output experiments/exp_005_committee_prediction/selected_random_seed0.json
+```
+
+Round 0 random seed1 / seed2：
+
+```bash
+python scripts/active_learning/select_from_predictions.py \
+  --predictions experiments/exp_005_committee_prediction/committee_predictions.npz \
+  --strategy random \
+  --top-k 10 \
+  --seed 1 \
+  --template-json experiments/exp_005_committee_prediction/selected_topk.json \
+  --output experiments/exp_005_committee_prediction/selected_random_seed1.json
+
+python scripts/active_learning/select_from_predictions.py \
+  --predictions experiments/exp_005_committee_prediction/committee_predictions.npz \
+  --strategy random \
+  --top-k 10 \
+  --seed 2 \
+  --template-json experiments/exp_005_committee_prediction/selected_topk.json \
+  --output experiments/exp_005_committee_prediction/selected_random_seed2.json
+```
+
+Round 1 random selection 同理，将 `--predictions` 和 `--template-json` 替换为：
+
+```text
+experiments/exp_008_round001_committee_prediction/committee_predictions.npz
+experiments/exp_008_round001_committee_prediction/selected_topk.json
+```
+
+输出文件：
+
+```text
+experiments/exp_008_round001_committee_prediction/selected_uncertainty.json
+experiments/exp_008_round001_committee_prediction/selected_random_seed0.json
+experiments/exp_008_round001_committee_prediction/selected_random_seed1.json
+experiments/exp_008_round001_committee_prediction/selected_random_seed2.json
+```
+
+---
+
+### 16.2 汇总 selection-level baseline
+
+运行：
+
+```bash
+python scripts/analysis/summarize_selection_baselines.py
+```
+
+输出：
+
+```text
+experiments/baselines/selection_baseline_runs.csv
+experiments/baselines/selection_baseline_summary.csv
+experiments/baselines/selection_baseline_summary.md
+```
+
+当前 selection-level 对比结果：
+
+```text
+Round 000:
+random force_dev_max_mean      : 0.143007
+uncertainty force_dev_max_mean : 0.440989
+
+Round 001:
+random force_dev_max_mean      : 0.145731
+uncertainty force_dev_max_mean : 0.269333
+```
+
+说明：
+
+```text
+uncertainty top-K 策略确实选中了平均不确定性更高的构型；
+random sampling 选中的构型平均不确定性较低。
+```
+
+但该结果只是 selection-level 现象，不能单独证明主动学习最终效果更好。需要继续进行 retraining baseline。
+
+---
+
+## 17. Step 11：Random seed0 Round 001 retraining baseline
+
+当前已经完成 random seed0 Round 001 retraining baseline。
+
+### 17.1 构造 random seed0 Round 001 train set
+
+```bash
+python scripts/data/merge_selected_frames.py \
+  --train data/toy_h2/train \
+  --candidate data/toy_h2/valid \
+  --selection experiments/exp_005_committee_prediction/selected_random_seed0.json \
+  --output data/toy_h2/random_seed0_round_001_train \
+  --overwrite
+```
+
+输出：
+
+```text
+data/toy_h2/random_seed0_round_001_train
+```
+
+检查结果：
+
+```text
+coord.npy  : (210, 6)
+box.npy    : (210, 9)
+energy.npy : (210,)
+force.npy  : (210, 6)
+```
+
+### 17.2 构造 random seed0 Round 001 remaining candidate
+
+```bash
+python scripts/data/make_remaining_candidate.py \
+  --candidate data/toy_h2/valid \
+  --selection experiments/exp_005_committee_prediction/selected_random_seed0.json \
+  --output data/toy_h2/random_seed0_round_001_candidate \
+  --overwrite
+```
+
+输出：
+
+```text
+data/toy_h2/random_seed0_round_001_candidate
+```
+
+检查结果：
+
+```text
+coord.npy  : (40, 6)
+box.npy    : (40, 9)
+energy.npy : (40,)
+force.npy  : (40, 6)
+```
+
+---
+
+### 17.3 使用 random seed0 专用 config
+
+random seed0 config 目录：
+
+```text
+configs/deepmd/random_seed0_round_001_committee/
+```
+
+4 个配置文件均指向：
+
+```text
+/data/zft/data/toy_h2/random_seed0_round_001_train
+```
+
+检查配置：
+
+```bash
+grep -R "training_data\|systems\|random_seed0_round_001_train" -n \
+  configs/deepmd/random_seed0_round_001_committee
+```
+
+JSON 语法检查：
+
+```bash
+python - <<'PY'
+import json
+from pathlib import Path
+
+config_dir = Path("configs/deepmd/random_seed0_round_001_committee")
+
+for p in sorted(config_dir.glob("*.json")):
+    with p.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    print("OK", p)
+    print("  train:", data["training"]["training_data"]["systems"])
+    print("  valid:", data["training"]["validation_data"]["systems"])
+PY
+```
+
+---
+
+### 17.4 训练 random seed0 Round 001 committee models
+
+```bash
+bash scripts/train/train_round_committee_models.sh \
+  001 \
+  configs/deepmd/random_seed0_round_001_committee \
+  experiments/baselines/random_seed0_round001_committee_models \
+  /data/zft/data/toy_h2/valid
+```
+
+注意：
+
+```text
+该训练输出目录不提交到 GitHub：
+experiments/baselines/random_seed0_round001_committee_models/
+
+其中包含：
+frozen_model.pb
+checkpoint
+model.ckpt*
+train.log
+test.log
+lcurve.out
+```
+
+检查 4 个 frozen models 是否生成：
+
+```bash
+find experiments/baselines/random_seed0_round001_committee_models \
+  -maxdepth 2 \
+  -name "frozen_model.pb" \
+  -type f \
+  | sort
+```
+
+预期输出：
+
+```text
+experiments/baselines/random_seed0_round001_committee_models/model_000/frozen_model.pb
+experiments/baselines/random_seed0_round001_committee_models/model_001/frozen_model.pb
+experiments/baselines/random_seed0_round001_committee_models/model_002/frozen_model.pb
+experiments/baselines/random_seed0_round001_committee_models/model_003/frozen_model.pb
+```
+
+---
+
+### 17.5 random seed0 committee metrics summary
+
+当前 random seed0 Round 001 committee 测试结果：
+
+| Model | Energy RMSE / eV | Force RMSE / eV/Å |
+|---|---:|---:|
+| model_000 | 8.813657e-01 | 2.551970e-01 |
+| model_001 | 9.782892e-03 | 1.827423e-01 |
+| model_002 | 1.965928e-01 | 8.939603e-02 |
+| model_003 | 1.675800e+00 | 4.940109e-01 |
+| Mean | 6.908853e-01 | 2.553366e-01 |
+| Std | 7.559906e-01 | 1.729852e-01 |
+
+相关轻量结果：
+
+```text
+experiments/baselines/random_seed0_round001_metrics_summary.csv
+experiments/baselines/random_seed0_round001_metrics_summary.md
+```
+
+说明：
+
+```text
+random seed0 committee model 方差较大；
+因此后续需要继续补充 seed1 / seed2，并报告 random mean ± std。
+```
+
+---
+
+## 18. Step 12：Random seed0 candidate-pool committee prediction
+
+使用 random seed0 Round 001 committee models 对剩余 candidate pool 进行 prediction。
+
+运行：
+
+```bash
+python scripts/inference/predict_committee_models.py \
+  --data data/toy_h2/random_seed0_round_001_candidate \
+  --models \
+    experiments/baselines/random_seed0_round001_committee_models/model_000/frozen_model.pb \
+    experiments/baselines/random_seed0_round001_committee_models/model_001/frozen_model.pb \
+    experiments/baselines/random_seed0_round001_committee_models/model_002/frozen_model.pb \
+    experiments/baselines/random_seed0_round001_committee_models/model_003/frozen_model.pb \
+  --output experiments/baselines/random_seed0_round001_committee_prediction/committee_predictions.npz \
+  --selected-json experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json \
+  --top-k 10
+```
+
+输出：
+
+```text
+experiments/baselines/random_seed0_round001_committee_prediction/committee_predictions.npz
+experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
+```
+
+其中：
+
+```text
+committee_predictions.npz 不提交到 GitHub
+selected_topk.json 可以提交到 GitHub
+```
+
+当前 random seed0 candidate-pool prediction 结果：
+
+```text
+n_frames: 40
+
+force_dev_max_mean: 0.355420
+force_dev_max_max : 1.586355
+force_dev_max_min : 0.086667
+
+energy_dev_mean   : 0.656541
+energy_dev_max    : 0.810345
+energy_dev_min    : 0.642052
+```
+
+---
+
+## 19. Step 13：Uncertainty branch vs Random seed0 comparison
+
+对比 uncertainty Round 001 与 random seed0 Round 001 的 remaining candidate pool uncertainty。
+
+| Run | Candidate Pool | n_frames | force_dev_max mean | force_dev_max max | force_dev_max min | energy_dev mean |
+|---|---|---:|---:|---:|---:|---:|
+| uncertainty_round001 | data/toy_h2/round_001_candidate | 40 | 0.126442 | 0.508339 | 0.042645 | 0.448212 |
+| random_seed0_round001 | data/toy_h2/random_seed0_round_001_candidate | 40 | 0.355420 | 1.586355 | 0.086667 | 0.656541 |
+
+相关轻量结果：
+
+```text
+experiments/baselines/random_seed0_round001_prediction_summary.csv
+experiments/baselines/random_seed0_round001_prediction_summary.md
+```
+
+主要观察：
+
+```text
+在 toy H2 offline active learning 设置下，
+加入 10 个 uncertainty-selected frames 后，
+剩余 candidate pool 的平均 force model deviation 低于 random seed0 baseline。
+
+这初步表明 uncertainty sampling 比 random seed0 baseline
+更有效地降低了候选池不确定性。
+```
+
+注意：
+
+```text
+该结论目前仍基于 toy H2 和单个 random seed0。
+后续必须补充 random seed1 / seed2，并报告 random mean ± std。
+```
+
+---
+
+## 20. 当前实验目录说明
 
 | 实验编号 | 实验名称 | 状态 | GitHub 轻量记录 | 说明 |
 |---|---|---|---|---|
@@ -823,34 +1302,39 @@ Round 3: 0.174265
 | exp_002 | framework_check | 已完成 | result.json | 基于模拟 committee forces 验证 deviation 和 top-K 选择 |
 | exp_003 | single_model_baseline | 已完成 | README.md、metrics_summary.md | toy H2 单模型 DeePMD train / freeze / test |
 | exp_004 | committee_models | 已完成 | metrics_summary.md | 4 个真实 DeePMD committee models 训练、冻结和测试 |
-| exp_005 | committee_prediction | 已完成 | metrics_summary.md、selected_topk.json | 4 个 frozen models 真实预测、deviation 计算和 top-K 筛选 |
+| exp_005 | committee_prediction | 已完成 | metrics_summary.md、selected_topk.json、selected_random_seed*.json、selected_uncertainty.json | 4 个 frozen models 真实预测、deviation 计算、top-K 和 random selection |
 | exp_006 | offline_active_learning | 已完成 | metrics_summary.md、round_001_selection.json | 基于 top-K 结果形成一轮 offline AL selection 记录 |
 | exp_007 | round001_committee_models | 已完成 | metrics_summary.md | 合并 Round 0 selected frames 后，重新训练 Round 1 的 4 个 committee models |
-| exp_008 | round001_committee_prediction | 已完成 | selected_topk.json | 使用 Round 1 models 对 40 个剩余 candidate 进行预测和 top-K 筛选 |
+| exp_008 | round001_committee_prediction | 已完成 | selected_topk.json、selected_random_seed*.json、selected_uncertainty.json | 使用 Round 1 models 对 40 个剩余 candidate 进行预测、top-K 和 random selection |
 | exp_009 | round002_committee_models | 已完成 | metrics_summary.md | 合并 Round 1 selected frames 后，重新训练 Round 2 的 4 个 committee models |
 | exp_010 | round002_committee_prediction | 已完成 | selected_topk.json | 使用 Round 2 models 对 30 个剩余 candidate 进行预测和 top-K 筛选 |
 | exp_011 | round003_committee_models | 已完成 | metrics_summary.md | 合并 Round 2 selected frames 后，重新训练 Round 3 的 4 个 committee models |
 | exp_012 | round003_committee_prediction | 已完成 | round003_summary.md、selected_topk.json | 使用 Round 3 models 对 20 个剩余 candidate 进行预测和 top-K 筛选 |
+| baselines/selection_baseline | 已完成 | selection_baseline_runs.csv、selection_baseline_summary.csv、selection_baseline_summary.md | random sampling 与 uncertainty sampling 的 selection-level 对比 |
+| baselines/random_seed0_round001 | 已完成 | metrics summary、prediction summary、selected_topk.json | random seed0 Round 001 retraining baseline 与 candidate-pool prediction comparison |
 | figures | learning curve figures | 已完成 | svg figures | 生成 Round 0–3 的 deviation、dataset size 和 RMSE 曲线 |
 
 ---
 
-## 17. 代码与配置检查
+## 21. 代码与配置检查
 
 Python 语法检查：
 
 ```bash
-python3 -m py_compile \
+python -m py_compile \
   scripts/active_learning/run_framework_check.py \
   scripts/active_learning/run_offline_al_round.py \
+  scripts/active_learning/select_from_predictions.py \
   scripts/inference/predict_committee_models.py \
   scripts/data/merge_selected_frames.py \
   scripts/data/make_remaining_candidate.py \
   scripts/config/make_round_committee_configs.py \
   scripts/analysis/summarize_al_rounds.py \
   scripts/analysis/plot_al_rounds.py \
+  scripts/analysis/summarize_selection_baselines.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
+  src/al/selector.py \
   src/al/loop.py
 ```
 
@@ -868,12 +1352,13 @@ bash -n \
 JSON 配置检查：
 
 ```bash
-python3 -m json.tool configs/deepmd/toy_h2_input.json > /tmp/check_toy_h2_input.json
+python -m json.tool configs/deepmd/toy_h2_input.json > /tmp/check_toy_h2_input.json
 
 for f in configs/deepmd/round_001_committee/*.json \
          configs/deepmd/round_002_committee/*.json \
-         configs/deepmd/round_003_committee/*.json; do
-  python3 -m json.tool "$f" > /tmp/check_round_config.json
+         configs/deepmd/round_003_committee/*.json \
+         configs/deepmd/random_seed0_round_001_committee/*.json; do
+  python -m json.tool "$f" > /tmp/check_round_config.json
 done
 ```
 
@@ -881,37 +1366,36 @@ Git 状态检查：
 
 ```bash
 git status --short
-git ls-files | grep -E "exp_008|exp_010|exp_007|exp_009|exp_011"
-git ls-files | grep -E "深度势能|第一性原理|高性能加速" || true
+git log --oneline -5
+git ls-files | grep -E "random_seed0|selection_baseline|selected_random|selected_uncertainty"
 ```
 
 预期结果：
 
 ```text
 working tree clean
-exp_008 / exp_010 selected_topk.json 已被追踪
-exp_007 / exp_009 / exp_011 metrics_summary.md 已被追踪
-根目录误生成的中文空文件不再被追踪
+random baseline 相关轻量文件已被追踪
+.pb / .npz / checkpoint / log 文件没有被追踪
 ```
 
 ---
 
-## 18. 当前已知限制
+## 22. 当前已知限制
 
 当前项目仍处于原型验证阶段，主要限制包括：
 
 1. 当前 toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
 2. 当前已经完成 dataset-level offline active learning 多轮闭环，但尚未引入真实 DFT / AIMD 数据集；
-3. 当前已经完成 Round 0–3 committee retraining、prediction 和 learning curve 汇总，但尚未加入 random sampling baseline；
-4. 当前还不能证明 model deviation sampling 一定优于随机采样；
-5. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
-6. 当前尚未进行 H100 多 GPU 加速实验；
-7. 当前尚未进行真实 DFT labeling 或在线主动学习调度，仅使用已有 toy 数据模拟 offline labeling；
-8. 当前 V100 profiling 只记录了 Round 3 的初步训练与预测耗时，尚未系统记录 Round 0–2 的端到端耗时。
+3. 当前已经加入 random sampling baseline，但 retraining baseline 只完成 random seed0，仍需补充 seed1 / seed2 并报告 mean ± std；
+4. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
+5. 当前尚未进行 H100 多 GPU 加速实验；
+6. 当前尚未进行真实 DFT labeling 或在线主动学习调度，仅使用已有 toy 数据模拟 offline labeling；
+7. 当前 V100 profiling 只记录了部分训练与预测耗时，尚未系统记录所有 round 的端到端耗时；
+8. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响。
 
 ---
 
-## 19. GitHub 提交建议
+## 23. GitHub 提交建议
 
 提交前检查：
 
@@ -925,10 +1409,13 @@ git diff
 ```text
 metrics_summary.md
 selected_topk.json
+selected_random_seed*.json
+selected_uncertainty.json
 round*_summary.md
 summary.csv
 summary.md
 small figures
+config json
 ```
 
 大型文件不要提交：
@@ -949,13 +1436,13 @@ input_v2_compat.json
 
 ```bash
 git add docs/reproduce.md
-git commit -m "Update reproduction guide for active learning pipeline"
+git commit -m "Update reproduce guide with random baseline workflow"
 git push origin main
 ```
 
 ---
 
-## 20. 后续迁移到 H100 时的复用方式
+## 24. 后续迁移到 H100 时的复用方式
 
 迁移到 H100 时，本文件仍然作为主流程参考。主要需要替换或补充：
 
@@ -982,23 +1469,25 @@ GPU 利用率与显存占用
 
 ---
 
-## 21. 后续计划
+## 25. 后续计划
 
 下一阶段重点工作：
 
 ```text
-1. 加入 random sampling baseline
-2. 迁移到真实 DFT / AIMD 数据集
-3. 补充 V100 profiling
-4. 在 H100 多 GPU 平台上评估端到端加速效果
+1. 补充 random seed1 / seed2 retraining baseline
+2. 报告 random mean ± std
+3. 加入 uncertainty-diversity sampling
+4. 迁移到真实 DFT / AIMD 数据集
+5. 补充 V100 profiling
+6. 在 H100 多 GPU 平台上评估端到端加速效果
 ```
 
-random sampling baseline 计划：
+random sampling baseline 后续计划：
 
 ```text
-model deviation sampling
+uncertainty sampling
 vs.
-random sampling
+random seed0 / seed1 / seed2
 ```
 
 需要比较：
@@ -1015,14 +1504,15 @@ Energy RMSE
 预期输出：
 
 ```text
-experiments/random_baseline/
-experiments/random_vs_deviation_summary.csv
-experiments/figures/random_vs_deviation.svg
+experiments/baselines/random_seed1_round001_metrics_summary.md
+experiments/baselines/random_seed2_round001_metrics_summary.md
+experiments/baselines/random_vs_uncertainty_summary.csv
+experiments/figures/random_vs_uncertainty.svg
 ```
 
 ---
 
-## 22. 当前阶段总结
+## 26. 当前阶段总结
 
 当前项目已经完成：
 
@@ -1060,18 +1550,42 @@ Round 3 candidate pool 重新预测与筛选
 Round 0–3 summary 表格生成
   ↓
 Round 0–3 learning curve 图生成
+  ↓
+random sampling selection-level baseline
+  ↓
+random seed0 Round 001 retraining baseline
+  ↓
+uncertainty branch vs random seed0 candidate-pool comparison
 ```
 
-当前仓库已经从 **selection-level 记录** 推进到 **dataset-level offline active learning 多轮闭环原型 + 初步结果分析阶段**。
-
-下一步关键是从：
+当前仓库已经从：
 
 ```text
-多轮流程跑通 + learning curve 初步整理
+selection-level 记录
 ```
 
 推进到：
 
 ```text
-有对照实验、真实数据验证和高性能加速证据
+dataset-level offline active learning 多轮闭环原型
+  +
+random sampling baseline 初步对照实验
+```
+
+下一步关键是从：
+
+```text
+单 seed random baseline + toy H2 流程验证
+```
+
+推进到：
+
+```text
+多 seed random baseline
+  ↓
+uncertainty-diversity sampling
+  ↓
+真实 DFT / AIMD 数据集
+  ↓
+系统 profiling 与 H100 加速实验
 ```
