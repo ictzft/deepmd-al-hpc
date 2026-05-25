@@ -1,8 +1,10 @@
-# V100 Profiling 方案与实操指南
+# V100 Profiling
 
-本文档定义在 2×Tesla V100 GPU 平台上对 `deepmd-al-hpc` 主动学习闭环进行系统性能 profiling 的方案和具体操作命令。
+本文档记录在 2×Tesla V100 GPU 平台上对 `deepmd-al-hpc` 主动学习闭环的性能 profiling 方案和实测数据。
 
-**当前状态：训练耗时已从 train.log 提取（2026-05-25），prediction 和端到端耗时基于 Docker 时间戳估算。** 详细数据见 `experiments/profiling/profiling_v100_summary.md`。GPU 利用率和显存尚未系统监控。
+**当前状态：Wall-clock training time 已从 36 个 train.log 完整提取（2026-05-25）。GPU utilization/memory 已有 representative sample（nvidia-smi dmon 单次训练记录）。Prediction 和 I/O 阶段耗时为估算值。** 详细数据见 `experiments/profiling/profiling_v100_summary.md`。
+
+The current V100 profiling should be treated as a **wall-clock baseline** rather than a complete performance characterization.
 
 ## 1. 为什么 V100 阶段需要做 profiling
 
@@ -13,7 +15,8 @@ V100 阶段的 profiling 目标不是追求极限性能，而是：
 - 识别主要性能瓶颈（training vs inference vs I/O）；
 - 为后续 H100 迁移和多 GPU scaling 提供 baseline 对比数据。
 
-当前 V100 profiling 只零散记录了部分训练和预测耗时（见 `experiments/al_rounds_summary.csv` 中的 `train_elapsed_s` 和 `prediction_elapsed_s` 列），尚未系统记录所有 round 和所有 seed 的完整性能数据。
+已完成：training wall-clock time（36 个 train.log，mean=10.9s/model），2×V100 并行加速比（1.97×），representative GPU utilization/memory sample。
+待完成：prediction/I/O 阶段精确耗时，系统 GPU utilization 曲线记录，end-to-end round 精确 wall-clock time。
 
 ---
 

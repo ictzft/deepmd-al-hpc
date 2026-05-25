@@ -175,7 +175,7 @@ toy H2 数据规模较小；
 committee models 随机初始化带来差异；
 当前 valid set 同时承担 candidate pool 和 validation/test 角色；
 top-K uncertainty selection 更直接优化候选池覆盖，而不一定保证每一轮 RMSE 单调下降；
-当前尚未进行多 seed mean ± std 统计。
+当前已完成 multi-seed (seed0/seed1/seed2) mean ± std 统计（Round 001/002/003）。
 ```
 
 ---
@@ -399,9 +399,9 @@ force_dev_max_mean = 0.391784
 需要注意：
 
 ```text
-该结论目前仍基于 toy H2 和 Round 001 单轮 retraining；
-后续需要补充 Round 002/003 多轮 random retraining；
-不能直接推广到真实 DFT / AIMD 数据集。
+该结论目前仍基于 toy H2 数据集；
+Round 001–003 multi-round random retraining 已补充完成；
+但仍不能直接推广到真实 DFT / AIMD 数据集。
 ```
 
 相关结果文件：
@@ -476,12 +476,12 @@ experiments/baselines/random_round001_comparison.csv
 2. 当前 valid set 同时承担 candidate pool 和 validation/test 的角色；
 3. 当前尚未引入真实 DFT / AIMD 数据集；
 4. random sampling baseline 已完成 Round 001–003 三 seed multi-round retraining (2026-05-25, 2×V100)；
-5. 当前尚未形成完整 RMSE learning curve 对比；
-6. 当前尚未加入结构多样性选择策略；
+5. uncertainty vs random full RMSE learning curve 对比已生成；
+6. 当前尚未加入结构多样性选择策略的 multi-round retraining（策略原型已实现，Round 001 已验证）；
 7. 当前尚未进行 H100 / 多 GPU scaling 实验；
-8. 当前尚未系统记录端到端 active learning wall-clock time；
+8. V100 training wall-clock profiling 已记录；GPU utilization 和端到端系统测量仍需补充；
 9. 当前尚未进行 MD 稳定性验证；
-10. 当前结果更适合证明主动学习闭环可运行，尚不足以作为完整论文级结论。
+10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
 
 ---
 
@@ -670,7 +670,7 @@ general conclusions.
 中文表述：
 
 ```text
-然而，该观察目前仍基于 toy H2 数据集和单轮 retraining (Round 001)。
+然而，该观察目前仍基于 toy H2 数据集。Round 001–003 multi-round random retraining 已补充完成，但仍不能直接推广到真实 DFT/AIMD 体系。
 在得出一般性结论之前，仍需补充多轮 random retraining (Round 002/003)、
 真实 DFT / AIMD 数据集以及系统性能分析。
 ```

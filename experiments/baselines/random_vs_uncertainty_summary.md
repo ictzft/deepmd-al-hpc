@@ -35,14 +35,13 @@
 
 ## Notes
 
-- Uncertainty branch uses `force_dev_max` top-K selection across Round 0–3.
-- Random baseline currently has Round 001 multi-seed data (seed0/seed1/seed2).
-- Random Round 002/003 data is pending — scripts and configs are prepared for reproducibility.
+- Uncertainty branch: `force_dev_max` top-K selection across Round 0–3.
+- Random baseline: multi-seed (seed0/seed1/seed2) Round 001–003 retraining completed (2026-05-25, 2×V100).
 - This is a toy H2 workflow validation. Real DFT/AIMD datasets and H100 scaling are not yet included.
+- `force_dev_max_mean` metadata summary reflects per-round statistics.
 
 **Field meaning note:** `force_dev_max_mean` has different semantics per branch:
 - For **uncertainty**: mean `force_dev_max` of the top-K **selected** frames from committee prediction.
 - For **random**: mean `force_dev_max` of the **remaining candidate pool** after retraining.
 - These are not directly comparable; for a fair remaining candidate-pool comparison,
-  see the per-seed `random_seed*_round001_prediction_summary.csv` files (which include
-  the uncertainty_round001 remaining candidate-pool row).
+  both branches should use the same metric (remaining candidate-pool force_dev_max_mean).

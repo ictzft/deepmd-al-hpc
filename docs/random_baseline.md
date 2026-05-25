@@ -916,7 +916,7 @@ uncertainty branch 的 remaining candidate-pool force_dev_max_mean
 
 ```text
 该结论目前仍基于 toy H2 和 Round 001 单轮 retraining。
-后续需要补充 Round 002/003 多轮 random retraining，
+Round 002/003 多轮 random retraining 已完成（2026-05-25），
 并生成完整 RMSE learning curve 对比。
 ```
 

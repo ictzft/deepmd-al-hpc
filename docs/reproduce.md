@@ -135,8 +135,8 @@ Round 002/003:
   已执行完毕（2026-05-25），summary 和 comparison 已生成
 
 当前可复现的 random baseline 范围为：
-  Round 001 single-round multi-seed comparison
-  尚未覆盖 Round 002/003 多轮 learning curve
+  Round 001–003 multi-seed multi-round comparison
+  uncertainty vs random full learning curve
 ```
 
 说明：
@@ -683,11 +683,11 @@ uncertainty-diversity selection
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. 当前尚未引入真实 DFT / AIMD 数据集；
 3. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
-4. 当前尚未形成完整 RMSE learning curve 对比；
-5. 当前尚未加入结构多样性选择策略；
+4. uncertainty vs random full RMSE learning curve 对比已生成；
+5. diversity 和 trust-level 策略原型已实现（Round 001 已验证），multi-round 尚未完成；
 6. 当前尚未进行 H100 / 多 GPU scaling 实验；
-7. 当前尚未系统记录端到端 active learning wall-clock time；
-8. 当前结果更适合证明主动学习闭环可运行，尚不足以作为完整论文级结论。
+7. V100 training wall-clock profiling 已记录；GPU utilization/memory 系统监测和端到端精确测量未完成；
+8. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
 
 ---
 

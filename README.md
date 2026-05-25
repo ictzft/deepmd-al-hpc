@@ -819,7 +819,7 @@ uncertainty vs random full comparison + learning curves
 
 > 在 toy H2 offline active learning 设置下，uncertainty sampling 能够更有效地选择高不确定性构型，并在 Round 001 的 random seed0 / seed1 / seed2 对比中一致显示出更低的剩余 candidate-pool force model deviation。
 
-但该结论仍基于 toy H2 数据集，且尚未完成 Round 002/003 多轮 random retraining，不能直接推广到真实 DFT / AIMD 数据集，也不能直接作为完整论文级结论。
+但该结论仍基于 toy H2 数据集，尚未在真实 DFT / AIMD 数据集上验证，不能直接推广到真实材料体系，也不能直接作为完整论文级结论。
 
 下一步重点是：
 
