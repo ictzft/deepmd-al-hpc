@@ -40,58 +40,70 @@ def extract_remaining_candidate_dev(pred_dir: Path) -> tuple:
     data = np.load(npz, allow_pickle=True)
     fdm = data["force_dev_max"]
     ed = data["energy_dev"]
-    return float(np.mean(fdm)), float(np.std(fdm)), float(np.mean(ed))
+    return (float(np.mean(fdm)), float(np.std(fdm)), float(np.mean(ed)))
 
 
 def main():
     rows = []
 
-    # ---- Uncertainty branch (Round 0-3) ----
-    # Remaining candidate pool: round_*_candidate dirs
+    # ---- Uncertainty branch (Round 0-3, now with multi-seed seed0/1/2) ----
     for r in [0, 1, 2, 3]:
         rs = f"{r:03d}" if r > 0 else "000"
-        pred_dir = PROJ / f"experiments/exp_{5+r:03d}_committee_prediction" if r == 0 else \
-                   PROJ / f"experiments/exp_{7+r:03d}_round{rs}_committee_prediction" if r <= 1 else \
-                   PROJ / f"experiments/exp_{6+r:03d}_round{rs}_committee_prediction"
-
-        # Uncertainty remaining candidate = round_X_candidate (shared data)
-        cand_dir = PROJ / f"data/toy_h2/round_{rs}_candidate"
-
-        # RMSE from al_rounds_summary.csv
-        al_csv = PROJ / "experiments" / "al_rounds_summary.csv"
-        e_rmse = None
-        f_rmse = None
-        if al_csv.exists():
-            with al_csv.open() as f:
-                for row in csv.DictReader(f):
-                    if int(row["round"]) == r:
-                        e_rmse = float(row["energy_rmse_mean"])
-                        f_rmse = float(row["force_rmse_mean"])
-
-        # Remaining candidate force_dev_max from the committee prediction NPZ
-        # exp_005 (R0), exp_008 (R1), exp_010 (R2), exp_012 (R3)
-        pred_exp_map = {0: "005", 1: "008", 2: "010", 3: "012"}
-        exp_prefix = f"exp_{pred_exp_map[r]}"
-        pred_npz_list = list(PROJ.glob(f"experiments/{exp_prefix}_*/committee_predictions.npz"))
-        fdm_mean = None
-        fdm_std = None
-        ed_mean = None
-        if pred_npz_list:
-            fdm_mean, fdm_std, ed_mean = extract_remaining_candidate_dev(pred_npz_list[0].parent)
-
         train_frames = 200 + r * 10
         cand_frames = 50 - r * 10
 
-        rows.append({
-            "strategy": "uncertainty", "seed": "—", "round": r,
-            "train_frames": train_frames, "candidate_frames": cand_frames,
-            "energy_rmse": f"{e_rmse:.6e}" if e_rmse else "",
-            "force_rmse": f"{f_rmse:.6e}" if f_rmse else "",
-            "remaining_candidate_force_dev_max_mean": f"{fdm_mean:.6e}" if fdm_mean else "",
-            "remaining_candidate_force_dev_max_std": f"{fdm_std:.6e}" if fdm_std else "",
-            "remaining_candidate_energy_dev_mean": f"{ed_mean:.6e}" if ed_mean else "",
-            "metric_note": "remaining candidate pool",
-        })
+        if r == 0:
+            # Round 0 has only one set of models (no multi-seed)
+            e_val = None
+            f_val = None
+            # Read from al_rounds_summary.csv for Round 0
+            al_csv = PROJ / "experiments" / "al_rounds_summary.csv"
+            if al_csv.exists():
+                with al_csv.open() as f:
+                    for row in csv.DictReader(f):
+                        if int(row["round"]) == r:
+                            e_val = float(row["energy_rmse_mean"])
+                            f_val = float(row["force_rmse_mean"])
+            rows.append({
+                "strategy": "uncertainty", "seed": "—", "round": r,
+                "train_frames": train_frames, "candidate_frames": cand_frames,
+                "energy_rmse": f"{e_val:.6e}" if e_val else "",
+                "force_rmse": f"{f_val:.6e}" if f_val else "",
+                "remaining_candidate_force_dev_max_mean": "",
+                "remaining_candidate_force_dev_max_std": "",
+                "remaining_candidate_energy_dev_mean": "",
+                "metric_note": "Round 0 (initial committee, no multi-seed)",
+            })
+        else:
+            # Rounds 1-3: multi-seed via seed0/seed1/seed2
+            seed_e = []; seed_f = []
+            for si, seed in enumerate(["seed0", "seed1", "seed2"]):
+                model_dir = BASELINES / f"uncertainty_{seed}_round{rs}_committee_models"
+                pred_dir = BASELINES / f"uncertainty_{seed}_round{rs}_committee_prediction"
+                e_rmse, f_rmse = extract_rmse_from_test_log(model_dir)
+                fdm_mean, fdm_std, ed_mean = extract_remaining_candidate_dev(pred_dir)
+                if e_rmse: seed_e.append(e_rmse); seed_f.append(f_rmse)
+                rows.append({
+                    "strategy": "uncertainty", "seed": seed, "round": r,
+                    "train_frames": train_frames, "candidate_frames": cand_frames,
+                    "energy_rmse": f"{e_rmse:.6e}" if e_rmse else "",
+                    "force_rmse": f"{f_rmse:.6e}" if f_rmse else "",
+                    "remaining_candidate_force_dev_max_mean": f"{fdm_mean:.6e}" if fdm_mean else "",
+                    "remaining_candidate_force_dev_max_std": "",
+                    "remaining_candidate_energy_dev_mean": f"{ed_mean:.6e}" if ed_mean else "",
+                    "metric_note": "remaining candidate pool",
+                })
+            if len(seed_f) >= 2:
+                rows.append({"strategy": "uncertainty", "seed": "mean", "round": r,
+                    "train_frames": train_frames, "candidate_frames": cand_frames,
+                    "energy_rmse": f"{statistics.mean(seed_e):.6e}", "force_rmse": f"{statistics.mean(seed_f):.6e}",
+                    "remaining_candidate_force_dev_max_mean": "", "remaining_candidate_force_dev_max_std": "",
+                    "remaining_candidate_energy_dev_mean": "", "metric_note": "cross-seed mean (3 seeds)"})
+                rows.append({"strategy": "uncertainty", "seed": "std", "round": r,
+                    "train_frames": train_frames, "candidate_frames": cand_frames,
+                    "energy_rmse": f"{statistics.stdev(seed_e):.6e}", "force_rmse": f"{statistics.stdev(seed_f):.6e}",
+                    "remaining_candidate_force_dev_max_mean": "", "remaining_candidate_force_dev_max_std": "",
+                    "remaining_candidate_energy_dev_mean": "", "metric_note": "cross-seed std (3 seeds)"})
 
     # ---- Random / Diversity / Trust-level (Round 1-3, seed0/1/2) ----
     for strategy, dir_prefix in [("random", "random"), ("diversity", "diversity"), ("trust_level", "trust_level")]:
@@ -186,11 +198,12 @@ def main():
             std_rows = [x for x in rows if x["strategy"] == s and x["seed"] == "std" and x["round"] == r]
             if mean_rows:
                 v = mean_rows[0]["force_rmse"]
-                if std_rows:
+                if std_rows and std_rows[0]["force_rmse"] != "":
                     v += f" +/- {std_rows[0]['force_rmse']}"
                 vals[r] = v
-            elif s == "uncertainty":
-                u_rows = [x for x in rows if x["strategy"] == s and x["round"] == r]
+            else:
+                # fallback: non-seed row (Round 0)
+                u_rows = [x for x in rows if x["strategy"] == s and x["seed"] == "—" and x["round"] == r]
                 if u_rows:
                     vals[r] = u_rows[0]["force_rmse"]
 
@@ -204,8 +217,8 @@ def main():
         "",
         "## Notes",
         "",
-        "- **uncertainty**: single run (no multi-seed).",
-        "- **random/diversity/trust_level**: 3-seed mean ± std.",
+        "- **All four strategies**: 3-seed (seed0/seed1/seed2) mean ± std for Round 1-3.",
+        "- **Round 0** (uncertainty only): single run (initial committee).",
         "- `remaining_candidate_force_dev_max_mean`: mean force_dev_max of the candidate pool AFTER the current round retraining (NOT the selected frames).",
         "- This metric is directly comparable across all strategies.",
         "- Previous `random_vs_uncertainty_summary.csv` mixed selected top-K (uncertainty) with remaining candidate pool (random).",

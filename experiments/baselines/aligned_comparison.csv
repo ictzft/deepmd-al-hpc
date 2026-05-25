@@ -1,8 +1,20 @@
 strategy,seed,round,train_frames,candidate_frames,energy_rmse,force_rmse,remaining_candidate_force_dev_max_mean,remaining_candidate_force_dev_max_std,remaining_candidate_energy_dev_mean,metric_note
-uncertainty,—,0,200,50,7.357575e-01,1.821392e-01,1.496294e-01,1.595885e-01,8.283152e-01,remaining candidate pool
-uncertainty,—,1,210,40,7.292945e-01,1.617669e-01,1.264416e-01,1.078848e-01,4.482120e-01,remaining candidate pool
-uncertainty,—,2,220,30,1.206733e+00,1.938590e-01,1.336577e-01,4.951329e-02,1.552282e+00,remaining candidate pool
-uncertainty,—,3,230,20,9.990814e-01,1.742648e-01,1.365686e-01,4.192148e-02,1.080236e+00,remaining candidate pool
+uncertainty,—,0,200,50,7.357575e-01,1.821392e-01,,,,"Round 0 (initial committee, no multi-seed)"
+uncertainty,seed0,1,210,40,7.292945e-01,1.617669e-01,1.264416e-01,,4.482120e-01,remaining candidate pool
+uncertainty,seed1,1,210,40,2.194693e+00,1.696144e-01,6.518379e-02,,2.229511e+00,remaining candidate pool
+uncertainty,seed2,1,210,40,1.396661e+00,1.230035e-01,6.290115e-02,,1.687130e+00,remaining candidate pool
+uncertainty,mean,1,210,40,1.440216e+00,1.514616e-01,,,,cross-seed mean (3 seeds)
+uncertainty,std,1,210,40,7.336697e-01,2.495585e-02,,,,cross-seed std (3 seeds)
+uncertainty,seed0,2,220,30,1.206733e+00,1.938590e-01,1.336577e-01,,1.552282e+00,remaining candidate pool
+uncertainty,seed1,2,220,30,2.403860e+00,2.078873e-01,1.157233e-01,,2.586334e+00,remaining candidate pool
+uncertainty,seed2,2,220,30,1.858751e+00,2.377594e-01,1.316771e-01,,2.531813e+00,remaining candidate pool
+uncertainty,mean,2,220,30,1.823114e+00,2.131686e-01,,,,cross-seed mean (3 seeds)
+uncertainty,std,2,220,30,5.993587e-01,2.242164e-02,,,,cross-seed std (3 seeds)
+uncertainty,seed0,3,230,20,9.990814e-01,1.742648e-01,1.365686e-01,,1.080236e+00,remaining candidate pool
+uncertainty,seed1,3,230,20,1.639950e+00,1.929310e-01,1.547448e-01,,1.986923e+00,remaining candidate pool
+uncertainty,seed2,3,230,20,1.655514e+00,2.222937e-01,9.816224e-02,,2.355705e+00,remaining candidate pool
+uncertainty,mean,3,230,20,1.431515e+00,1.964965e-01,,,,cross-seed mean (3 seeds)
+uncertainty,std,3,230,20,3.745795e-01,2.421215e-02,,,,cross-seed std (3 seeds)
 random,seed0,1,210,40,6.908853e-01,2.553366e-01,3.554204e-01,3.399989e-01,6.565407e-01,remaining candidate pool
 random,seed1,1,210,40,2.488029e-01,2.288370e-01,2.447142e-01,2.034835e-01,3.965860e-01,remaining candidate pool
 random,seed2,1,210,40,4.284121e-01,1.494923e-01,1.554474e-01,2.136240e-01,4.412890e-01,remaining candidate pool
