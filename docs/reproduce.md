@@ -660,18 +660,17 @@ experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.j
 
 ```text
 真实 DFT / AIMD 数据集
-uncertainty-diversity sampling
-系统 GPU utilization / memory profiling
+全流程 GPU utilization 曲线记录 (nvidia-smi dmon)
 H100 / 多 GPU scaling
 MD 稳定性验证
+independent_test 独立评估
 ```
 
 其中近期优先级最高的是：
 
 ```text
-GPU utilization / memory profiling (nvidia-smi dmon)
-uncertainty-diversity selection
-真实 DFT / AIMD 数据集
+真实 DFT / AIMD 数据集（框架已就绪，见 docs/real_dataset_execution_guide.md）
+全流程 GPU monitoring 曲线记录
 ```
 
 ---
@@ -684,7 +683,7 @@ uncertainty-diversity selection
 2. 当前尚未引入真实 DFT / AIMD 数据集；
 3. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
 4. uncertainty vs random full RMSE learning curve 对比已生成；
-5. diversity 和 trust-level 策略原型已实现（Round 001 已验证），multi-round 尚未完成；
+5. diversity 和 trust-level 策略已完成 multi-seed Round 001–003 完整实验（2026-05-25, 2×V100）；
 6. 当前尚未进行 H100 / 多 GPU scaling 实验；
 7. V100 training wall-clock profiling 已记录；GPU utilization/memory 系统监测和端到端精确测量未完成；
 8. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
