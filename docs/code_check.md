@@ -64,6 +64,7 @@ python -m py_compile \
   scripts/analysis/summarize_random_vs_uncertainty.py \
   scripts/analysis/plot_random_vs_uncertainty.py \
   scripts/analysis/prepare_random_baseline_round.py \
+  scripts/analysis/summarize_random_round_baselines.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
   src/al/selector.py \
@@ -95,6 +96,7 @@ python3 -m py_compile \
   scripts/analysis/summarize_random_vs_uncertainty.py \
   scripts/analysis/plot_random_vs_uncertainty.py \
   scripts/analysis/prepare_random_baseline_round.py \
+  scripts/analysis/summarize_random_round_baselines.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
   src/al/selector.py \
@@ -115,7 +117,9 @@ bash -n \
   scripts/train/train_committee_models.sh \
   scripts/train/train_round_committee_models.sh \
   scripts/eval/freeze_model.sh \
-  scripts/eval/test_single_model.sh
+  scripts/eval/test_single_model.sh \
+  scripts/run_random_baseline_round.sh \
+  scripts/profiling/record_round_profiling.sh
 ```
 
 如果没有输出，说明这些 Shell 脚本语法检查通过。
@@ -661,6 +665,7 @@ python -m py_compile \
   scripts/analysis/summarize_random_vs_uncertainty.py \
   scripts/analysis/plot_random_vs_uncertainty.py \
   scripts/analysis/prepare_random_baseline_round.py \
+  scripts/analysis/summarize_random_round_baselines.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
   src/al/selector.py \
@@ -677,7 +682,9 @@ bash -n \
   scripts/train/train_committee_models.sh \
   scripts/train/train_round_committee_models.sh \
   scripts/eval/freeze_model.sh \
-  scripts/eval/test_single_model.sh
+  scripts/eval/test_single_model.sh \
+  scripts/run_random_baseline_round.sh \
+  scripts/profiling/record_round_profiling.sh
 ```
 
 ---

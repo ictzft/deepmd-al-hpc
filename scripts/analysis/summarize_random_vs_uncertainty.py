@@ -28,23 +28,40 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 UNCERTAINTY_CSV = PROJECT_ROOT / "experiments" / "al_rounds_summary.csv"
 
-RANDOM_INPUTS = [
-    PROJECT_ROOT / "experiments" / "baselines" / "random_round001_baseline_summary.csv",
-    # Future files when available:
-    # PROJECT_ROOT / "experiments" / "baselines" / "random_round002_baseline_summary.csv",
-    # PROJECT_ROOT / "experiments" / "baselines" / "random_round003_baseline_summary.csv",
-]
+RANDOM_INPUTS: list[Path] = []  # auto-discovered below
+
+
+def _discover_random_inputs() -> list[Path]:
+    """Auto-discover available random_round*_baseline_summary.csv files."""
+    baselines_dir = PROJECT_ROOT / "experiments" / "baselines"
+    candidates = sorted(baselines_dir.glob("random_round*_baseline_summary.csv"),
+                        key=lambda p: p.name)
+    if not candidates:
+        print("Warning: No random_round*_baseline_summary.csv files found.")
+    return candidates
+
+
+RANDOM_INPUTS = _discover_random_inputs()
 
 # Per-round prediction summaries for candidate-pool uncertainty comparison
-RANDOM_PREDICTION_INPUTS = {
-    "001": [
-        PROJECT_ROOT / "experiments" / "baselines" / "random_seed0_round001_prediction_summary.csv",
-        PROJECT_ROOT / "experiments" / "baselines" / "random_seed1_round001_prediction_summary.csv",
-        PROJECT_ROOT / "experiments" / "baselines" / "random_seed2_round001_prediction_summary.csv",
-    ],
-    # "002": [...],
-    # "003": [...],
-}
+# Auto-discovered from available random_seed*_round*_prediction_summary.csv files
+RANDOM_PREDICTION_INPUTS: dict[str, list[Path]] = {}
+
+
+def _discover_prediction_inputs() -> dict[str, list[Path]]:
+    """Auto-discover prediction summary files grouped by round."""
+    baselines_dir = PROJECT_ROOT / "experiments" / "baselines"
+    by_round: dict[str, list[Path]] = {}
+    for p in sorted(baselines_dir.glob("random_seed*_round*_prediction_summary.csv")):
+        # Extract round number from filename like random_seed0_round001_prediction_summary.csv
+        import re
+        m = re.search(r"round(\d{3})", p.name)
+        if m:
+            by_round.setdefault(m.group(1), []).append(p)
+    return by_round
+
+
+RANDOM_PREDICTION_INPUTS = _discover_prediction_inputs()
 
 OUT_DIR = PROJECT_ROOT / "experiments" / "baselines"
 OUT_CSV = OUT_DIR / "random_vs_uncertainty_summary.csv"

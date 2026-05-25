@@ -20,7 +20,6 @@
 
 ## Notes
 
-- Current random Round001 baseline has been extended from single-seed (seed0) to multi-seed (seed0 / seed1 / seed2).
-- The cross-seed mean and std are reported for energy_rmse, force_rmse, and candidate force_dev_max.
+- Random Round001 multi-seed baseline (seed0/seed1/seed2).
+- Cross-seed mean and std are reported for energy_rmse, force_rmse, and candidate force_dev_max.
 - This is still a toy H2 workflow validation and does not represent realistic first-principles material systems.
-- The next step is to complete random Round002 / Round003 retraining for a full multi-round learning curve.
