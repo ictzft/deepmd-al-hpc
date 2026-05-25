@@ -84,29 +84,21 @@ toy H2 数据生成
   ↓
 单模型 DeePMD baseline
   ↓
-4-model committee training
+4-model committee training + prediction
   ↓
-committee prediction
-  ↓
-force / energy model deviation
-  ↓
-uncertainty top-K 构型筛选
-  ↓
-selected frames 合并进训练集
-  ↓
-candidate pool 更新
-  ↓
-下一轮 committee retraining
+force / energy model deviation + uncertainty top-K selection
   ↓
 dataset-level offline active learning Round 0–3
   ↓
 Round 0–3 summary 与 learning curve
   ↓
-random sampling selection-level baseline
+random sampling selection-level baseline (seed0/seed1/seed2)
   ↓
-random seed0 Round 001 retraining baseline
+random seed0/seed1/seed2 Round 001–003 retraining baseline
   ↓
-uncertainty branch vs random seed0 candidate-pool comparison
+uncertainty-diversity + trust-level multi-seed Round 001–003
+  ↓
+four-strategy aligned comparison + learning curves
 ```
 
 当前 toy H2 主线实验已经形成如下 uncertainty-sampling 多轮闭环：
@@ -118,26 +110,19 @@ Round 2: train 220, candidate 30
 Round 3: train 230, candidate 20
 ```
 
-当前 random baseline 已完成：
+当前 random baseline 已完成（2026-05-25, 2×V100）：
 
 ```text
 Selection-level baseline:
   Round 0 random seed0 / seed1 / seed2
   Round 1 random seed0 / seed1 / seed2
 
-Retraining baseline:
-  random seed0 / seed1 / seed2 Round 001
-  multi-seed random Round 001 mean ± std
-  random Round 001 candidate-pool prediction summary (seed0/seed1/seed2)
-  uncertainty vs random Round 001 candidate-pool comparison
+Retraining baseline (all completed):
+  random seed0 / seed1 / seed2 Round 001–003
+  multi-seed random mean ± std (Round 001/002/003)
+  diversity + trust_level multi-seed Round 001–003
+  four-strategy aligned comparison with consistent metrics
   uncertainty vs random comparison figures
-
-Round 002/003:
-  已执行完毕（2026-05-25），summary 和 comparison 已生成
-
-当前可复现的 random baseline 范围为：
-  Round 001–003 multi-seed multi-round comparison
-  uncertainty vs random full learning curve
 ```
 
 说明：
@@ -158,18 +143,16 @@ Step 0: 环境准备
 Step 1: toy H2 数据生成
 Step 2: 单模型 DeePMD baseline
 Step 3: 初始 4-model committee training
-Step 4: 初始 committee prediction
-Step 5: uncertainty top-K selection
-Step 6: uncertainty branch Round 0–3 多轮闭环
-Step 7: Round 0–3 summary 与 learning curve
-Step 8: random sampling selection-level baseline (seed0/seed1/seed2)
-Step 9: random seed0 Round 001 retraining baseline
-Step 10: random seed1/seed2 Round 001 retraining baseline
-Step 11: multi-seed random Round 001 mean ± std 汇总
-Step 12: uncertainty vs random Round 001 candidate-pool 对比
-Step 13: 结果解释与当前限制分析
-Step 14: 代码、配置和 Git 状态检查
-Step 15: profiling 与 H100 迁移计划
+Step 4: 初始 committee prediction + uncertainty top-K selection
+Step 5: uncertainty branch Round 0–3 多轮闭环
+Step 6: Round 0–3 summary 与 learning curve
+Step 7: random sampling selection-level baseline (seed0/seed1/seed2)
+Step 8: random seed0/seed1/seed2 Round 001–003 retraining baseline
+Step 9: diversity + trust_level multi-seed Round 001–003
+Step 10: 四策略 aligned comparison 汇总
+Step 11: V100 profiling 记录
+Step 12: 结果解释与当前限制分析
+Step 13: 代码、配置和 Git 状态检查
 ```
 
 对应文档如下：
@@ -177,12 +160,12 @@ Step 15: profiling 与 H100 迁移计划
 | Step | 内容 | 文档 |
 |---|---|---|
 | Step 0 | 环境准备、Docker、GPU 检查 | `docs/setup.md` |
-| Step 1–5 | toy H2 数据、单模型、初始 committee、prediction、top-K | `docs/toy_h2_pipeline.md` |
-| Step 6 | uncertainty branch Round 0–3 多轮闭环 | `docs/uncertainty_rounds.md` |
-| Step 7、13 | 结果汇总、learning curve、当前结论与限制 | `docs/results.md` |
-| Step 8–12 | random sampling baseline、seed0/1/2 retraining、multi-seed 汇总、uncertainty vs random 对比 | `docs/random_baseline.md` |
-| Step 14 | Python / Shell / JSON / Git 检查 | `docs/code_check.md` |
-| Step 15 | V100 profiling 与 H100 迁移计划 | `docs/profiling_v100.md` |
+| Step 1–4 | toy H2 数据、单模型、初始 committee、prediction、top-K | `docs/toy_h2_pipeline.md` |
+| Step 5 | uncertainty branch Round 0–3 多轮闭环 | `docs/uncertainty_rounds.md` |
+| Step 6、12 | 结果汇总、learning curve、当前结论与限制 | `docs/results.md` |
+| Step 7–10 | random baseline、diversity/trust_level、四策略对比 | `docs/random_baseline.md` + `docs/selection_strategies.md` |
+| Step 11 | V100 profiling | `docs/profiling_v100.md` |
+| Step 13 | Python / Shell / JSON / Git 检查 | `docs/code_check.md` |
 
 ---
 
@@ -237,13 +220,13 @@ learning curve summary
 环境配置
 数据生成
 单模型 baseline
-committee training
-committee prediction
+committee training + prediction
 uncertainty branch Round 0–3
 selection-level random baseline (seed0/seed1/seed2)
-random seed0/seed1/seed2 Round 001 retraining baseline
-random multi-seed Round 001 mean ± std 汇总
-uncertainty vs random Round 001 candidate-pool comparison
+random seed0/seed1/seed2 Round 001–003 retraining
+diversity + trust_level multi-seed Round 001–003
+四策略 aligned comparison
+V100 profiling
 结果汇总
 代码与配置检查
 Git 状态检查
@@ -328,19 +311,16 @@ uncertainty top-K 主线如何从 Round 0 跑到 Round 3？
 selection-level random baseline
 Round 0 random seed0 / seed1 / seed2
 Round 1 random seed0 / seed1 / seed2
-random seed0 / seed1 / seed2 Round 001 retraining
-random seed0 / seed1 / seed2 candidate-pool prediction
-multi-seed random mean ± std (Round 001)
-uncertainty branch vs random_seed* Round 001 comparison
-uncertainty vs random comparison figures
-后续 random Round 002/003 计划
+random seed0 / seed1 / seed2 Round 001–003 retraining
+multi-seed random mean ± std (Round 001/002/003)
+uncertainty vs random comparison + learning curves
+V100 profiling summary
 ```
 
 该文档回答：
 
 ```text
-如何构造 random baseline，并与 uncertainty branch 进行 Round 001 初步对比？
-后续如何扩展到 Round 002/003？
+如何构造 random baseline 并完成 multi-seed multi-round 对比？
 ```
 
 ---
@@ -470,52 +450,27 @@ Round 3: 0.174265
 
 > 多轮主动学习后，候选池不确定性呈持续下降趋势；验证集 Force RMSE 整体处于同一量级，但受 toy 数据规模、随机初始化和 committee 模型差异影响，存在一定波动。
 
-当前 random Round 001 candidate-pool uncertainty 对比结果为：
-
-```text
-uncertainty_round001:
-  force_dev_max_mean = 0.126442
-
-random_seed0_round001:
-  force_dev_max_mean = 0.355420
-
-random_seed1_round001:
-  force_dev_max_mean = 0.487795
-
-random_seed2_round001:
-  force_dev_max_mean = 0.332138
-
-random mean (seed0/seed1/seed2):
-  force_dev_max_mean = 0.391784
-```
-
-该结果初步表明：
-
-```text
-在 toy H2 offline active learning 和 Round 001 设置下，
-uncertainty branch 的 remaining candidate-pool force_dev_max_mean
-在 seed0 / seed1 / seed2 三个对比中均低于对应的 random branch。
-```
+四策略对齐对比（统一 remaining candidate-pool 指标）见 `experiments/baselines/aligned_comparison.md`。
+各策略 Force RMSE 差异在 1σ 以内（toy H2）。
 
 但需要注意：
 
 ```text
-Round 001 random baseline provides an initial multi-seed comparison;
-uncertainty selection reduces remaining candidate-pool uncertainty more clearly
-in the current toy H2 Round 001 comparison;
-validation RMSE still fluctuates and requires more rounds for robust conclusion;
-random Round 002/003 are still needed for complete learning-curve comparison.
+该结论仍基于 toy H2 数据集；
+所有四策略 multi-seed multi-round comparison 已生成；
+validation RMSE 跨 seed 波动较大，toy H2 无法支撑统计显著性结论；
+真实 DFT/AIMD 数据集是最关键的下一步。
 ```
 
 ---
 
-## 8. 扩展 random baseline 到 Round 002/003
+## 8. Random Baseline Round 002/003 复现命令（已完成，保留供参考）
 
-本节提供从 Round 001 扩展到 Round 002/003 的完整复现命令。
+> 以下命令已在 2026-05-25 执行完毕。保留在此供复现参考。
 
 ### 8.1 前提条件
 
-每个 seed 需要先完成上一轮的 committee prediction。Round 001 已全部完成。
+每个 seed 需要先完成上一轮的 committee prediction。
 
 ### 8.2 使用自动化脚本生成数据和配置
 
@@ -628,7 +583,7 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 9.3 Multi-seed Random Round 001 Retraining Baseline
+### 9.3 Multi-seed Random Round 001–003 Retraining Baseline
 
 ```text
 experiments/baselines/random_seed0_round001_metrics_summary.csv
@@ -701,23 +656,17 @@ independent_test 独立评估
 
 ## 12. 后续文档维护计划
 
-下一阶段补充 random baseline 后，建议更新以下文档：
+random baseline 已完成，后续文档重点：
 
 ```text
-docs/random_baseline.md:
-  增加 random Round 002/003 多轮 branch
-  增加 multi-round learning curve 对比
-
 docs/results.md:
-  增加多轮 uncertainty vs random mean ± std
-  增加 full RMSE learning curve
-  增加 candidate-pool uncertainty curve
+  补充真实 DFT/AIMD 数据集结果（待数据到位）
+
+docs/profiling_v100.md:
+  补充全流程 GPU utilization 曲线
 
 docs/profiling_h100.md:
-  增加每轮训练、预测、selection、dataset update 和端到端耗时
-
-README.md:
-  只保留精简版结果摘要和文档入口
+  在 H100 实验完成后补充 scaling 数据
 ```
 
 后续迁移到真实 DFT / AIMD 数据集时，建议新增：
@@ -770,10 +719,13 @@ docs/data_and_git_policy.md:
 docs/code_check.md:
   代码和配置检查。
 
+docs/profiling_v100.md:
+  V100 profiling 方案与实测。
+
 docs/profiling_h100.md:
-  性能分析与 H100 迁移计划。
+  H100 迁移计划（尚未执行）。
 ```
 
 这样可以避免 `reproduce.md` 继续膨胀，也更符合论文型开源项目的文档组织方式。
 
-<!-- reproduce.md reorganized as a reproduction index and documentation roadmap on 2026-05-18. -->
+<!-- reproduce.md updated on 2026-05-25. -->
