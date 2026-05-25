@@ -1,0 +1,67 @@
+{
+  "model": {
+    "type_map": [
+      "H"
+    ],
+    "descriptor": {
+      "type": "se_e2_a",
+      "sel": [
+        1
+      ],
+      "rcut_smth": 3.5,
+      "rcut": 4.0,
+      "neuron": [
+        8,
+        16,
+        32
+      ],
+      "resnet_dt": false,
+      "axis_neuron": 4,
+      "seed": 3203
+    },
+    "fitting_net": {
+      "neuron": [
+        32,
+        32,
+        32
+      ],
+      "resnet_dt": true,
+      "seed": 3203
+    }
+  },
+  "learning_rate": {
+    "type": "exp",
+    "decay_steps": 200,
+    "start_lr": 0.001,
+    "stop_lr": 1e-06
+  },
+  "loss": {
+    "type": "ener",
+    "start_pref_e": 0.02,
+    "limit_pref_e": 1.0,
+    "start_pref_f": 100.0,
+    "limit_pref_f": 1.0,
+    "start_pref_v": 0.0,
+    "limit_pref_v": 0.0
+  },
+  "training": {
+    "training_data": {
+      "systems": [
+        "/data/zft/deepmd-al-hpc/data/toy_h2/diversity_round_002_train"
+      ],
+      "batch_size": 10
+    },
+    "validation_data": {
+      "systems": [
+        "/data/zft/deepmd-al-hpc/data/toy_h2/valid"
+      ],
+      "batch_size": 10,
+      "numb_btch": 1
+    },
+    "numb_steps": 1000,
+    "seed": 3203,
+    "disp_file": "lcurve.out",
+    "disp_freq": 100,
+    "save_freq": 500
+  }
+}
