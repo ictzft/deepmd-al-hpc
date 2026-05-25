@@ -9,11 +9,13 @@ random seed0 / seed1 / seed2 selection
   ↓
 selection-level baseline summary
   ↓
-random seed0 Round 001 retraining
+random seed0 / seed1 / seed2 Round 001 retraining
   ↓
-random seed0 candidate-pool committee prediction
+random seed0 / seed1 / seed2 candidate-pool committee prediction
   ↓
-uncertainty branch vs random seed0 comparison
+multi-seed random mean ± std (Round 001)
+  ↓
+uncertainty branch vs random_seed* comparison
 ```
 
 该文档承接：
@@ -58,18 +60,16 @@ retraining 后剩余 candidate pool 的不确定性
 
 ```text
 selection-level random baseline
-random seed0 Round 001 retraining baseline
-random seed0 candidate-pool prediction summary
+random seed0 / seed1 / seed2 Round 001 retraining baseline
+random seed0 / seed1 / seed2 candidate-pool prediction summary
+random multi-seed mean ± std (Round 001)
 ```
 
 尚未完成：
 
 ```text
-random seed1 Round 001 retraining
-random seed2 Round 001 retraining
 random seed0 / seed1 / seed2 Round 002 retraining
 random seed0 / seed1 / seed2 Round 003 retraining
-random mean ± std
 full RMSE learning curve
 end-to-end wall-clock time comparison
 ```
@@ -87,10 +87,13 @@ Selection-level baseline:
 
 Retraining baseline:
   random seed0 Round 001
+  random seed1 Round 001
+  random seed2 Round 001
 
 Prediction comparison:
-  random seed0 Round 001 candidate-pool committee prediction
-  uncertainty_round001 vs random_seed0_round001 candidate-pool uncertainty comparison
+  random seed0 / seed1 / seed2 Round 001 candidate-pool committee prediction
+  uncertainty_round001 vs random_seed*_round001 candidate-pool uncertainty comparison
+  multi-seed random mean ± std (Round 001)
 ```
 
 当前还不能直接声称：
@@ -102,8 +105,8 @@ uncertainty sampling 显著优于 random sampling
 更严谨的说法是：
 
 ```text
-在 toy H2 和 random seed0 Round 001 的初步对比中，
-uncertainty sampling 显示出更低的 remaining candidate-pool force model deviation。
+在 toy H2 和 Round 001 的 random seed0 / seed1 / seed2 对比中，
+uncertainty sampling 一致显示出更低的 remaining candidate-pool force model deviation。
 ```
 
 ---
@@ -562,12 +565,84 @@ experiments/baselines/random_seed0_round001_metrics_summary.md
 
 ```text
 random seed0 committee model 方差较大；
-因此后续需要继续补充 seed1 / seed2，并报告 random mean ± std。
+因此需要补充 seed1 / seed2，并报告 random mean ± std。
 ```
 
 ---
 
-## 14. Random seed0 Candidate-pool Committee Prediction
+## 14. Random seed1 Round 001 Committee Metrics
+
+当前 random seed1 Round 001 committee 测试结果：
+
+| Model | Energy RMSE / eV | Force RMSE / eV/Å |
+|---|---:|---:|
+| model_000 | 9.330507e-01 | 2.555631e-01 |
+| model_001 | 8.658584e-03 | 2.624681e-01 |
+| model_002 | 4.101113e-02 | 1.900886e-01 |
+| model_003 | 1.249115e-02 | 2.072284e-01 |
+| Mean | 2.488029e-01 | 2.288370e-01 |
+| Std | 4.563935e-01 | 3.565438e-02 |
+
+相关轻量结果：
+
+```text
+experiments/baselines/random_seed1_round001_metrics_summary.csv
+experiments/baselines/random_seed1_round001_metrics_summary.md
+```
+
+---
+
+## 15. Random seed2 Round 001 Committee Metrics
+
+当前 random seed2 Round 001 committee 测试结果：
+
+| Model | Energy RMSE / eV | Force RMSE / eV/Å |
+|---|---:|---:|
+| model_000 | 1.034722e+00 | 1.450501e-01 |
+| model_001 | 1.650412e-02 | 2.141395e-01 |
+| model_002 | 6.554224e-01 | 1.356484e-01 |
+| model_003 | 7.000031e-03 | 1.031312e-01 |
+| Mean | 4.284121e-01 | 1.494923e-01 |
+| Std | 5.054377e-01 | 4.669047e-02 |
+
+相关轻量结果：
+
+```text
+experiments/baselines/random_seed2_round001_metrics_summary.csv
+experiments/baselines/random_seed2_round001_metrics_summary.md
+```
+
+---
+
+## 16. Multi-seed Random Round 001 汇总
+
+三个 seed 的 Round 001 retraining 结果汇总：
+
+| Seed | Energy RMSE Mean / eV | Energy RMSE Std / eV | Force RMSE Mean / eV/Å | Force RMSE Std / eV/Å |
+|---|---:|---:|---:|---:|
+| seed0 | 6.908853e-01 | 7.559906e-01 | 2.553366e-01 | 1.729852e-01 |
+| seed1 | 2.488029e-01 | 4.563935e-01 | 2.288370e-01 | 3.565438e-02 |
+| seed2 | 4.284121e-01 | 5.054377e-01 | 1.494923e-01 | 4.669047e-02 |
+| **Mean** | **4.560335e-01** | — | **2.112220e-01** | — |
+| **Std** | **2.223318e-01** | — | **5.507695e-02** | — |
+
+说明：
+
+```text
+三个 random seed 的 committee model 间存在较大方差；
+该方差源自 toy H2 数据规模较小和 committee 随机初始化；
+后续需要补充 Round 002/003 多轮 retraining 完成完整 learning curve。
+```
+
+相关汇总文件：
+
+```text
+experiments/baselines/random_round001_comparison.csv
+```
+
+---
+
+## 17. Random seed0 Candidate-pool Committee Prediction
 
 使用 random seed0 Round 001 committee models 对剩余 candidate pool 进行 prediction。
 
@@ -602,7 +677,7 @@ selected_topk.json 可以提交到 GitHub。
 
 ---
 
-## 15. Random seed0 Candidate-pool Prediction 当前结果
+## 18. Random seed0 Candidate-pool Prediction 当前结果
 
 当前 random seed0 candidate-pool prediction 结果：
 
@@ -627,7 +702,7 @@ experiments/baselines/random_seed0_round001_prediction_summary.md
 
 ---
 
-## 16. Uncertainty Branch 与 Random seed0 对比
+## 19. Uncertainty Branch 与 Random Baseline 对比
 
 对比对象：
 
@@ -637,38 +712,50 @@ uncertainty_round001:
 
 random_seed0_round001:
   data/toy_h2/random_seed0_round_001_candidate
+
+random_seed1_round001:
+  data/toy_h2/random_seed1_round_001_candidate
+
+random_seed2_round001:
+  data/toy_h2/random_seed2_round_001_candidate
 ```
 
 对比表：
 
-| Run | Candidate Pool | n_frames | force_dev_max mean | force_dev_max max | force_dev_max min | energy_dev mean |
-|---|---|---:|---:|---:|---:|---:|
-| uncertainty_round001 | data/toy_h2/round_001_candidate | 40 | 0.126442 | 0.508339 | 0.042645 | 0.448212 |
-| random_seed0_round001 | data/toy_h2/random_seed0_round_001_candidate | 40 | 0.355420 | 1.586355 | 0.086667 | 0.656541 |
+| Run | n_frames | force_dev_max mean | force_dev_max max | force_dev_max min | energy_dev mean |
+|---|---:|---:|---:|---:|---:|
+| uncertainty_round001 | 40 | 0.126442 | 0.508339 | 0.042645 | 0.448212 |
+| random_seed0_round001 | 40 | 0.355420 | 1.586355 | 0.086667 | 0.656541 |
+| random_seed1_round001 | 40 | 0.487795 | 1.262038 | 0.327483 | 0.396726 |
+| random_seed2_round001 | 40 | 0.332138 | 1.117230 | 0.139321 | 0.446260 |
+| **random mean** | 40 | **0.391784** | — | — | **0.499842** |
 
 主要观察：
 
 ```text
 在 toy H2 offline active learning 设置下，
 加入 10 个 uncertainty-selected frames 后，
-剩余 candidate pool 的平均 force model deviation 低于 random seed0 baseline。
+剩余 candidate pool 的平均 force model deviation (0.126442)
+低于所有三个 random seed baseline (seed0: 0.355420, seed1: 0.487795, seed2: 0.332138)。
 
-这初步表明 uncertainty sampling 比 random seed0 baseline
-更有效地降低了候选池不确定性。
+这初步表明 uncertainty sampling 比 random sampling
+更有效地降低了候选池不确定性，
+且该结论在 seed0 / seed1 / seed2 上表现一致。
 ```
 
 注意：
 
 ```text
-该结论目前仍基于 toy H2 和单个 random seed0。
-后续必须补充 random seed1 / seed2，并报告 random mean ± std。
+该结论目前仍基于 toy H2 和 Round 001 单轮 retraining。
+后续需要补充 Round 002/003 多轮 random retraining，
+并生成完整 RMSE learning curve 对比。
 ```
 
 ---
 
-## 17. 当前输出文件汇总
+## 20. 当前输出文件汇总
 
-### 17.1 Selection-level Baseline
+### 20.1 Selection-level Baseline
 
 ```text
 experiments/baselines/selection_baseline_runs.csv
@@ -678,7 +765,7 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 17.2 Random seed0 Round 001 Retraining Baseline
+### 20.2 Random seed0 Round 001 Retraining Baseline
 
 ```text
 experiments/baselines/random_seed0_round001_metrics_summary.csv
@@ -687,7 +774,33 @@ experiments/baselines/random_seed0_round001_metrics_summary.md
 
 ---
 
-### 17.3 Random seed0 Candidate-pool Prediction
+### 20.3 Random seed1 Round 001 Retraining Baseline
+
+```text
+experiments/baselines/random_seed1_round001_metrics_summary.csv
+experiments/baselines/random_seed1_round001_metrics_summary.md
+```
+
+---
+
+### 20.4 Random seed2 Round 001 Retraining Baseline
+
+```text
+experiments/baselines/random_seed2_round001_metrics_summary.csv
+experiments/baselines/random_seed2_round001_metrics_summary.md
+```
+
+---
+
+### 20.5 Multi-seed Round 001 Comparison
+
+```text
+experiments/baselines/random_round001_comparison.csv
+```
+
+---
+
+### 20.6 Random seed0 Candidate-pool Prediction
 
 ```text
 experiments/baselines/random_seed0_round001_prediction_summary.csv
@@ -697,7 +810,27 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 
 ---
 
-## 18. 大文件与轻量文件说明
+### 20.7 Random seed1 Candidate-pool Prediction
+
+```text
+experiments/baselines/random_seed1_round001_prediction_summary.csv
+experiments/baselines/random_seed1_round001_prediction_summary.md
+experiments/baselines/random_seed1_round001_committee_prediction/selected_topk.json
+```
+
+---
+
+### 20.8 Random seed2 Candidate-pool Prediction
+
+```text
+experiments/baselines/random_seed2_round001_prediction_summary.csv
+experiments/baselines/random_seed2_round001_prediction_summary.md
+experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.json
+```
+
+---
+
+## 21. 大文件与轻量文件说明
 
 以下内容默认不提交 GitHub：
 
@@ -733,25 +866,30 @@ random_seed0_round001_prediction_summary.md
 
 ---
 
-## 19. 后续 Random Baseline 补充计划
+## 22. 后续 Random Baseline 补充计划
+
+当前已完成：
+
+```text
+random seed0 / seed1 / seed2 Round 001 retraining
+multi-seed random mean ± std (Round 001)
+```
 
 下一步需要从：
 
 ```text
-single-seed random baseline
+multi-seed Round 001 random baseline
 ```
 
 推进到：
 
 ```text
-multi-seed random baseline with mean ± std
+multi-seed Round 0–3 random baseline with full learning curve
 ```
 
 需要补充：
 
 ```text
-random seed1 Round 001 retraining
-random seed2 Round 001 retraining
 random seed0 Round 002 retraining
 random seed1 Round 002 retraining
 random seed2 Round 002 retraining
@@ -774,7 +912,7 @@ prediction time mean ± std
 
 ---
 
-## 20. 后续结果文件建议
+## 23. 后续结果文件建议
 
 后续可以新增：
 
@@ -799,7 +937,7 @@ random mean ± std
 
 ---
 
-## 21. 注意事项
+## 24. 注意事项
 
 1. selection-level baseline 只比较“选出来的样本”，不能证明 retraining 后效果；
 2. retraining baseline 才能比较 Force RMSE、Energy RMSE 和 candidate-pool uncertainty；
@@ -814,9 +952,9 @@ random mean ± std
 
 ---
 
-## 22. 小结
+## 25. 小结
 
-当前 random sampling baseline 已经从 selection-level 对比推进到 random seed0 Round 001 retraining baseline。
+当前 random sampling baseline 已经完成 selection-level 对比和 random seed0 / seed1 / seed2 Round 001 retraining baseline。
 
 当前完成链路为：
 
@@ -827,33 +965,31 @@ random seed0 / seed1 / seed2 selection
   ↓
 selection-level summary
   ↓
-random seed0 selected frames 合并进训练集
+random seed0 / seed1 / seed2 selected frames 合并进训练集
   ↓
-random seed0 remaining candidate pool 更新
+random seed0 / seed1 / seed2 remaining candidate pool 更新
   ↓
-random seed0 Round 001 committee retraining
+random seed0 / seed1 / seed2 Round 001 committee retraining
   ↓
-random seed0 candidate-pool prediction
+random seed0 / seed1 / seed2 candidate-pool prediction
   ↓
-uncertainty_round001 vs random_seed0_round001 comparison
+uncertainty_round001 vs random_seed*_round001 multi-seed comparison
 ```
 
 当前结论应谨慎表述为：
 
 ```text
-在 toy H2 和 random seed0 Round 001 的初步对比中，
-uncertainty sampling 相比 random seed0 baseline
-显示出更低的 remaining candidate-pool force model deviation。
+在 toy H2 和 Round 001 的 random seed0 / seed1 / seed2 对比中，
+uncertainty sampling 一致显示出更低的 remaining candidate-pool force model deviation
+(0.126442 vs random mean 0.391784)。
 ```
 
 下一阶段重点是：
 
 ```text
-补充 random seed1 / seed2
+补充 random Round 002/003 retraining
   ↓
-补充 random Round 0–3 retraining
+生成 full RMSE learning curve 对比
   ↓
-统计 random mean ± std
-  ↓
-生成 full RMSE learning curve
+统计 multi-round random mean ± std
 ```

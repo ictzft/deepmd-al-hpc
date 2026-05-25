@@ -312,10 +312,11 @@ uncertainty top-K 主线如何从 Round 0 跑到 Round 3？
 selection-level random baseline
 Round 0 random seed0 / seed1 / seed2
 Round 1 random seed0 / seed1 / seed2
-random seed0 Round 001 retraining
-random seed0 candidate-pool prediction
-uncertainty branch vs random seed0 对比
-后续 random seed1 / seed2 计划
+random seed0 / seed1 / seed2 Round 001 retraining
+random seed0 / seed1 / seed2 candidate-pool prediction
+multi-seed random mean ± std (Round 001)
+uncertainty branch vs random_seed* 对比
+后续 random Round 002/003 计划
 ```
 
 该文档回答：
@@ -451,8 +452,8 @@ uncertainty sampling 相比 random seed0 baseline
 但需要注意：
 
 ```text
-该结论目前仍基于 toy H2 和单个 random seed0。
-后续必须补充 random seed1 / seed2，并报告 random mean ± std。
+该结论目前仍基于 toy H2 数据集和 Round 001 单轮 retraining。
+后续需要补充 Round 002/003 多轮 random retraining 完成完整对比。
 ```
 
 ---
@@ -488,11 +489,16 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 8.3 Random seed0 Round 001 Retraining Baseline
+### 8.3 Multi-seed Random Round 001 Retraining Baseline
 
 ```text
 experiments/baselines/random_seed0_round001_metrics_summary.csv
 experiments/baselines/random_seed0_round001_metrics_summary.md
+experiments/baselines/random_seed1_round001_metrics_summary.csv
+experiments/baselines/random_seed1_round001_metrics_summary.md
+experiments/baselines/random_seed2_round001_metrics_summary.csv
+experiments/baselines/random_seed2_round001_metrics_summary.md
+experiments/baselines/random_round001_comparison.csv
 ```
 
 ---
@@ -505,6 +511,17 @@ experiments/baselines/random_seed0_round001_prediction_summary.md
 experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
 ```
 
+### 8.5 Random seed1 / seed2 Candidate-pool Prediction
+
+```text
+experiments/baselines/random_seed1_round001_prediction_summary.csv
+experiments/baselines/random_seed1_round001_prediction_summary.md
+experiments/baselines/random_seed1_round001_committee_prediction/selected_topk.json
+experiments/baselines/random_seed2_round001_prediction_summary.csv
+experiments/baselines/random_seed2_round001_prediction_summary.md
+experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.json
+```
+
 ---
 
 ## 9. 当前尚未完成内容
@@ -512,11 +529,9 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 当前仍需补充：
 
 ```text
-random seed1 / seed2 retraining baseline
-random Round 0–3 多轮 retraining
-random mean ± std
-完整 RMSE learning curve
-candidate-pool uncertainty curve
+random Round 002/003 多轮 retraining
+完整 RMSE learning curve 对比
+candidate-pool uncertainty curve (multi-round)
 真实 DFT / AIMD 数据集
 uncertainty-diversity sampling
 V100 / H100 profiling
@@ -527,22 +542,20 @@ MD 稳定性验证
 其中近期优先级最高的是：
 
 ```text
-random seed1 / seed2
-random Round 0–3 retraining
-random mean ± std
-full RMSE learning curve
+random Round 002/003 retraining
+full RMSE learning curve 对比
 ```
 
 也就是先把 random baseline 从：
 
 ```text
-single-seed random baseline
+multi-seed Round 001 random baseline
 ```
 
 推进到：
 
 ```text
-multi-seed random baseline with mean ± std
+multi-seed Round 0–3 random baseline with full learning curve
 ```
 
 ---
@@ -553,14 +566,12 @@ multi-seed random baseline with mean ± std
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. 当前尚未引入真实 DFT / AIMD 数据集；
-3. random sampling baseline 尚未完整完成，目前 retraining baseline 只完成 random seed0；
-4. 当前尚未完成 random seed1 / seed2 和多轮 random retraining；
-5. 当前尚未报告 random mean ± std；
-6. 当前尚未形成完整 RMSE learning curve 对比；
-7. 当前尚未加入结构多样性选择策略；
-8. 当前尚未进行 H100 / 多 GPU scaling 实验；
-9. 当前尚未系统记录端到端 active learning wall-clock time；
-10. 当前结果更适合证明主动学习闭环可运行，尚不足以作为完整论文级结论。
+3. random sampling baseline 已经完成 Round 001 三 seed retraining，但尚未完成 Round 002/003 多轮 retraining；
+4. 当前尚未形成完整 RMSE learning curve 对比；
+5. 当前尚未加入结构多样性选择策略；
+6. 当前尚未进行 H100 / 多 GPU scaling 实验；
+7. 当前尚未系统记录端到端 active learning wall-clock time；
+8. 当前结果更适合证明主动学习闭环可运行，尚不足以作为完整论文级结论。
 
 ---
 
@@ -570,12 +581,11 @@ multi-seed random baseline with mean ± std
 
 ```text
 docs/random_baseline.md:
-  增加 random seed1 / seed2 retraining
-  增加 random Round 0–3 多轮 branch
-  增加 random mean ± std
+  增加 random Round 002/003 多轮 branch
+  增加 multi-round learning curve 对比
 
 docs/results.md:
-  增加 uncertainty vs random mean ± std
+  增加多轮 uncertainty vs random mean ± std
   增加 full RMSE learning curve
   增加 candidate-pool uncertainty curve
 

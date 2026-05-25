@@ -7,8 +7,9 @@
 ```text
 uncertainty branch Round 0–3
 selection-level random baseline
-random seed0 Round 001 retraining baseline
-uncertainty_round001 vs random_seed0_round001 candidate-pool uncertainty comparison
+random seed0 / seed1 / seed2 Round 001 retraining baseline
+multi-seed random mean ± std (Round 001)
+uncertainty_round001 vs random_seed*_round001 candidate-pool uncertainty comparison
 ```
 
 需要说明的是：
@@ -41,17 +42,17 @@ Round 0–3 summary 与 learning curve
   ↓
 selection-level random baseline
   ↓
-random seed0 Round 001 retraining baseline
+random seed0 / seed1 / seed2 Round 001 retraining baseline
   ↓
-uncertainty branch vs random seed0 candidate-pool comparison
+multi-seed random mean ± std (Round 001)
+  ↓
+uncertainty branch vs random_seed* candidate-pool comparison
 ```
 
 当前尚未完成：
 
 ```text
-random seed1 / seed2 retraining baseline
-random Round 0–3 多轮 retraining
-random mean ± std
+random Round 002/003 多轮 retraining
 完整 RMSE learning curve 对比
 真实 DFT / AIMD 数据集
 H100 / 多 GPU scaling
@@ -262,9 +263,9 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-## 7. Random seed0 Round 001 Retraining 结果
+## 7. Multi-seed Random Round 001 Retraining 结果
 
-当前已经完成 random seed0 的 Round 001 retraining baseline。
+当前已经完成 random seed0 / seed1 / seed2 的 Round 001 retraining baseline。
 
 实验设置：
 
@@ -273,60 +274,73 @@ experiments/baselines/selection_baseline_summary.md
   ↓
 合并进初始 train set
   ↓
-生成 random_seed0_round_001_train
+生成 random_seed*_round_001_train
   ↓
-生成 random_seed0_round_001_candidate
+生成 random_seed*_round_001_candidate
   ↓
-训练 4 个 random seed0 committee models
+训练 4 个 random seed* committee models
   ↓
 测试 committee models
 ```
 
-数据规模：
+每个 seed 的数据规模：
 
 ```text
-random_seed0_round_001_train     : 210 frames
-random_seed0_round_001_candidate : 40 frames
+random_seed*_round_001_train     : 210 frames
+random_seed*_round_001_candidate : 40 frames
 ```
 
-4 个 random seed0 Round 001 committee models 的测试结果为：
+三个 seed 的 Round 001 committee models 测试结果：
 
-| Model | Energy RMSE / eV | Force RMSE / eV/Å |
-|---|---:|---:|
-| model_000 | 8.813657e-01 | 2.551970e-01 |
-| model_001 | 9.782892e-03 | 1.827423e-01 |
-| model_002 | 1.965928e-01 | 8.939603e-02 |
-| model_003 | 1.675800e+00 | 4.940109e-01 |
-| Mean | 6.908853e-01 | 2.553366e-01 |
-| Std | 7.559906e-01 | 1.729852e-01 |
+| Seed | Energy RMSE Mean / eV | Energy RMSE Std / eV | Force RMSE Mean / eV/Å | Force RMSE Std / eV/Å |
+|---|---:|---:|---:|---:|
+| seed0 | 6.908853e-01 | 7.559906e-01 | 2.553366e-01 | 1.729852e-01 |
+| seed1 | 2.488029e-01 | 4.563935e-01 | 2.288370e-01 | 3.565438e-02 |
+| seed2 | 4.284121e-01 | 5.054377e-01 | 1.494923e-01 | 4.669047e-02 |
+| **Mean** | **4.560335e-01** | — | **2.112220e-01** | — |
+| **Std** | **2.223318e-01** | — | **5.507695e-02** | — |
+
+跨 seed 随机均值为：
+
+```text
+Random Mean Energy RMSE: 0.456034 eV
+Random Mean Force RMSE : 0.211222 eV/Å
+```
 
 相关结果文件：
 
 ```text
 experiments/baselines/random_seed0_round001_metrics_summary.csv
 experiments/baselines/random_seed0_round001_metrics_summary.md
+experiments/baselines/random_seed1_round001_metrics_summary.csv
+experiments/baselines/random_seed1_round001_metrics_summary.md
+experiments/baselines/random_seed2_round001_metrics_summary.csv
+experiments/baselines/random_seed2_round001_metrics_summary.md
+experiments/baselines/random_round001_comparison.csv
 ```
 
 主要观察：
 
 ```text
-random seed0 committee models 的 Energy RMSE 和 Force RMSE 方差较大；
-单个 random seed 结果不够稳定；
-后续需要继续补充 random seed1 / seed2，并报告 random mean ± std。
+三个 random seed 的 committee models 间 Energy RMSE 和 Force RMSE 存在较大方差；
+该方差源自 toy H2 数据规模较小和 committee 随机初始化；
+seed0 的 Energy RMSE Std 最大 (0.756 eV)，因为 model_003 异常偏高；
+后续需要补充 Round 002/003 多轮 retraining 完成完整 learning curve。
 ```
 
 ---
 
 ## 8. Candidate-pool Uncertainty 对比
 
-random seed0 Round 001 retraining 后，对剩余 candidate pool 进行 committee prediction，并与 uncertainty branch Round 001 进行对比。
+各 branch Round 001 retraining 后，对剩余 candidate pool 进行 committee prediction 的对比结果。
 
-对比结果如下：
-
-| Run | Candidate Pool | n_frames | force_dev_max mean | force_dev_max max | force_dev_max min | energy_dev mean |
-|---|---|---:|---:|---:|---:|---:|
-| uncertainty_round001 | data/toy_h2/round_001_candidate | 40 | 0.126442 | 0.508339 | 0.042645 | 0.448212 |
-| random_seed0_round001 | data/toy_h2/random_seed0_round_001_candidate | 40 | 0.355420 | 1.586355 | 0.086667 | 0.656541 |
+| Run | n_frames | force_dev_max mean | force_dev_max max | force_dev_max min | energy_dev mean |
+|---|---:|---:|---:|---:|---:|
+| uncertainty_round001 | 40 | 0.126442 | 0.508339 | 0.042645 | 0.448212 |
+| random_seed0_round001 | 40 | 0.355420 | 1.586355 | 0.086667 | 0.656541 |
+| random_seed1_round001 | 40 | 0.487795 | 1.262038 | 0.327483 | 0.396726 |
+| random_seed2_round001 | 40 | 0.332138 | 1.117230 | 0.139321 | 0.446260 |
+| **random mean** | 40 | **0.391784** | — | — | **0.499842** |
 
 其中：
 
@@ -334,8 +348,8 @@ random seed0 Round 001 retraining 后，对剩余 candidate pool 进行 committe
 uncertainty_round001:
 force_dev_max_mean = 0.126442
 
-random_seed0_round001:
-force_dev_max_mean = 0.355420
+random mean (seed0/seed1/seed2):
+force_dev_max_mean = 0.391784
 ```
 
 该结果说明：
@@ -343,19 +357,20 @@ force_dev_max_mean = 0.355420
 ```text
 在当前 toy H2 offline active learning 设置下，
 加入 10 个 uncertainty-selected frames 后，
-剩余 candidate pool 的平均 force model deviation 低于 random seed0 baseline。
+剩余 candidate pool 的平均 force model deviation (0.126442)
+低于所有三个 random seed baseline (seed0: 0.355420, seed1: 0.487795, seed2: 0.332138)。
 ```
 
 更严谨的表述为：
 
-> 在 toy H2 和 random seed0 Round 001 的初步对比中，uncertainty sampling 相比 random seed0 baseline 显示出更低的 remaining candidate-pool force model deviation。
+> 在 toy H2 和 Round 001 的 random seed0 / seed1 / seed2 对比中，uncertainty sampling 一致显示出更低的 remaining candidate-pool force model deviation (0.126442 vs random mean 0.391784)。
 
 需要注意：
 
 ```text
-该结论目前仍基于 toy H2 和单个 random seed0；
-不能直接推广到所有 random seeds；
-也不能直接推广到真实 DFT / AIMD 数据集。
+该结论目前仍基于 toy H2 和 Round 001 单轮 retraining；
+后续需要补充 Round 002/003 多轮 random retraining；
+不能直接推广到真实 DFT / AIMD 数据集。
 ```
 
 相关结果文件：
@@ -363,7 +378,11 @@ force_dev_max_mean = 0.355420
 ```text
 experiments/baselines/random_seed0_round001_prediction_summary.csv
 experiments/baselines/random_seed0_round001_prediction_summary.md
-experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
+experiments/baselines/random_seed1_round001_prediction_summary.csv
+experiments/baselines/random_seed1_round001_prediction_summary.md
+experiments/baselines/random_seed2_round001_prediction_summary.csv
+experiments/baselines/random_seed2_round001_prediction_summary.md
+experiments/baselines/random_round001_comparison.csv
 ```
 
 ---
@@ -381,13 +400,14 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 6. uncertainty branch 中 top-K force_dev_max_mean 随轮次推进呈下降趋势。
 7. random sampling selection-level baseline 已经初步完成。
 8. uncertainty top-K 确实选中了平均不确定性更高的构型。
-9. random seed0 Round 001 retraining baseline 已经完成。
-10. 在 random seed0 Round 001 对比中，uncertainty branch 的 remaining candidate-pool force_dev_max_mean 更低。
+9. random seed0 / seed1 / seed2 Round 001 retraining baseline 已经完成。
+10. multi-seed random mean ± std 已经在 Round 001 上完成。
+11. 在 random seed0 / seed1 / seed2 Round 001 对比中，uncertainty branch 的 remaining candidate-pool force_dev_max_mean 一致低于所有 random seed。
 ```
 
 可以写进 README 的简洁表述：
 
-> 当前 toy H2 原型已经完成 DeePMD committee training、candidate-pool prediction、model deviation 计算、uncertainty top-K selection、dataset update 和 Round 0–3 offline active learning 闭环。初步 random baseline 结果显示，uncertainty top-K 能选中平均不确定性更高的构型，并在 random seed0 Round 001 对比中显示出更低的 remaining candidate-pool force model deviation。
+> 当前 toy H2 原型已经完成 DeePMD committee training、candidate-pool prediction、model deviation 计算、uncertainty top-K selection、dataset update 和 Round 0–3 offline active learning 闭环。random baseline 已经完成 selection-level 对比和 seed0/seed1/seed2 Round 001 retraining，结果显示 uncertainty top-K 在三个 random seed 上一致显示出更低的 remaining candidate-pool force model deviation。
 
 ---
 
@@ -402,7 +422,7 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 4. 当前方法已经完成 H100 / 多 GPU 加速验证；
 5. 当前 active learning 可以稳定降低 Force RMSE；
 6. 当前 toy H2 结果可以推广到真实材料体系；
-7. 当前 random baseline 已经完整完成；
+7. 当前 random baseline 已经完整完成 (Round 002/003 尚未完成)；
 8. 当前结果已经证明 MD 稳定性更好。
 ```
 
@@ -410,7 +430,7 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 
 ```text
 当前结果说明主动学习闭环和 baseline 对比流程可行；
-但仍需要多 seed random baseline、真实 DFT / AIMD 数据、系统 profiling 和 H100 scaling 进一步验证。
+但仍需要多轮 random retraining、真实 DFT / AIMD 数据、系统 profiling 和 H100 scaling 进一步验证。
 ```
 
 ---
@@ -422,15 +442,13 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. 当前 valid set 同时承担 candidate pool 和 validation/test 的角色；
 3. 当前尚未引入真实 DFT / AIMD 数据集；
-4. random sampling baseline 尚未完整完成，目前 retraining baseline 只完成 random seed0；
-5. 当前尚未完成 random seed1 / seed2 和多轮 random retraining；
-6. 当前尚未报告 random mean ± std；
-7. 当前尚未形成完整 RMSE learning curve 对比；
-8. 当前尚未加入结构多样性选择策略；
-9. 当前尚未进行 H100 / 多 GPU scaling 实验；
-10. 当前尚未系统记录端到端 active learning wall-clock time；
-11. 当前尚未进行 MD 稳定性验证；
-12. 当前结果更适合证明主动学习闭环可运行，尚不足以作为完整论文级结论。
+4. random sampling baseline 已经完成 Round 001 三 seed retraining，但尚未完成 Round 002/003 多轮 retraining；
+5. 当前尚未形成完整 RMSE learning curve 对比；
+6. 当前尚未加入结构多样性选择策略；
+7. 当前尚未进行 H100 / 多 GPU scaling 实验；
+8. 当前尚未系统记录端到端 active learning wall-clock time；
+9. 当前尚未进行 MD 稳定性验证；
+10. 当前结果更适合证明主动学习闭环可运行，尚不足以作为完整论文级结论。
 
 ---
 
@@ -440,11 +458,16 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 
 ### 12.1 完整 Random Baseline
 
-需要补充：
+已完成的 Round 001：
 
 ```text
-random seed1 Round 001
-random seed2 Round 001
+random seed0 / seed1 / seed2 Round 001
+multi-seed random mean ± std (Round 001)
+```
+
+需要补充的 Round 002/003：
+
+```text
 random seed0 Round 002 / Round 003
 random seed1 Round 002 / Round 003
 random seed2 Round 002 / Round 003
@@ -587,9 +610,9 @@ uncertainty-based selection, dataset update, and baseline comparison.
 ```text
 Selection-level random baseline shows that uncertainty top-K selects configurations
 with higher average force model deviation than random sampling.
-Furthermore, in the preliminary random seed0 Round 001 retraining comparison,
-the uncertainty branch yields a lower remaining candidate-pool force_dev_max_mean
-than the random seed0 branch.
+Furthermore, in the Round 001 retraining comparison across random seed0 / seed1 / seed2,
+the uncertainty branch consistently yields a lower remaining candidate-pool
+force_dev_max_mean (0.126 vs random mean 0.392) than all three random branches.
 ```
 
 中文表述：
@@ -597,25 +620,26 @@ than the random seed0 branch.
 ```text
 selection-level random baseline 表明，uncertainty top-K 相比随机采样
 能够选中平均 force model deviation 更高的构型。
-进一步地，在 random seed0 Round 001 的初步 retraining 对比中，
+进一步地，在 Round 001 的 random seed0 / seed1 / seed2 对比中，
 uncertainty branch 的 remaining candidate-pool force_dev_max_mean
-低于 random seed0 branch。
+一致低于所有三个 random branch (0.126 vs random mean 0.392)。
 ```
 
 注意必须补充限制：
 
 ```text
-However, this observation is still based on a toy H2 dataset and a single random seed.
-More random seeds, complete random retraining branches, real DFT / AIMD datasets,
-and systematic profiling are needed before drawing general conclusions.
+However, this observation is still based on a toy H2 dataset and a single round
+of retraining (Round 001). More rounds of random retraining (Round 002/003),
+real DFT / AIMD datasets, and systematic profiling are needed before drawing
+general conclusions.
 ```
 
 中文表述：
 
 ```text
-然而，该观察目前仍基于 toy H2 数据集和单个 random seed。
-在得出一般性结论之前，仍需补充多随机种子 random baseline、
-完整 random retraining branch、真实 DFT / AIMD 数据集以及系统性能分析。
+然而，该观察目前仍基于 toy H2 数据集和单轮 retraining (Round 001)。
+在得出一般性结论之前，仍需补充多轮 random retraining (Round 002/003)、
+真实 DFT / AIMD 数据集以及系统性能分析。
 ```
 
 ---
@@ -648,12 +672,48 @@ experiments/baselines/random_seed0_round001_metrics_summary.csv
 experiments/baselines/random_seed0_round001_metrics_summary.md
 ```
 
+random seed1 retraining baseline：
+
+```text
+experiments/baselines/random_seed1_round001_metrics_summary.csv
+experiments/baselines/random_seed1_round001_metrics_summary.md
+```
+
+random seed2 retraining baseline：
+
+```text
+experiments/baselines/random_seed2_round001_metrics_summary.csv
+experiments/baselines/random_seed2_round001_metrics_summary.md
+```
+
+multi-seed Round 001 汇总：
+
+```text
+experiments/baselines/random_round001_comparison.csv
+```
+
 random seed0 candidate-pool prediction：
 
 ```text
 experiments/baselines/random_seed0_round001_prediction_summary.csv
 experiments/baselines/random_seed0_round001_prediction_summary.md
 experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
+```
+
+random seed1 candidate-pool prediction：
+
+```text
+experiments/baselines/random_seed1_round001_prediction_summary.csv
+experiments/baselines/random_seed1_round001_prediction_summary.md
+experiments/baselines/random_seed1_round001_committee_prediction/selected_topk.json
+```
+
+random seed2 candidate-pool prediction：
+
+```text
+experiments/baselines/random_seed2_round001_prediction_summary.csv
+experiments/baselines/random_seed2_round001_prediction_summary.md
+experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.json
 ```
 
 ---
@@ -665,32 +725,29 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 ```text
 deepmd-al-hpc 已经完成 toy H2 上的 dataset-level offline active learning 原型验证；
 uncertainty branch 已经跑通 Round 0–3；
-random sampling baseline 已经从 selection-level 推进到 random seed0 Round 001 retraining；
-当前结果初步显示 uncertainty sampling 能够更有效地降低 remaining candidate-pool force model deviation。
+random sampling baseline 已经完成 selection-level 对比和 seed0/seed1/seed2 Round 001 retraining；
+multi-seed random mean ± std 已在 Round 001 上完成；
+在 Round 001 三个 random seed 上，uncertainty branch 一致显示出更低的 remaining candidate-pool force model deviation。
 ```
 
 但当前结果仍然属于：
 
 ```text
-toy workflow validation
+toy workflow validation with single-round random baseline
 ```
 
 而不是：
 
 ```text
-final paper-level validation
+final paper-level validation with multi-round random baseline
 ```
 
 下一步重点是：
 
 ```text
-random seed1 / seed2
+random Round 002/003 retraining
   ↓
-random Round 0–3 retraining
-  ↓
-random mean ± std
-  ↓
-full RMSE learning curve
+full RMSE learning curve 对比
   ↓
 real DFT / AIMD dataset
   ↓
