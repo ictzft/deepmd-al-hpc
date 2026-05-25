@@ -7,9 +7,9 @@
 ```text
 uncertainty branch Round 0–3
 selection-level random baseline
-random seed0 / seed1 / seed2 Round 001 retraining baseline
-multi-seed random mean ± std (Round 001)
-uncertainty_round001 vs random_seed*_round001 candidate-pool uncertainty comparison
+random seed0 / seed1 / seed2 Round 001–003 retraining baseline
+multi-seed random mean ± std (Round 001/002/003)
+uncertainty vs random full multi-round comparison
 ```
 
 需要说明的是：
@@ -487,7 +487,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 4. 当前方法已经完成 H100 / 多 GPU 加速验证；
 5. 当前 active learning 可以稳定降低 Force RMSE；
 6. 当前 toy H2 结果可以推广到真实材料体系；
-7. 当前 random baseline 已经形成完整 multi-seed multi-round learning curve；
+7. 当前方法在所有真实材料体系上有效；
 8. 当前结果已经证明 MD 稳定性更好。
 ```
 
@@ -495,7 +495,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 ```text
 当前结果说明主动学习闭环和 baseline 对比流程可行；
-但仍需要多轮 random retraining、真实 DFT / AIMD 数据、系统 profiling 和 H100 scaling 进一步验证。
+但仍需要真实 DFT / AIMD 数据、系统 GPU profiling 和 H100 scaling 进一步验证。
 ```
 
 ---
@@ -509,7 +509,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 3. 当前尚未引入真实 DFT / AIMD 数据集；
 4. random sampling baseline 已完成 Round 001–003 三 seed multi-round retraining (2026-05-25, 2×V100)；
 5. uncertainty vs random full RMSE learning curve 对比已生成；
-6. 当前尚未加入结构多样性选择策略的 multi-round retraining（策略原型已实现，Round 001 已验证）；
+6. uncertainty-diversity 和 trust-level 策略已完成 multi-seed Round 001–003（2026-05-25, 2×V100）；
 7. 当前尚未进行 H100 / 多 GPU scaling 实验；
 8. V100 training wall-clock profiling 已记录；GPU utilization 和端到端系统测量仍需补充；
 9. 当前尚未进行 MD 稳定性验证；

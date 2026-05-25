@@ -374,9 +374,9 @@ deepmd-al-hpc/
 | `docs/reproduce_legacy.md` | 早期复现记录，作为历史版本保留 |
 | `docs/data_and_git_policy.md` | 数据文件、模型文件、日志文件与 Git 管理规范 |
 | `docs/code_check.md` | 提交前代码检查、状态检查和大文件检查 |
-| `docs/profiling_h100.md` | V100 profiling、H100 迁移和多 GPU scaling 实验计划 |
+| `docs/profiling_h100.md` | H100 迁移和多 GPU scaling 实验计划（尚未执行） |
 | `docs/paper_evidence.md` | 论文证据清单，当前可支持/不可支持的结论 |
-| `docs/random_baseline_next_steps.md` | random baseline 后续 Round 002/003 实验计划和目录组织 |
+| `docs/random_baseline_next_steps.md` | random baseline 完成后的下一步（profiling / diversity / trust-level / real data） |
 | `docs/random_baseline_execution_checklist.md` | random Round 002/003 实际执行命令清单（可直接复制粘贴） |
 | `docs/selection_strategies.md` | 四类 selection strategy 说明、参数、设计动机和 Round 001 对比 |
 | `docs/diversity_and_trust_level_plan.md` | diversity 和 trust-level baseline 的后续多轮实验计划 |

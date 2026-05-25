@@ -20,7 +20,8 @@ docs/
 ├── results.md                   # 实验结果汇总与解释
 ├── data_and_git_policy.md       # 数据目录、Git 跟踪、大文件忽略规则
 ├── code_check.md                # Python / Shell / JSON / Git 检查命令
-└── profiling_h100.md            # V100 profiling 与 H100 迁移计划
+├── profiling_v100.md            # V100 profiling 方案与实测
+└── profiling_h100.md            # H100 迁移计划（尚未执行）
 ```
 
 ---
@@ -181,7 +182,7 @@ Step 15: profiling 与 H100 迁移计划
 | Step 7、13 | 结果汇总、learning curve、当前结论与限制 | `docs/results.md` |
 | Step 8–12 | random sampling baseline、seed0/1/2 retraining、multi-seed 汇总、uncertainty vs random 对比 | `docs/random_baseline.md` |
 | Step 14 | Python / Shell / JSON / Git 检查 | `docs/code_check.md` |
-| Step 15 | V100 profiling 与 H100 迁移计划 | `docs/profiling_h100.md` |
+| Step 15 | V100 profiling 与 H100 迁移计划 | `docs/profiling_v100.md` |
 
 ---
 
@@ -251,7 +252,7 @@ Git 状态检查
 如果后续要补充系统性能实验和 H100 迁移，请继续阅读：
 
 ```text
-8. docs/profiling_h100.md
+8. docs/profiling_v100.md
 ```
 
 ---
@@ -410,18 +411,26 @@ Git 状态检查
 
 ---
 
-### 6.9 `docs/profiling_h100.md`
+### 6.9 `docs/profiling_v100.md`
 
-用于记录后续系统性能分析和 H100 迁移计划，主要包括：
+用于记录 V100 系统性能 profiling 方案和实测数据，主要包括：
 
 ```text
-V100 profiling 当前状态
-训练耗时统计
-candidate prediction 耗时统计
-model deviation 计算耗时统计
-端到端 active learning wall-clock time
-H100 迁移需要修改的内容
-H100 / 多 GPU scaling 实验计划
+V100 profiling 当前状态（training: 132 models, mean=11.0s）
+训练耗时统计和 2×V100 并行加速比（1.97×）
+GPU utilization/memory representative sample
+candidate prediction / dataset update 分阶段命令模板
+端到端 active learning round 时间估算（~32s）
+```
+
+### 6.10 `docs/profiling_h100.md`
+
+用于记录后续 H100 迁移计划（尚未执行），主要包括：
+
+```text
+H100 scaling 实验计划
+V100 vs H100 对比维度
+多 GPU scaling 方案
 ```
 
 ---

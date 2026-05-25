@@ -641,7 +641,7 @@ experiments/baselines/random_seed2_round001_metrics_summary.md
 ```text
 三个 random seed 的 committee model 间存在较大方差；
 该方差源自 toy H2 数据规模较小和 committee 随机初始化；
-后续需要补充 Round 002/003 多轮 retraining 完成完整 learning curve。
+Round 002/003 已完成（2026-05-25, 2×V100），完整 multi-round learning curve 已生成。
 ```
 
 相关汇总文件：
@@ -915,7 +915,7 @@ uncertainty branch 的 remaining candidate-pool force_dev_max_mean
 注意：
 
 ```text
-该结论目前仍基于 toy H2 和 Round 001 单轮 retraining。
+该结论目前仍基于 toy H2 数据集，Round 001–003 multi-round retraining 已补充完成。
 Round 002/003 多轮 random retraining 已完成（2026-05-25），
 并生成完整 RMSE learning curve 对比。
 ```
