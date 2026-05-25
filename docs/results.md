@@ -429,12 +429,28 @@ Diversity 和 trust_level 策略已完成 seed0/seed1/seed2 Round 001–003 mult
 | diversity | 2.052e-01 | 5.789e-02 | 1.738e-01 | 9.290e-03 | 1.759e-01 | 4.082e-02 |
 | trust_level | 1.353e-01 | 2.761e-02 | 1.491e-01 | 2.256e-02 | 1.782e-01 | 6.470e-03 |
 
-完整数据见 `experiments/strategy_comparison_toy_h2/strategy_summary.md`。
-Random、diversity、trust_level 均为 3-seed mean ± std；uncertainty 当前为单次 run。
+完整数据见 `experiments/strategy_comparison_toy_h2/strategy_summary.md` 和 `experiments/baselines/aligned_comparison.md`。
+全部四策略均为 3-seed mean ± std。
 
 ---
 
-## 10. 当前可以支持的结论
+## 10. Structural Diversity Analysis (2026-05-25)
+
+Round 0 selection-level 对比三种策略选中帧的 H-H 键长分布：
+
+| Strategy | PW dist (Å) | FDM mean | 解读 |
+|---|---:|---:|---|
+| uncertainty | 0.038 | 0.441 | 最高不确定性，结构聚类 |
+| diversity | 0.119 | 0.254 | 3.1x 更大结构覆盖 |
+| trust_level | 0.063 | 0.351 | 中间态 |
+
+Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显著提升了选中帧的结构覆盖度（pairwise distance 从 0.038Å 增加到 0.119Å），代价是平均 force_dev_max 从 0.441 降低到 0.254。这验证了 uncertainty-diversity 策略的设计动机：在高不确定性帧中增加结构多样性，减少重复选择相似构型。
+
+完整分析见 `experiments/baselines/diversity_analysis.md`。
+
+---
+
+## 11. 当前可以支持的结论
 
 基于当前结果，可以支持以下结论：
 

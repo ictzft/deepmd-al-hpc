@@ -15,8 +15,8 @@ V100 阶段的 profiling 目标不是追求极限性能，而是：
 - 识别主要性能瓶颈（training vs inference vs I/O）；
 - 为后续 H100 迁移和多 GPU scaling 提供 baseline 对比数据。
 
-已完成：training wall-clock time（36 个 train.log，mean=10.9s/model），2×V100 并行加速比（1.97×），representative GPU utilization/memory sample。
-待完成：prediction/I/O 阶段精确耗时，系统 GPU utilization 曲线记录，end-to-end round 精确 wall-clock time。
+已完成：training wall-clock time（132 个 train.log，mean=11.0s/model, std=0.5s, range 10.1–12.5s），2×V100 并行加速比（1.97×），estimated end-to-end per round ~32s，representative GPU utilization/memory sample（SM 23%, 5407 MiB），prediction/dataset update 分阶段 profiling 工具已就绪。
+待完成：全流程 GPU utilization 曲线记录（nvidia-smi dmon 配合完整 round），prediction/I/O 阶段在真实训练中的精确耗时。
 
 ---
 
@@ -432,16 +432,19 @@ V100 profiling 建立的指标体系和 CSV 格式可以直接复用到 H100：
 
 ## 6. 当前 V100 profiling 已有数据
 
-### 6.1 训练耗时（从 train.log 提取，n=36）
+### 6.1 训练耗时（从 train.log 提取，n=132, 2026-05-25）
 
-| Round | Mean / model | Min | Max | 2×V100 parallel (4 models) |
-|---|---:|---:|---:|---:|
-| 001 | 10.9 s | 10.1 s | 11.7 s | ~22 s |
-| 002 | 10.7 s | 10.3 s | 11.5 s | ~22 s |
-| 003 | 11.2 s | 10.5 s | 12.4 s | ~22 s |
-| Overall | 10.9 s | 10.1 s | 12.4 s | ~22 s |
+| Metric | Value |
+|---|---|
+| Total models | 132 (4 strategies × 3 seeds × 3 rounds × 4 models + uncertainty R0) |
+| Mean wall time | 11.0 s |
+| Std | 0.5 s |
+| Range | 10.1 – 12.5 s |
+| 2×V100 parallel (4 models) | ~22 s/round |
+| Estimated end-to-end | ~32 s/round (train + predict + I/O) |
+| Avg time per batch | 8.7 ms/batch (1000 steps) |
 
-Avg time per batch: 8.7 ms/batch (1000 steps)
+完整 per-model 数据见 `experiments/profiling/training_wall_time_summary.csv`。
 
 ### 6.2 2×V100 并行加速比
 

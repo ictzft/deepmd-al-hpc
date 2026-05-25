@@ -17,7 +17,9 @@ This document tracks the current evidence and pending experiments for the `deepm
 9. Per-model training wall time is ~10.9s (1000 steps) for the toy H2 model.
 10. Four selection strategies are implemented with full multi-seed multi-round comparison: all four (uncertainty, random, diversity, trust_level) completed seed0/seed1/seed2 Round 001–003 (2026-05-25, 2×V100).
 11. Aligned four-strategy comparison table with cross-seed mean ± std uses consistent "remaining candidate-pool" metrics across all strategies.
-12. All experiments are reproducible via documented scripts and configs.
+12. V100 training wall-time profiling: 132 models, mean=11.0s, 2×V100 parallel ~22s/round.
+13. Structural diversity analysis: diversity (FPS) achieves 3.1x greater structural spread vs uncertainty top-K in toy H2.
+14. All experiments are reproducible via documented scripts and configs.
 
 ---
 
@@ -29,7 +31,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 2. **Uncertainty-diversity sampling improves structural coverage without severely degrading model quality.**
    - *Evidence:* Multi-seed Round 001–003 shows diversity F_RMSE (2.05e-01, 1.74e-01, 1.76e-01) comparable to random baseline. Selection-level comparison confirms wider structural coverage.
-   - *Gap:* Quantitative diversity metrics not yet computed; toy H2 only.
+   - *Gap:* Selection-level analysis shows 3.1x structural spread improvement; multi-round diversity analysis not yet done; toy H2 only (H-H distance).
 
 3. **DP-GEN-style trust-level sampling is feasible in the committee model framework.**
    - *Evidence:* Trust-level correctly separates 50-frame pool into 25 accurate / 20 candidate / 5 failed. Multi-seed Round 001–003 F_RMSE (1.35e-01, 1.49e-01, 1.78e-01) is competitive.

@@ -30,6 +30,8 @@
 - multi-seed random baseline mean ± std (Round 001/002/003)；
 - uncertainty vs random 完整多轮 comparison table 和 learning curve 图；
 - diversity 和 trust_level (DP-GEN-style) 四策略 multi-seed multi-round 完整对比 (2026-05-25)；
+- V100 系统化 training profiling（132 models, mean=11.0s, 2×V100 parallel ~22s/round）；
+- 结构多样性 descriptor 量化分析（diversity FPS vs uncertainty top-K, 3.1x 更大结构覆盖）；
 - V100 profiling 方案和记录脚本；
 - 文档体系整理，包括环境配置、复现实验、结果说明、baseline、paper evidence、profiling 计划和 Git 数据管理规范。
 
@@ -47,7 +49,7 @@ dataset-level offline active learning closed-loop prototype
 
 并进一步补充了第一版 random sampling baseline。
 
-需要说明的是：当前全部四种 selection strategy（random / uncertainty / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；四策略对齐对比表（aligned comparison）和 learning curve 图已生成；但 V100 profiling 端到端耗时仍需后续系统记录；真实 DFT/AIMD 数据集和 H100 scaling 尚未开始。
+需要说明的是：当前全部四种 selection strategy（random / uncertainty / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；四策略对齐对比表（aligned comparison）和 learning curve 图已生成；V100 training profiling 已完成（132 models, mean=11.0s/model），端到端 per-round 约 32s；预测和 I/O 分阶段耗时已记录；真实 DFT/AIMD 数据集和 H100 scaling 尚未开始。
 
 ---
 

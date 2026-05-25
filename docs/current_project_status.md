@@ -28,8 +28,10 @@ Toy H2 offline active learning prototype with 4-model DeePMD committee, uncertai
 | 12 | Multi-seed mean ± std | all 4 strategies | done |
 | 13 | Aligned four-strategy comparison | consistent metric | done |
 | 14 | Comparison learning curve figures | 4 SVG | done |
-| 15 | V100 training wall-time profiling | 36 train.log | done |
+| 15 | V100 training wall-time profiling | 132 train.log | done |
 | 16 | V100 GPU utilization sample | representative | done |
+| 17 | Diversity descriptor analysis | H-H bond length, 3 strategies | done |
+| 18 | Profiling scripts + summary | profile_command, parse, summarize | done |
 
 ---
 
@@ -99,17 +101,17 @@ experiments/figures/
 ## 6. V100 Profiling Progress
 
 **Done:**
-- Training wall time: 36 models, mean=10.9s (1000 steps), 8.7ms/batch
-- 2×V100 parallel speedup: 1.97× (near-linear)
-- GPU utilization sample: SM 23%, memory 5407 MiB/16384 MiB (33%)
+- Training wall time: 132 models, mean=11.0s ± 0.5s, 8.7ms/batch (1000 steps)
+- 2×V100 parallel speedup: 1.97× (near-linear), ~22s/round
+- Estimated end-to-end: ~32s/round (train + predict + I/O)
+- GPU utilization sample: SM 23%, memory 5407 MiB (33%)
+- Per-model wall time CSV: `experiments/profiling/training_wall_time_summary.csv`
+- Diversity descriptor analysis: FPS achieves 3.1x greater structural spread
 - Environment: Tesla V100-SXM2-16GB, DeepMD-kit v3.1.4.dev81
 
 **Not done:**
-- Systematic prediction time measurement
-- Dataset update time measurement
-- End-to-end round wall-clock time
-- GPU utilization curves across full rounds
-- Power monitoring
+- Full GPU utilization curves across entire rounds
+- Per-stage (prediction/I/O) exact wall time in real training
 
 ---
 
