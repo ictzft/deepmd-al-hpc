@@ -118,19 +118,36 @@ for ((ROUND=START_ROUND; ROUND<=END_ROUND; ROUND++)); do
     $CMD3 || { echo "ERROR: Config generation failed for round ${ROUND_STR}"; exit 1; }
   fi
 
-  # --- Step 4: Training (longest step) ---
-  CMD4="bash scripts/train/train_round_committee_models.sh ${ROUND_STR} configs/deepmd/${STRATEGY_DIR}_round_${ROUND_STR}_committee experiments/strategy_comparison_toy_h2/${STRATEGY_DIR}/round_${ROUND_STR}/committee_models ${PROJECT_ROOT}/data/toy_h2/valid"
-  echo "[Step 4] Training: ${CMD4}"
+  # --- Step 4: Training (2xV100, requires DeepMD-kit Docker) ---
+  TRAIN_CMD="bash scripts/train/train_round_committee_models.sh ${ROUND_STR} configs/deepmd/${STRATEGY_DIR}_round_${ROUND_STR}_committee experiments/strategy_comparison_toy_h2/${STRATEGY_DIR}/round_${ROUND_STR}/committee_models ${PROJECT_ROOT}/data/toy_h2/valid"
+  echo "[Step 4] Training: ${TRAIN_CMD}"
   if [ "$DRY_RUN" = false ]; then
-    echo "  TODO: Run training inside DeepMD-kit Docker container."
-    echo "  This step requires GPU and dp command."
+    if command -v dp &> /dev/null; then
+      ${TRAIN_CMD} || { echo "ERROR: Training failed for round ${ROUND_STR}"; exit 1; }
+    else
+      echo "  dp not on PATH. Attempting inside Docker container..."
+      docker run --rm --gpus all -e HOME=/tmp \
+        -v /data/zft:/data/zft -w "${PROJECT_ROOT}" \
+        ghcr.io/deepmodeling/deepmd-kit:master \
+        bash -lc "export PATH=/opt/deepmd-kit/bin:\$PATH; export LD_LIBRARY_PATH=/opt/deepmd-kit/lib:\$LD_LIBRARY_PATH; ${TRAIN_CMD}" \
+        || { echo "ERROR: Docker training failed for round ${ROUND_STR}"; exit 1; }
+    fi
   fi
 
   # --- Step 5: Prediction ---
-  CMD5="python scripts/inference/predict_committee_models.py --data ${CAND_DATA} --models ${MODELS_DIR}/model_000/frozen_model.pb ${MODELS_DIR}/model_001/frozen_model.pb ${MODELS_DIR}/model_002/frozen_model.pb ${MODELS_DIR}/model_003/frozen_model.pb --output ${PRED_OUTPUT} --selected-json ${SELECTED_JSON} --top-k ${TOP_K}"
-  echo "[Step 5] Prediction: ${CMD5}"
+  PREDICT_CMD="python scripts/inference/predict_committee_models.py --data ${CAND_DATA} --models ${MODELS_DIR}/model_000/frozen_model.pb ${MODELS_DIR}/model_001/frozen_model.pb ${MODELS_DIR}/model_002/frozen_model.pb ${MODELS_DIR}/model_003/frozen_model.pb --output ${PRED_OUTPUT} --selected-json ${SELECTED_JSON} --top-k ${TOP_K}"
+  echo "[Step 5] Prediction: ${PREDICT_CMD}"
   if [ "$DRY_RUN" = false ]; then
-    echo "  TODO: Run prediction after training completes."
+    if python -c "import numpy" 2>/dev/null; then
+      ${PREDICT_CMD} || { echo "ERROR: Prediction failed for round ${ROUND_STR}"; exit 1; }
+    else
+      echo "  numpy not on host. Attempting inside Docker container..."
+      docker run --rm --gpus all -e HOME=/tmp \
+        -v /data/zft:/data/zft -w "${PROJECT_ROOT}" \
+        ghcr.io/deepmodeling/deepmd-kit:master \
+        bash -lc "export PATH=/opt/deepmd-kit/bin:\$PATH; export LD_LIBRARY_PATH=/opt/deepmd-kit/lib:\$LD_LIBRARY_PATH; ${PREDICT_CMD}" \
+        || { echo "ERROR: Docker prediction failed for round ${ROUND_STR}"; exit 1; }
+    fi
   fi
 
   echo ""

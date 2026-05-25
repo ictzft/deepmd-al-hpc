@@ -2,9 +2,10 @@
 
 | Stage | Elapsed (s) | Exit | Command |
 |---|---|---|---|
+| smoke | 0.0 | 0 | echo ok |
 | smoke_test | 0.0 | 0 | echo hello profiling |
 
-**Total elapsed**: 0.0s across 1 stages.
+**Total elapsed**: 0.0s across 2 stages.
 **Failures**: 0 stage(s) with non-zero exit code.
 
 ---
