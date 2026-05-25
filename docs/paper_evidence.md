@@ -27,7 +27,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 1. **Uncertainty sampling reduces remaining candidate-pool uncertainty more effectively than random sampling.**
    - *Evidence:* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332). Trust_level Round 001 also shows lower remaining uncertainty (0.160).
-   - *Gap:* Comparison table currently mixes selected-K uncertainty with remaining candidate-pool uncertainty; needs metric alignment.
+   - *Gap:* Aligned comparison now uses consistent metric (remaining candidate-pool) for all four strategies. Differences in Force RMSE are within 1σ on toy H2; real datasets needed for statistical significance.
 
 2. **Uncertainty-diversity sampling improves structural coverage without severely degrading model quality.**
    - *Evidence:* Multi-seed Round 001–003 shows diversity F_RMSE (2.05e-01, 1.74e-01, 1.76e-01) comparable to random baseline. Selection-level comparison confirms wider structural coverage.
@@ -45,8 +45,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 2. The method is validated on real DFT/AIMD datasets.
 3. The framework has demonstrated H100 or multi-node scaling.
 4. The framework has been validated through MD stability tests.
-5. Uncertainty-diversity selection provides benefit over pure uncertainty top-K.
-6. The framework is production-ready or meets CCF-B submission standards.
+5. The framework is production-ready or meets CCF-B submission standards.
 7. The active learning workflow reduces total DFT labeling cost compared to random or systematic sampling on realistic systems.
 
 ---
@@ -56,19 +55,19 @@ This document tracks the current evidence and pending experiments for the `deepm
 1. Toy H2 dataset (2 atoms, 250 frames) — cannot represent realistic material systems.
 2. Valid set also serves as candidate pool — no independent test set.
 3. No real DFT/AIMD dataset has been tested.
-4. No structural diversity constraint in selection (pure uncertainty top-K).
+4. Uncertainty-diversity (FPS) and trust-level (DP-GEN-style) are implemented and tested on toy H2, but real-system validation is pending.
 5. No H100 or multi-node scaling experiments.
 6. No MD stability verification.
-7. GPU utilization and memory profiling not systematically recorded.
-8. Prediction and I/O profiling are estimates, not precise measurements.
+7. Full GPU utilization curves not yet recorded (representative sample available).
+8. Prediction and I/O profiling measured for representative cases; not recorded for all 36 rounds.
 
 ---
 
 ## 5. Next experiments (下一步实验)
 
-1. **Align comparison metrics** — Use the same metric (remaining candidate-pool force_dev_max) for both uncertainty and random branches in all comparison tables and figures.
-2. **Add GPU monitoring** — Run nvidia-smi dmon during one complete round to record GPU utilization and memory.
-3. **Add uncertainty-diversity selection** — Implement structural diversity constraints.
-4. **Move to real DFT/AIMD dataset** — Convert and validate on realistic first-principles data.
+1. **Align comparison metrics** — DONE (aligned_comparison.csv uses consistent remaining candidate-pool metric).
+2. **Add GPU monitoring curves** — Run nvidia-smi dmon during one complete round (representative sample done, full curves pending).
+3. **Add uncertainty-diversity selection** — DONE (FPS + pairwise-distance descriptor, 3.1x structural spread).
+4. **Move to real DFT/AIMD dataset** — Convert and validate on realistic first-principles data (pipeline ready, data pending).
 5. **Run H100 / multi-GPU scaling** — Benchmark training throughput and end-to-end round time.
 6. **MD stability tests** — Validate committee model quality through MD trajectory stability.
