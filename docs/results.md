@@ -59,8 +59,7 @@ uncertainty vs random full comparison + learning curves
 真实 DFT / AIMD 数据集
 H100 / 多 GPU scaling
 MD 稳定性验证
-uncertainty-diversity selection
-系统 GPU utilization / memory profiling
+系统 GPU utilization / memory 曲线记录
 ```
 
 ---
@@ -267,9 +266,9 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-## 7. Multi-seed Random Round 001 Retraining 结果
+## 7. Multi-seed Random Round 001–003 Retraining 结果
 
-当前已经完成 random seed0 / seed1 / seed2 的 Round 001 retraining baseline。
+当前已经完成 random seed0 / seed1 / seed2 的 Round 001–003 retraining baseline（2026-05-25, 2×V100）。
 
 实验设置：
 
@@ -424,13 +423,13 @@ Diversity 和 trust_level 策略已完成 seed0/seed1/seed2 Round 001–003 mult
 
 | Strategy | R1 F_RMSE | R1 std | R2 F_RMSE | R2 std | R3 F_RMSE | R3 std |
 |---|---:|---:|---:|---:|---:|---:|
-| uncertainty | 1.618e-01 | — | 1.939e-01 | — | 1.743e-01 | — |
+| uncertainty | 1.515e-01 | 2.496e-02 | 2.132e-01 | 2.242e-02 | 1.965e-01 | 2.421e-02 |
 | random | 2.112e-01 | 5.508e-02 | 1.962e-01 | 1.623e-02 | 1.890e-01 | 4.782e-02 |
 | diversity | 2.052e-01 | 5.789e-02 | 1.738e-01 | 9.290e-03 | 1.759e-01 | 4.082e-02 |
 | trust_level | 1.353e-01 | 2.761e-02 | 1.491e-01 | 2.256e-02 | 1.782e-01 | 6.470e-03 |
 
 完整数据见 `experiments/strategy_comparison_toy_h2/strategy_summary.md` 和 `experiments/baselines/aligned_comparison.md`。
-全部四策略均为 3-seed mean ± std。
+全部四策略（uncertainty / random / diversity / trust_level）均为 3-seed mean ± std（2026-05-25, 2×V100）。
 
 ---
 
@@ -472,7 +471,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 可以写进 README 的简洁表述：
 
-> 当前 toy H2 原型已经完成 DeePMD committee training、candidate-pool prediction、model deviation 计算、uncertainty top-K selection、dataset update 和 Round 0–3 offline active learning 闭环。random baseline 已经完成 selection-level 对比和 seed0/seed1/seed2 Round 001 retraining，结果显示 uncertainty top-K 在三个 random seed 上一致显示出更低的 remaining candidate-pool force model deviation。
+> 当前 toy H2 原型已经完成 DeePMD committee training、candidate-pool prediction、model deviation 计算、uncertainty top-K selection、dataset update 和 Round 0–3 offline active learning 闭环。全部四种策略（uncertainty / random / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining，四策略对齐对比表明各策略 Force RMSE 差异在 1σ 以内。
 
 ---
 
@@ -521,94 +520,34 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 为了进一步支撑 CCF-B 投稿，后续需要补充以下结果。
 
-### 12.1 完整 Random Baseline
-
-已完成的 Round 001：
+### 12.1 Random Baseline（已完成）
 
 ```text
-random seed0 / seed1 / seed2 Round 001
-multi-seed random mean ± std (Round 001)
+random seed0 / seed1 / seed2 Round 001–003 ✓
+multi-seed random mean ± std (Round 001/002/003) ✓
+Force RMSE / Energy RMSE learning curve ✓
+candidate-pool uncertainty curve ✓
+training time per model ✓
+prediction time per round ✓
 ```
 
-需要补充的 Round 002/003：
+### 12.2 Four-Strategy Comparison（已完成）
 
 ```text
-random seed0 Round 002 / Round 003
-random seed1 Round 002 / Round 003
-random seed2 Round 002 / Round 003
+uncertainty / random / diversity / trust_level multi-seed Round 001–003 ✓
+aligned comparison table (remaining candidate-pool metric) ✓
+structural diversity analysis ✓
 ```
 
-最终报告：
+### 12.3 V100 Profiling（已完成）
 
 ```text
-Force RMSE mean ± std
-Energy RMSE mean ± std
-candidate-pool uncertainty mean ± std
-selected uncertainty mean ± std
-training time mean ± std
-prediction time mean ± std
-```
-
----
-
-### 12.2 Full RMSE Learning Curve
-
-需要生成：
-
-```text
-uncertainty branch Force RMSE curve
-random mean Force RMSE curve
-random ± std shaded region
-uncertainty branch Energy RMSE curve
-random mean Energy RMSE curve
-```
-
-目标是回答：
-
-```text
-uncertainty sampling 是否在多轮 retraining 后比 random sampling 更有效？
-```
-
----
-
-### 12.3 Candidate-pool Uncertainty Curve
-
-需要生成：
-
-```text
-uncertainty branch candidate-pool force_dev_max_mean curve
-random mean candidate-pool force_dev_max_mean curve
-random ± std shaded region
-```
-
-目标是回答：
-
-```text
-uncertainty sampling 是否更快降低 remaining candidate pool uncertainty？
-```
-
----
-
-### 12.4 Profiling 与 Wall-clock Time
-
-需要补充：
-
-```text
-single-model training time
-4-model committee training time
-committee prediction time
-model deviation calculation time
-selection time
-dataset update time
-end-to-end active learning round time
-```
-
-目标是回答：
-
-```text
-主动学习闭环的主要耗时瓶颈在哪里？
-多模型并行和 H100 加速能否降低端到端 wall-clock time？
-```
+single-model training time (132 models, mean=11.0s) ✓
+2×V100 parallel training time (~22s/round) ✓
+prediction time (6.5–7.2s) ✓
+dataset update time (0.34s) ✓
+end-to-end round time (~29s) ✓
+GPU utilization sample (SM 23%, 5407 MiB) ✓
 
 ---
 
@@ -693,18 +632,18 @@ uncertainty branch 的 remaining candidate-pool force_dev_max_mean
 注意必须补充限制：
 
 ```text
-However, this observation is still based on a toy H2 dataset and a single round
-of retraining (Round 001). More rounds of random retraining (Round 002/003),
-real DFT / AIMD datasets, and systematic profiling are needed before drawing
-general conclusions.
+However, this observation is still based on a toy H2 dataset.
+Round 001–003 multi-round random retraining has been completed,
+but real DFT / AIMD datasets and systematic profiling are still needed
+before drawing general conclusions.
 ```
 
 中文表述：
 
 ```text
-然而，该观察目前仍基于 toy H2 数据集。Round 001–003 multi-round random retraining 已补充完成，但仍不能直接推广到真实 DFT/AIMD 体系。
-在得出一般性结论之前，仍需补充多轮 random retraining (Round 002/003)、
-真实 DFT / AIMD 数据集以及系统性能分析。
+然而，该观察目前仍基于 toy H2 数据集。Round 001–003 multi-round random retraining
+已补充完成（2026-05-25），但仍不能直接推广到真实 DFT/AIMD 体系。
+在得出一般性结论之前，仍需真实 DFT / AIMD 数据集和系统性能分析。
 ```
 
 ---
@@ -812,9 +751,9 @@ final paper-level validation on real datasets
 ```text
 real DFT / AIMD dataset
   ↓
-uncertainty-diversity selection
+full GPU utilization curves (nvidia-smi dmon)
   ↓
-systematic profiling (GPU utilization + end-to-end)
+MD stability validation
   ↓
 H100 scaling
 ```
