@@ -2,6 +2,10 @@
 
 Date: 2026-05-25 | All experiments run on 2xTesla V100-16GB
 
+> **Authoritative source**: `experiments/baselines/aligned_comparison.md` — uses consistent
+> "remaining candidate-pool" metric for all four strategies. This file mirrors that data.
+> `strategy_summary.csv` is a copy of `aligned_comparison.csv`.
+
 ---
 
 ## Random Baseline (seed0/seed1/seed2 Round 001-003)
@@ -47,7 +51,7 @@ Date: 2026-05-25 | All experiments run on 2xTesla V100-16GB
 
 | Strategy | R1 F_RMSE | R1 std | R2 F_RMSE | R2 std | R3 F_RMSE | R3 std |
 |---|---:|---:|---:|---:|---:|---:|
-| uncertainty | 1.618e-01 | — | 1.939e-01 | — | 1.743e-01 | — |
+| uncertainty | 1.515e-01 | 2.496e-02 | 2.132e-01 | 2.242e-02 | 1.965e-01 | 2.421e-02 |
 | random | 2.112e-01 | 5.508e-02 | 1.962e-01 | 1.623e-02 | 1.890e-01 | 4.782e-02 |
 | diversity | 2.052e-01 | 5.789e-02 | 1.738e-01 | 9.290e-03 | 1.759e-01 | 4.082e-02 |
 | trust_level | 1.353e-01 | 2.761e-02 | 1.491e-01 | 2.256e-02 | 1.782e-01 | 6.470e-03 |
@@ -56,6 +60,6 @@ Date: 2026-05-25 | All experiments run on 2xTesla V100-16GB
 
 - Toy H2 only (2 atoms, 250 frames). Results do NOT generalize to real materials.
 - Cross-seed variance is large, especially for Energy RMSE.
-- Uncertainty branch does not have per-seed breakdown (single run).
+- All four strategies have 3-seed (seed0/seed1/seed2) mean ± std for Round 1-3.
 - Force RMSE differences between strategies are within one standard deviation.
 - Independent test set and MD stability validation are not yet performed.
