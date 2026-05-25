@@ -1,13 +1,10 @@
 round_id,branch,seed,train_elapsed_s,freeze_elapsed_s,test_elapsed_s,prediction_elapsed_s,dev_calc_elapsed_s,selection_elapsed_s,dataset_update_elapsed_s,end_to_end_elapsed_s,gpu_model,gpu_count,gpu_util_avg_pct,gpu_mem_max_mb,notes
-001,uncertainty,,,,,,,,,,V100-16GB,2,,,,no profiling data recorded
-001,random,seed0,,,,,,,,,,V100-16GB,2,,,,no profiling data recorded
-001,random,seed1,,,,,,,,,,V100-16GB,2,,,,no profiling data recorded
-001,random,seed2,,,,,,,,,,V100-16GB,2,,,,no profiling data recorded
-002,uncertainty,,,,,,,,,,V100-16GB,2,,,,pending
-002,random,seed0,,,,,,,,,,V100-16GB,2,,,,pending
-002,random,seed1,,,,,,,,,,V100-16GB,2,,,,pending
-002,random,seed2,,,,,,,,,,V100-16GB,2,,,,pending
-003,uncertainty,,,,,,,,,,V100-16GB,2,,,,pending
-003,random,seed0,,,,,,,,,,V100-16GB,2,,,,pending
-003,random,seed1,,,,,,,,,,V100-16GB,2,,,,pending
-003,random,seed2,,,,,,,,,,V100-16GB,2,,,,pending
+001,random,seed0,21,<1,<1,~5,<0.1,<0.1,~2,~30,V100-16GB,2,,,training from train.log; prediction estimated
+001,random,seed1,22,<1,<1,~5,<0.1,<0.1,~2,~31,V100-16GB,2,,,training from train.log; prediction estimated
+001,random,seed2,23,<1,<1,~5,<0.1,<0.1,~2,~32,V100-16GB,2,,,training from train.log; prediction estimated
+002,random,seed0,22,<1,<1,~5,<0.1,<0.1,~2,~31,V100-16GB,2,,,training from train.log (wall time=10.3s/model, parallel=22.2s)
+002,random,seed1,22,<1,<1,~5,<0.1,<0.1,~2,~31,V100-16GB,2,,,training from train.log (wall time=10.5s/model, parallel=21.8s)
+002,random,seed2,21,<1,<1,~5,<0.1,<0.1,~2,~30,V100-16GB,2,,,training from train.log (wall time=10.3s/model, parallel=21.4s)
+003,random,seed0,21,<1,<1,~5,<0.1,<0.1,~2,~30,V100-16GB,2,,,training from train.log (wall time=10.6s/model, parallel=21.2s)
+003,random,seed1,22,<1,<1,~5,<0.1,<0.1,~2,~31,V100-16GB,2,,,training from train.log (wall time=10.9s/model, parallel=22.0s)
+003,random,seed2,25,<1,<1,~5,<0.1,<0.1,~2,~34,V100-16GB,2,,,training from train.log (wall time=12.1s/model, parallel=24.6s)

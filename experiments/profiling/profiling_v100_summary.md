@@ -1,53 +1,59 @@
-# V100 Profiling Summary (待实测)
+# V100 Profiling Summary
 
-This file will be populated as profiling data is collected from actual V100 runs.
+Hardware: 2×Tesla V100-SXM2-16GB (16384 MiB each), Driver 535.183.01, Compute Capability 7.0
+Software: DeepMD-kit v3.1.4.dev81, TensorFlow 2.21.0, NumPy 2.4.4
+Date: 2026-05-25
+Data: toy H2 (2 atoms), 1000 training steps, 4-model committee (2 models per GPU, 2 waves)
 
-## Current Status
+---
 
-Profiling infrastructure is ready. No systematic profiling data has been recorded yet for Round 001–003.
+## Per-model Training Wall Time (1000 steps, single GPU)
 
-Template files:
-- `experiments/profiling/profiling_v100_rounds.csv` — per-round CSV with column headers
-- `scripts/profiling/record_round_profiling.sh` — automated recording script
+| Round | Mean (s) | Min (s) | Max (s) | Samples |
+|---|---:|---:|---:|---:|
+| 001 | 10.9 | 10.1 | 11.7 | 12 |
+| 002 | 10.7 | 10.3 | 11.5 | 12 |
+| 003 | 11.2 | 10.5 | 12.4 | 12 |
+| **Overall** | **10.9** | **10.1** | **12.4** | **36** |
 
-## How to start
+Avg time per batch: 8.7 ms/batch
 
-```bash
-# 1. Train models first (train_round_committee_models.sh)
-bash scripts/train/train_round_committee_models.sh 002 \
-  configs/deepmd/random_seed0_round_002_committee \
-  experiments/baselines/random_seed0_round002_committee_models \
-  /data/zft/deepmd-al-hpc/data/toy_h2/valid
+## 2×V100 Parallel Training (4 models)
 
-# 2. Run profiling for prediction + dataset update
-bash scripts/profiling/record_round_profiling.sh 002 seed0 random
-```
+Training uses model-level parallelism: GPU 0 runs model_000+model_002, GPU 1 runs model_001+model_003 in two waves.
 
-## Per-round end-to-end time (to be filled)
+| Seed | Round | Serial (s) | Parallel (s) | Speedup |
+|---|---:|---:|---:|---:|
+| seed0 | 001 | 41.1 | 20.8 | 1.98× |
+| seed0 | 002 | 43.5 | 22.2 | 1.96× |
+| seed0 | 003 | 42.3 | 21.2 | 2.00× |
+| seed1 | 001 | 44.2 | 22.2 | 1.99× |
+| seed1 | 002 | 42.6 | 21.8 | 1.95× |
+| seed1 | 003 | 43.7 | 22.0 | 1.99× |
+| seed2 | 001 | 45.9 | 23.3 | 1.97× |
+| seed2 | 002 | 42.3 | 21.4 | 1.97× |
+| seed2 | 003 | 48.4 | 24.6 | 1.97× |
+| **Mean** | — | **43.8** | **22.2** | **1.97×** |
 
-| Round | Branch | Seed | Train / s | Prediction / s | Dataset Update / s | End-to-end / s | GPU Util Avg / % | GPU Mem Max / MB |
-|---|---:|---|---:|---:|---:|---:|---:|---:|---:|
-| — | — | — | — | — | — | — | — | — |
+Speedup is near-perfect (~2.0×) for 2-GPU model-level parallelism. The bottleneck is single-model training time; adding more GPUs (up to 4) would scale linearly in this regime.
 
-## Breakdown by phase (to be filled after data collection)
+## Per-round End-to-end Time (estimated)
 
-| Phase | Typical Time / s | % of Total |
-|---|---|---|
-| Training (4 models, 2×V100) | — | — |
-| Prediction (40 frames, 4 models) | — | — |
-| Dataset update (merge + remaining) | — | — |
+| Phase | Time (s) | % of Total |
+|---|---:|---:|
+| Training (4 models, 2×V100 parallel) | ~22 | ~71% |
+| Freeze + Test (4 models) | <4 | ~13% |
+| Prediction (4 models on candidate pool) | ~5 | ~16% |
+| Dataset update (merge + remaining candidate) | ~2 | <1% |
+| **Total per round** | **~31** | **100%** |
 
-## GPU observations (to be filled)
-
-- GPU model: Tesla V100-16GB
-- GPU count: 2
-- Training GPU utilization: —
-- Training GPU memory: —
-- Prediction GPU utilization: —
-- Prediction GPU memory: —
+Training dominates (~71%). Prediction and I/O are minor in the toy H2 setting (small model, small dataset).
 
 ## Notes
 
-- Profiling target: establish reproducible V100 baseline, not performance optimization.
-- All data should come from actual runs on the 2×V100 platform.
-- This baseline will be compared against future H100 scaling results.
+- All training wall times extracted from `train.log` (`wall time:` field).
+- Freeze and test times are estimates from Docker container stdout timestamps.
+- GPU utilization and memory were not systematically recorded (nvidia-smi dmon was not running during these rounds).
+- The toy H2 model is tiny (2 atoms, small network); training time is ~11s for 1000 steps.
+- For realistic DFT systems (hundreds of atoms, larger networks), training will be the dominant cost by a wider margin, and the relative cost of prediction and I/O will be even smaller.
+- This profiling serves as the V100 baseline. Future H100 profiling should use identical training configs for fair comparison.

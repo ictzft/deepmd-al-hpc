@@ -2,7 +2,7 @@
 
 本文档定义在 2×Tesla V100 GPU 平台上对 `deepmd-al-hpc` 主动学习闭环进行系统性能 profiling 的方案和具体操作命令。
 
-**当前状态：方案阶段。** 以下大部分指标和命令模板已就绪，但尚未系统执行所有 round 的 profiling。当前只有少量零散耗时记录（见第 6 节）。本文档的目标是提供可立即执行的 profiling 操作指南。
+**当前状态：训练耗时已从 train.log 提取（2026-05-25），prediction 和端到端耗时基于 Docker 时间戳估算。** 详细数据见 `experiments/profiling/profiling_v100_summary.md`。GPU 利用率和显存尚未系统监控。
 
 ## 1. 为什么 V100 阶段需要做 profiling
 
@@ -429,16 +429,33 @@ V100 profiling 建立的指标体系和 CSV 格式可以直接复用到 H100：
 
 ## 6. 当前 V100 profiling 已有数据
 
-`experiments/al_rounds_summary.csv` 中：
+### 6.1 训练耗时（从 train.log 提取，n=36）
 
-| Round | train_elapsed_s | prediction_elapsed_s |
-|---|---:|---:|
-| 0 | — | — |
-| 1 | — | — |
-| 2 | — | — |
-| 3 | 76 | 7 |
+| Round | Mean / model | Min | Max | 2×V100 parallel (4 models) |
+|---|---:|---:|---:|---:|
+| 001 | 10.9 s | 10.1 s | 11.7 s | ~22 s |
+| 002 | 10.7 s | 10.3 s | 11.5 s | ~22 s |
+| 003 | 11.2 s | 10.5 s | 12.4 s | ~22 s |
+| Overall | 10.9 s | 10.1 s | 12.4 s | ~22 s |
 
-说明：目前只有 Round 3 记录了耗时。需要在后续实验中补充完整 profiling 数据。
+Avg time per batch: 8.7 ms/batch (1000 steps)
+
+### 6.2 2×V100 并行加速比
+
+9 组 (seed, round) 的串行 vs 并行对比：
+- 串行均值：43.8 s（4 models sequential）
+- 并行均值：22.2 s（2 waves × 2 GPUs）
+- 加速比：1.97×（接近线性）
+
+### 6.3 环境信息
+
+- GPU: 2×Tesla V100-SXM2-16GB (16384 MiB), Driver 535.183.01, CC 7.0
+- DeepMD-kit: v3.1.4.dev81
+- TensorFlow: 2.21.0
+
+完整 profiling 数据见 `experiments/profiling/profiling_v100_rounds.csv` 和 `experiments/profiling/profiling_v100_summary.md`。
+
+仍未记录的内容：GPU 利用率曲线、GPU 显存占用曲线、prediction 阶段精确耗时（当前为估算）。
 
 ---
 

@@ -1,6 +1,8 @@
-# Random Baseline 后续实验计划
+# Random Baseline 执行记录
 
-本文档说明当前 random sampling baseline 的完成状态、后续需要补充的实验、以及如何执行这些实验。
+> 本文档原为 random baseline 后续实验计划。截至 2026-05-25，Round 002/003 已在 2×V100 上全部执行完毕。本文档现作为历史执行记录保留。
+
+**当前状态：所有计划实验已完成。** 执行命令清单见 `docs/random_baseline_execution_checklist.md`（已全部标记 done）。
 
 ---
 

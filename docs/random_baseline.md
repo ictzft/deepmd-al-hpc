@@ -65,13 +65,19 @@ random seed0 / seed1 / seed2 candidate-pool prediction summary
 random multi-seed mean ± std (Round 001)
 ```
 
-尚未完成：
+已全部完成（2026-05-25）：
 
 ```text
 random seed0 / seed1 / seed2 Round 002 retraining
 random seed0 / seed1 / seed2 Round 003 retraining
-full RMSE learning curve
-end-to-end wall-clock time comparison
+full RMSE learning curve (uncertainty vs random, 4 SVG figures)
+multi-round candidate-pool uncertainty comparison
+```
+
+仍待完成：
+
+```text
+end-to-end wall-clock time (systematic profiling with GPU monitoring)
 ```
 
 ---
@@ -85,15 +91,19 @@ Selection-level baseline:
   Round 0 random seed0 / seed1 / seed2
   Round 1 random seed0 / seed1 / seed2
 
-Retraining baseline:
-  random seed0 Round 001
-  random seed1 Round 001
-  random seed2 Round 001
+Retraining baseline (all completed 2026-05-25 on 2×V100):
+  random seed0 Round 001 / 002 / 003
+  random seed1 Round 001 / 002 / 003
+  random seed2 Round 001 / 002 / 003
 
 Prediction comparison:
-  random seed0 / seed1 / seed2 Round 001 candidate-pool committee prediction
-  uncertainty_round001 vs random_seed*_round001 candidate-pool uncertainty comparison
-  multi-seed random mean ± std (Round 001)
+  random seed0 / seed1 / seed2 Round 001–003 candidate-pool committee prediction
+  multi-seed random mean ± std (Round 001/002/003)
+  uncertainty branch vs random multi-seed full comparison table + learning curves
+
+Profiling:
+  training wall time recorded per model from train.log (mean=10.9s/model, n=36)
+  2×V100 parallel speedup: 1.97× (near-linear)
 ```
 
 当前还不能直接声称：
