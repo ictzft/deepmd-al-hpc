@@ -116,17 +116,17 @@ uncertainty / top-K:
 random:
   Randomly select configurations with fixed random seeds.
   Used as random sampling baseline.
+
+uncertainty-diversity:
+  Top-M high-uncertainty candidates + Farthest Point Sampling on
+  pairwise-distance descriptor. Reduces structural redundancy.
+
+trust-level (DP-GEN-style):
+  Split candidate pool into accurate / candidate / failed regions
+  by force_dev_max percentiles. Select primarily from candidate region.
 ```
 
-后续计划加入：
-
-```text
-uncertainty-diversity sampling:
-  Select high-uncertainty configurations while reducing structural redundancy.
-
-DP-GEN-style threshold sampling:
-  Split configurations into accurate / candidate / failed regions using trust levels.
-```
+详见 `docs/selection_strategies.md`。
 
 ---
 
@@ -324,6 +324,7 @@ deepmd-al-hpc/
 │   ├── random_baseline_next_steps.md
 │   ├── reproduce.md
 │   ├── reproduce_legacy.md
+│   ├── selection_strategies.md
 │   ├── results.md
 │   ├── setup.md
 │   ├── toy_h2_pipeline.md
@@ -398,6 +399,7 @@ deepmd-al-hpc/
 | `docs/paper_evidence.md` | 论文证据清单，当前可支持/不可支持的结论 |
 | `docs/random_baseline_next_steps.md` | random baseline 后续 Round 002/003 实验计划和目录组织 |
 | `docs/random_baseline_execution_checklist.md` | random Round 002/003 实际执行命令清单（可直接复制粘贴） |
+| `docs/selection_strategies.md` | 四类 selection strategy 说明、参数、设计动机和 Round 001 对比 |
 | `docs/profiling_v100.md` | V100 系统性能 profiling 方案、指标和输出格式 |
 
 推荐阅读顺序：

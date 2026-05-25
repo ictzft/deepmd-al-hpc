@@ -1,0 +1,92 @@
+{
+  "n_frames": 50,
+  "top_k": 10,
+  "selection_strategy": "uncertainty-diversity",
+  "selection_policy": "uncertainty-diversity",
+  "selected_indices": [
+    39,
+    10,
+    3,
+    19,
+    37,
+    32,
+    30,
+    44,
+    18,
+    47
+  ],
+  "selected_frames": [
+    {
+      "rank": 1,
+      "frame_index": 39,
+      "force_dev_max": 0.7891948696247796,
+      "force_dev_mean": 0.7891948696247796,
+      "energy_dev": 0.862544694353717
+    },
+    {
+      "rank": 2,
+      "frame_index": 10,
+      "force_dev_max": 0.08709343127156148,
+      "force_dev_mean": 0.08709343127156148,
+      "energy_dev": 0.8276591271792969
+    },
+    {
+      "rank": 3,
+      "frame_index": 3,
+      "force_dev_max": 0.07166012201056685,
+      "force_dev_mean": 0.07166012201056685,
+      "energy_dev": 0.8229937560079836
+    },
+    {
+      "rank": 4,
+      "frame_index": 19,
+      "force_dev_max": 0.40604666190536187,
+      "force_dev_mean": 0.40604666190536187,
+      "energy_dev": 0.8295973003694145
+    },
+    {
+      "rank": 5,
+      "frame_index": 37,
+      "force_dev_max": 0.08574711185200977,
+      "force_dev_mean": 0.08574711185200977,
+      "energy_dev": 0.826076660359975
+    },
+    {
+      "rank": 6,
+      "frame_index": 32,
+      "force_dev_max": 0.07109544167956028,
+      "force_dev_mean": 0.07109544167956028,
+      "energy_dev": 0.825389111925558
+    },
+    {
+      "rank": 7,
+      "frame_index": 30,
+      "force_dev_max": 0.10383724883617505,
+      "force_dev_mean": 0.10383724883617505,
+      "energy_dev": 0.8225665804716474
+    },
+    {
+      "rank": 8,
+      "frame_index": 44,
+      "force_dev_max": 0.3340988386404334,
+      "force_dev_mean": 0.3340988386404334,
+      "energy_dev": 0.8799229133868361
+    },
+    {
+      "rank": 9,
+      "frame_index": 18,
+      "force_dev_max": 0.4544573279369877,
+      "force_dev_mean": 0.4544573279369877,
+      "energy_dev": 0.8399899690417547
+    },
+    {
+      "rank": 10,
+      "frame_index": 47,
+      "force_dev_max": 0.13849631367305007,
+      "force_dev_mean": 0.13849631367305007,
+      "energy_dev": 0.8241781657282218
+    }
+  ],
+  "top_m": 30,
+  "descriptor": "pairwise-distance"
+}

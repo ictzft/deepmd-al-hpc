@@ -54,7 +54,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Select candidate frames from committee prediction npz using "
-            "uncertainty or random sampling."
+            "uncertainty, random, uncertainty-diversity, or trust-level sampling."
         )
     )
     parser.add_argument(
@@ -66,7 +66,9 @@ def main() -> None:
     parser.add_argument(
         "--strategy",
         default="uncertainty",
-        choices=["uncertainty", "topk", "top-k", "random"],
+        choices=["uncertainty", "topk", "top-k", "random",
+                 "uncertainty-diversity", "diversity",
+                 "trust-level", "trust", "dpgen"],
         help="Selection strategy.",
     )
     parser.add_argument(
@@ -80,6 +82,30 @@ def main() -> None:
         type=int,
         default=0,
         help="Random seed. Only used by random strategy.",
+    )
+    parser.add_argument(
+        "--top-m",
+        type=int,
+        default=30,
+        help="For diversity: top-M high-uncertainty pool size before FPS.",
+    )
+    parser.add_argument(
+        "--low-pct",
+        type=float,
+        default=50.0,
+        help="For trust-level: percentile for accurate/candidate boundary.",
+    )
+    parser.add_argument(
+        "--high-pct",
+        type=float,
+        default=90.0,
+        help="For trust-level: percentile for candidate/failed boundary.",
+    )
+    parser.add_argument(
+        "--candidate-ratio",
+        type=float,
+        default=0.8,
+        help="For trust-level: fraction from candidate region.",
     )
     parser.add_argument(
         "--template-json",
@@ -119,27 +145,53 @@ def main() -> None:
     n_frames = int(force_dev_max.shape[0])
     top_k = min(int(args.top_k), n_frames)
 
-    selected_indices = select_by_strategy(
+    # Extract coords if available (needed for diversity strategy)
+    coords = data.get("coord", None)
+    if coords is not None:
+        coords = np.asarray(coords)
+
+    result = select_by_strategy(
         scores=force_dev_max,
         k=top_k,
         strategy=args.strategy,
         seed=args.seed,
+        coords=coords,
+        top_m=args.top_m,
+        low_pct=args.low_pct,
+        high_pct=args.high_pct,
+        candidate_ratio=args.candidate_ratio,
     )
+
+    # Handle dict return from trust-level strategy
+    extra_meta: dict[str, Any] = {}
+    if isinstance(result, dict):
+        selected_indices = result.pop("selected_indices")
+        extra_meta = {k: v for k, v in result.items()}
+    else:
+        selected_indices = result
 
     template = load_json(args.template_json)
 
     output: dict[str, Any] = dict(template)
+    policy = {
+        "random": "random sampling",
+        "uncertainty": "top-k by force_dev_max",
+        "topk": "top-k by force_dev_max",
+        "top-k": "top-k by force_dev_max",
+        "uncertainty-diversity": "top-M uncertainty + FPS diversity",
+        "diversity": "top-M uncertainty + FPS diversity",
+        "trust-level": "DP-GEN-style trust-level sampling",
+        "trust": "DP-GEN-style trust-level sampling",
+        "dpgen": "DP-GEN-style trust-level sampling",
+    }.get(args.strategy, args.strategy)
+
     output.update(
         {
             "n_frames": n_frames,
             "top_k": int(len(selected_indices)),
             "output_npz": str(args.predictions),
             "selection_strategy": args.strategy,
-            "selection_policy": (
-                "random sampling"
-                if args.strategy == "random"
-                else "top-k by force_dev_max"
-            ),
+            "selection_policy": policy,
             "score_key": "force_dev_max",
             "seed": int(args.seed) if args.strategy == "random" else None,
             "selected_frames": build_selected_frames(
@@ -150,6 +202,8 @@ def main() -> None:
             ),
         }
     )
+    if extra_meta:
+        output.update(extra_meta)
 
     # If the npz contains force predictions, infer model and atom counts.
     if "forces" in data:

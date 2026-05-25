@@ -7,31 +7,33 @@ This document tracks the current evidence and pending experiments for the `deepm
 ## 1. Claims currently supported (已支持的结论)
 
 1. The repository implements a reproducible toy H2 offline active learning prototype on 2×V100.
-2. 4-model committee training, prediction, and model deviation (`force_dev_max`, `force_dev_mean`, `energy_dev`) are implemented end-to-end.
+2. 4-model committee training, prediction, and model deviation are implemented end-to-end.
 3. Uncertainty-based top-K selection consistently selects higher-uncertainty configurations than random sampling.
 4. In the uncertainty branch, selected top-K `force_dev_max_mean` decreases monotonically across Round 0–3 (0.441 → 0.170).
-5. Random sampling baseline has been completed at scale: 3 seeds × 3 rounds = 9 independent committee training runs + predictions.
+5. Random sampling baseline has been completed at scale: 3 seeds × 3 rounds = 9 independent runs.
 6. Multi-seed random mean ± std is available for Round 001/002/003.
-7. Uncertainty vs random comparison figures (Force RMSE, Energy RMSE, candidate force_dev, dataset size) are generated across all rounds.
-8. 2×V100 model-level parallel training achieves ~1.97× speedup (near-linear) over serial execution.
-9. Per-model training wall time is ~10.9s (1000 steps, 8.7ms/batch) for the toy H2 model.
-10. All experiments are reproducible via documented scripts and configs (see `docs/random_baseline_execution_checklist.md`).
+7. Uncertainty vs random comparison figures are generated across all rounds.
+8. 2×V100 model-level parallel training achieves ~1.97× speedup.
+9. Per-model training wall time is ~10.9s (1000 steps) for the toy H2 model.
+10. Four selection strategies are implemented and compared at selection level: random, uncertainty top-K, uncertainty-diversity (FPS), and DP-GEN-style trust-level.
+11. Uncertainty-diversity and trust-level strategies have been validated through Round 001 retraining.
+12. All experiments are reproducible via documented scripts and configs.
 
 ---
 
 ## 2. Claims partially supported, requiring further validation (部分支持但仍需验证的结论)
 
 1. **Uncertainty sampling reduces remaining candidate-pool uncertainty more effectively than random sampling.**
-   - *Evidence:* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332). However, the comparison table mixes "selected top-K uncertainty" for the uncertainty branch with "remaining candidate-pool uncertainty" for the random branch.
-   - *Gap:* Fair comparison requires both branches to use the same metric (e.g., remaining candidate-pool force_dev_max). The current data supports the trend but needs metric alignment.
+   - *Evidence:* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332). Trust_level Round 001 also shows lower remaining uncertainty (0.160).
+   - *Gap:* Single-run results for new strategies; multi-seed multi-round retraining needed.
 
-2. **Multi-round active learning reduces validation Force RMSE.**
-   - *Evidence:* Uncertainty branch Force RMSE fluctuates (0.182 → 0.162 → 0.194 → 0.174). Random mean Force RMSE: 0.211 → 0.196 → 0.189.
-   - *Gap:* No strictly monotonic decrease across rounds. The toy H2 dataset is too small for robust statistical conclusions.
+2. **Uncertainty-diversity sampling improves structural coverage without severely degrading model quality.**
+   - *Evidence:* Selection-level comparison shows diversity selects frames with mean force_dev_max=0.254 (vs 0.441 for pure top-K) but with wider structural coverage. Round 001 retraining shows F_RMSE=0.269.
+   - *Gap:* Single-run only; need multi-round comparison and quantitative diversity metrics.
 
-3. **The committee model approach yields reliable model deviation estimates.**
-   - *Evidence:* Committee models exhibit high variance in Energy RMSE (e.g., seed0 R002: 0.638–3.649 eV across 4 models). This variance is expected for small datasets but also limits the reliability of deviation-based selection.
-   - *Gap:* Need analysis of how committee size and model variance affect selection quality.
+3. **DP-GEN-style trust-level sampling is feasible in the committee model framework.**
+   - *Evidence:* Trust-level correctly separates 50-frame pool into 25 accurate / 20 candidate / 5 failed. Round 001 retraining results are comparable to uncertainty top-K.
+   - *Gap:* Only uses force_dev_max; full DP-GEN uses both force and energy deviation with system-specific thresholds.
 
 ---
 

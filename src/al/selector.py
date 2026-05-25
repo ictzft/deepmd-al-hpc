@@ -74,23 +74,202 @@ def select_random_k(n_items: int, k: int, seed: int | None = 0) -> np.ndarray:
     return selected_indices.astype(int)
 
 
+def select_uncertainty_diversity(
+    scores: np.ndarray,
+    coords: np.ndarray,
+    k: int = 10,
+    top_m: int = 30,
+    descriptor: str = "pairwise-distance",
+) -> np.ndarray:
+    """Select top-K diverse frames from top-M high-uncertainty candidates.
+
+    Algorithm:
+      1. Sort by scores (descending), keep top-M.
+      2. Compute a per-frame descriptor from coords.
+      3. Farthest Point Sampling (FPS) on the descriptor space to pick k
+         diverse frames.
+
+    Parameters
+    ----------
+    scores: [n_frames] uncertainty scores (e.g. force_dev_max).
+    coords: [n_frames, n_atoms * 3] flattened atomic coordinates.
+    k: number of frames to select.
+    top_m: number of high-uncertainty candidates to consider before FPS.
+    descriptor: descriptor type. Currently only "pairwise-distance" is supported
+                (flattened pairwise distance vector per frame).
+
+    Returns
+    -------
+    selected_indices: [k] indices into the ORIGINAL candidate pool.
+    """
+    scores = np.asarray(scores)
+    coords = np.asarray(coords)
+    n_frames = len(scores)
+    n_coords_per_frame = coords.shape[1]
+    n_atoms = n_coords_per_frame // 3
+
+    top_m = min(top_m, n_frames)
+    k = min(k, top_m)
+
+    # Step 1: top-M by uncertainty
+    candidate_pool = np.argsort(scores)[::-1][:top_m]
+    candidate_scores = scores[candidate_pool]
+    candidate_coords = coords[candidate_pool]
+
+    # Step 2: build descriptor
+    if descriptor == "pairwise-distance":
+        desc = _pairwise_distance_descriptor(candidate_coords, n_atoms)
+    else:
+        desc = _pairwise_distance_descriptor(candidate_coords, n_atoms)
+
+    # Step 3: FPS
+    selected_local = _farthest_point_sampling(desc, k)
+
+    return candidate_pool[selected_local].astype(int)
+
+
+def _pairwise_distance_descriptor(coords: np.ndarray, n_atoms: int) -> np.ndarray:
+    """Compute flattened pairwise distance vector per frame."""
+    n_frames = coords.shape[0]
+    coords_reshaped = coords.reshape(n_frames, n_atoms, 3)
+    desc_list = []
+    for i in range(n_frames):
+        diff = coords_reshaped[i, :, None, :] - coords_reshaped[i, None, :, :]
+        dist = np.linalg.norm(diff, axis=-1)
+        triu = dist[np.triu_indices(n_atoms, k=1)]
+        desc_list.append(triu)
+    return np.array(desc_list)
+
+
+def _farthest_point_sampling(descriptors: np.ndarray, k: int) -> np.ndarray:
+    """Select k diverse points via farthest point sampling in descriptor space."""
+    n = len(descriptors)
+    k = min(k, n)
+
+    selected = [0]
+    dist_to_selected = np.full(n, np.inf)
+
+    for _ in range(1, k):
+        last = selected[-1]
+        d = np.sum((descriptors - descriptors[last]) ** 2, axis=1)
+        dist_to_selected = np.minimum(dist_to_selected, d)
+        next_idx = int(np.argmax(dist_to_selected))
+        selected.append(next_idx)
+
+    return np.array(selected, dtype=int)
+
+
+def select_trust_level(
+    scores: np.ndarray,
+    k: int = 10,
+    low_pct: float = 50.0,
+    high_pct: float = 90.0,
+    candidate_ratio: float = 0.8,
+) -> dict:
+    """DP-GEN-style trust-level selection prototype.
+
+    Classifies frames into three regions based on force_dev_max percentiles:
+      - accurate:  scores < low_threshold   → skip
+      - candidate: low_threshold ≤ scores ≤ high_threshold → select from here
+      - failed:    scores > high_threshold  → record but skip (or keep a few)
+
+    Parameters
+    ----------
+    scores: [n_frames] uncertainty scores.
+    k: target number of frames to select.
+    low_pct: percentile for accurate/candidate boundary (default 50).
+    high_pct: percentile for candidate/failed boundary (default 90).
+    candidate_ratio: fraction of k to take from candidate region (default 0.8).
+                     Remaining (1 - candidate_ratio) * k from failed region.
+
+    Returns
+    -------
+    dict with keys:
+      selected_indices, accurate_count, candidate_count, failed_count,
+      low_threshold, high_threshold, n_from_candidate, n_from_failed,
+      selected_force_dev_max
+    """
+    scores = np.asarray(scores)
+    n_frames = len(scores)
+
+    low_threshold = float(np.percentile(scores, low_pct))
+    high_threshold = float(np.percentile(scores, high_pct))
+
+    accurate_mask = scores < low_threshold
+    candidate_mask = (scores >= low_threshold) & (scores <= high_threshold)
+    failed_mask = scores > high_threshold
+
+    accurate_idx = np.where(accurate_mask)[0]
+    candidate_idx = np.where(candidate_mask)[0]
+    failed_idx = np.where(failed_mask)[0]
+
+    n_from_candidate = min(int(k * candidate_ratio), len(candidate_idx))
+    n_from_failed = min(k - n_from_candidate, len(failed_idx))
+
+    # Select top-uncertainty within each region
+    if len(candidate_idx) > 0:
+        cand_order = np.argsort(scores[candidate_idx])[::-1]
+        selected_candidate = candidate_idx[cand_order[:n_from_candidate]]
+    else:
+        selected_candidate = np.array([], dtype=int)
+
+    if len(failed_idx) > 0:
+        fail_order = np.argsort(scores[failed_idx])[::-1]
+        selected_failed = failed_idx[fail_order[:n_from_failed]]
+    else:
+        selected_failed = np.array([], dtype=int)
+
+    # If still short, fill from remaining high-uncertainty
+    selected = np.concatenate([selected_candidate, selected_failed])
+    if len(selected) < k:
+        remaining = np.setdiff1d(np.argsort(scores)[::-1], selected)
+        needed = k - len(selected)
+        selected = np.concatenate([selected, remaining[:needed]])
+
+    selected = selected[:k]
+
+    return {
+        "selected_indices": selected.astype(int),
+        "accurate_count": int(np.sum(accurate_mask)),
+        "candidate_count": int(np.sum(candidate_mask)),
+        "failed_count": int(np.sum(failed_mask)),
+        "low_threshold": low_threshold,
+        "high_threshold": high_threshold,
+        "n_from_candidate": len(selected_candidate),
+        "n_from_failed": len(selected_failed),
+        "selected_force_dev_max": scores[selected].tolist(),
+    }
+
+
 def select_by_strategy(
     scores: np.ndarray,
     k: int,
     strategy: str = "uncertainty",
     seed: int | None = 0,
-) -> np.ndarray:
-    """
-    根据指定策略选择构型。
+    coords: np.ndarray | None = None,
+    top_m: int = 30,
+    descriptor: str = "pairwise-distance",
+    low_pct: float = 50.0,
+    high_pct: float = 90.0,
+    candidate_ratio: float = 0.8,
+):
+    """根据指定策略选择构型。
 
     Supported strategies
     --------------------
     uncertainty / topk / top-k:
         按 scores 从大到小选择 top-K。
-        当前默认 scores 一般为 force_dev_max。
 
     random:
-        随机选择 K 个构型，用于 random sampling baseline。
+        随机选择 K 个构型。
+
+    uncertainty-diversity / diversity:
+        从 top-M 高不确定性候选中用 FPS 选择 K 个多样性构型。
+        需要提供 coords 参数。
+
+    trust-level / trust / dpgen:
+        DP-GEN-style trust-level sampling。
+        按分位数分为 accurate / candidate / failed 三区。
     """
     scores = np.asarray(scores)
     strategy = strategy.lower().replace("_", "-")
@@ -101,9 +280,22 @@ def select_by_strategy(
     if strategy == "random":
         return select_random_k(n_items=len(scores), k=k, seed=seed)
 
+    if strategy in {"uncertainty-diversity", "diversity"}:
+        if coords is None:
+            raise ValueError("uncertainty-diversity strategy requires coords.")
+        return select_uncertainty_diversity(
+            scores=scores, coords=coords, k=k, top_m=top_m, descriptor=descriptor
+        )
+
+    if strategy in {"trust-level", "trust", "dpgen"}:
+        return select_trust_level(
+            scores=scores, k=k, low_pct=low_pct, high_pct=high_pct,
+            candidate_ratio=candidate_ratio,
+        )
+
     raise ValueError(
         f"Unknown selection strategy: {strategy}. "
-        "Supported strategies: uncertainty, topk, top-k, random."
+        "Supported: uncertainty, topk, random, uncertainty-diversity, trust-level."
     )
 
 
