@@ -1,4 +1,13 @@
-# Uncertainty vs Random Baseline Comparison
+# Uncertainty vs Random Baseline Comparison (Legacy — Metric Mismatch)
+
+> **DEPRECATED for cross-strategy comparison.** This file mixes two different metrics:
+> - **uncertainty** rows: `force_dev_max_mean` = selected top-K frames (from `al_rounds_summary.csv`)
+> - **random** rows: `force_dev_max_mean` = remaining candidate pool (from prediction_summary.csv)
+>
+> These are NOT directly comparable. Use `experiments/baselines/aligned_comparison.md`
+> instead, which reports the same metric (remaining candidate-pool force_dev_max) for all strategies.
+>
+> This file is kept for historical reference (uncertainty-only Round 0-3 trend data remains valid).
 
 ## Per-round summary (all methods)
 

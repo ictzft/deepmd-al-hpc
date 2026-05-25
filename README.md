@@ -235,14 +235,14 @@ experiments/strategy_comparison_toy_h2/strategy_summary.md
 
 ### 4.4 Full Uncertainty vs Random Multi-Round Comparison
 
-全轮次对比汇总见：
+全轮次对齐对比汇总（统一 remaining candidate-pool 指标）见：
 
 ```text
-experiments/baselines/random_vs_uncertainty_summary.csv
-experiments/baselines/random_vs_uncertainty_summary.md
+experiments/baselines/aligned_comparison.csv     (authoritative — consistent metric)
+experiments/baselines/aligned_comparison.md
 ```
 
-Multi-seed random mean candidate-pool force_dev_max vs uncertainty branch：
+旧版 `random_vs_uncertainty_summary.csv` 存在指标混用问题（uncertainty 行用 selected top-K，random 行用 remaining candidate pool），已标记为 deprecated，仅保留作历史参考。
 
 | Round | Uncertainty force_dev_max | Random mean force_dev_max | Random std |
 |---:|---:|---:|---:|

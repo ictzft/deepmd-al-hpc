@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Summarize uncertainty vs random baseline across all available rounds.
 
+NOTE: This script produces `random_vs_uncertainty_summary.csv` which mixes
+two different metrics (selected top-K for uncertainty vs remaining candidate pool
+for random). For cross-strategy comparison, prefer `build_aligned_comparison.py`
+which uses the same remaining-candidate-pool metric for all strategies.
+
 Reads uncertainty branch results from experiments/al_rounds_summary.csv and
 random baseline results from auto-discovered random_round*_baseline_summary.csv files.
 Currently covers Round 001/002/003 (all completed 2026-05-25).
 
 Outputs:
-  experiments/baselines/random_vs_uncertainty_summary.csv
+  experiments/baselines/random_vs_uncertainty_summary.csv  (legacy — see aligned_comparison.csv)
   experiments/baselines/random_vs_uncertainty_summary.md
 
 Field naming convention:

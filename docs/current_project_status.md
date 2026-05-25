@@ -63,7 +63,8 @@ See `experiments/baselines/aligned_comparison.md` for full aligned comparison.
 - `experiments/baselines/random_round001_baseline_summary.csv`
 - `experiments/baselines/random_round002_baseline_summary.csv`
 - `experiments/baselines/random_round003_baseline_summary.csv`
-- `experiments/baselines/random_vs_uncertainty_summary.csv` — 16 rows, all methods/rounds
+- `experiments/baselines/aligned_comparison.csv` — 统一 remaining-candidate-pool 指标的四策略对比（authoritative）
+- `experiments/baselines/random_vs_uncertainty_summary.csv` — 旧版（legacy，存在 selected-K vs remaining-candidate 指标混用）
 - `experiments/baselines/strategy_comparison_round000.csv` — selection-level 4-strategy comparison
 
 ---
