@@ -10,7 +10,7 @@
 
 ## 1. 当前状态
 
-截至 **2026-05-18**，本项目已在 **2×Tesla V100 GPU** 平台上完成 toy H2 原型验证。
+截至 **2026-05-25**，本项目已在 **2×Tesla V100 GPU** 平台上完成 toy H2 原型验证。
 
 当前已经实现：
 
@@ -24,11 +24,11 @@
 - dataset-level offline active learning Round 0–3 多轮闭环；
 - Round 0–3 summary 与 learning curve 结果分析；
 - random sampling baseline 的 selection-level 对比；
-- random seed0 Round 001 retraining baseline；
-- random seed0 candidate-pool committee prediction 与 uncertainty branch 对比；
-- random seed1 / seed2 Round 001 retraining baseline；
-- multi-seed random baseline mean ± std 汇总；
-- 初步文档体系整理，包括环境配置、复现实验、结果说明、baseline、profiling 计划和 Git 数据管理规范。
+- random seed0 / seed1 / seed2 Round 001 retraining baseline；
+- multi-seed random baseline mean ± std (Round 001)；
+- uncertainty vs random Round 001 初步对比和 learning curve 图；
+- random Round 002/003 数据准备脚本和复现命令；
+- 初步文档体系整理，包括环境配置、复现实验、结果说明、baseline、paper evidence、profiling 计划和 Git 数据管理规范。
 
 当前项目已经从：
 
@@ -44,7 +44,7 @@ dataset-level offline active learning closed-loop prototype
 
 并进一步补充了第一版 random sampling baseline。
 
-需要说明的是：当前 random sampling baseline 已经完成 selection-level random baseline 和 random seed0 / seed1 / seed2 Round 001 retraining baseline；后续仍需补充多轮 random retraining (Round 002/003)、完整 RMSE learning curve 和端到端耗时对比。
+需要说明的是：当前 random sampling baseline 已经完成 selection-level random baseline 和 random seed0 / seed1 / seed2 Round 001 retraining baseline；Round 002/003 的数据准备脚本和复现命令已就绪，等待实际训练执行；完整 RMSE learning curve 对比和端到端耗时仍需后续补充。
 
 ---
 
@@ -288,6 +288,7 @@ deepmd-al-hpc/
 │   ├── code_check.md
 │   ├── data_and_git_policy.md
 │   ├── profiling_h100.md
+│   ├── paper_evidence.md
 │   ├── random_baseline.md
 │   ├── reproduce.md
 │   ├── reproduce_legacy.md
@@ -297,6 +298,9 @@ deepmd-al-hpc/
 │   └── uncertainty_rounds.md
 ├── experiments/
 │   ├── baselines/
+│   │   ├── random_round001_*.csv
+│   │   ├── random_vs_uncertainty_summary.csv
+│   │   └── ...
 │   ├── exp_001_env_check/
 │   ├── exp_002_framework_check/
 │   ├── exp_003_single_model_baseline/
@@ -310,6 +314,9 @@ deepmd-al-hpc/
 │   ├── exp_011_round003_committee_models/
 │   ├── exp_012_round003_committee_prediction/
 │   ├── figures/
+│   │   ├── *_rounds.svg
+│   │   ├── random_vs_uncertainty_*.svg
+│   │   └── ...
 │   ├── al_model_level_summary.csv
 │   ├── al_rounds_summary.csv
 │   └── al_rounds_summary.md
@@ -354,6 +361,7 @@ deepmd-al-hpc/
 | `docs/data_and_git_policy.md` | 数据文件、模型文件、日志文件与 Git 管理规范 |
 | `docs/code_check.md` | 提交前代码检查、状态检查和大文件检查 |
 | `docs/profiling_h100.md` | V100 profiling、H100 迁移和多 GPU scaling 实验计划 |
+| `docs/paper_evidence.md` | 论文证据清单，当前可支持/不可支持的结论 |
 
 推荐阅读顺序：
 
@@ -503,6 +511,9 @@ docs/reproduce.md
 | `baselines/random_seed1_round001` | 已完成 | random seed1 Round 001 retraining 和 prediction summary |
 | `baselines/random_seed2_round001` | 已完成 | random seed2 Round 001 retraining 和 prediction summary |
 | `baselines/random_round001_comparison` | 已完成 | uncertainty vs random seed0/seed1/seed2 Round 001 汇总对比 |
+| `baselines/random_round001_baseline_summary` | 已完成 | random 三 seed Round 001 独立汇总 |
+| `baselines/random_vs_uncertainty_summary` | 已完成 | uncertainty vs random 全轮次汇总 CSV + MD |
+| `figures/random_vs_uncertainty_*` | 已完成 | uncertainty vs random 对比 learning curve 图 |
 | `figures` | 已完成 | 生成 Round 0–3 deviation、dataset size 和 RMSE 曲线 |
 
 ---

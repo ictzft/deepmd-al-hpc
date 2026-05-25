@@ -1076,22 +1076,25 @@ prediction time mean ± std
 后续可以新增：
 
 ```text
-experiments/baselines/random_seed1_round001_metrics_summary.md
-experiments/baselines/random_seed2_round001_metrics_summary.md
 experiments/baselines/random_seed0_round002_metrics_summary.md
 experiments/baselines/random_seed1_round002_metrics_summary.md
 experiments/baselines/random_seed2_round002_metrics_summary.md
-experiments/baselines/random_vs_uncertainty_summary.csv
-experiments/figures/random_vs_uncertainty_rmse.svg
-experiments/figures/random_vs_uncertainty_candidate_uncertainty.svg
+experiments/baselines/random_seed0_round003_metrics_summary.md
+experiments/baselines/random_seed1_round003_metrics_summary.md
+experiments/baselines/random_seed2_round003_metrics_summary.md
+experiments/baselines/random_round002_baseline_summary.csv
+experiments/baselines/random_round003_baseline_summary.csv
 ```
 
-最终在 `docs/results.md` 中统一汇总：
+当前已生成：
 
 ```text
-uncertainty branch
-vs.
-random mean ± std
+experiments/baselines/random_vs_uncertainty_summary.csv
+experiments/baselines/random_vs_uncertainty_summary.md
+experiments/figures/random_vs_uncertainty_force_rmse.svg
+experiments/figures/random_vs_uncertainty_energy_rmse.svg
+experiments/figures/random_vs_uncertainty_candidate_force_dev.svg
+experiments/figures/random_vs_uncertainty_dataset_size.svg
 ```
 
 ---
@@ -1113,7 +1116,7 @@ random mean ± std
 
 ## 26. 小结
 
-当前 random sampling baseline 已经完成 selection-level 对比和 random seed0 / seed1 / seed2 Round 001 retraining baseline。
+当前 random sampling baseline 已经完成 selection-level 对比和 random seed0 / seed1 / seed2 Round 001 retraining baseline。Round 002/003 的数据准备脚本 (`prepare_random_baseline_round.py`) 和完整复现命令已就绪。
 
 当前完成链路为：
 
@@ -1146,9 +1149,13 @@ uncertainty sampling 一致显示出更低的 remaining candidate-pool force mod
 下一阶段重点是：
 
 ```text
-补充 random Round 002/003 retraining
+运行 prepare_random_baseline_round.py 生成 Round 002/003 数据和配置
   ↓
-生成 full RMSE learning curve 对比
+运行 train_round_committee_models.sh 训练 Round 002/003 committee models
   ↓
-统计 multi-round random mean ± std
+运行 predict_committee_models.py 进行 committee prediction
+  ↓
+运行 summarize_random_vs_uncertainty.py + plot_random_vs_uncertainty.py
+  ↓
+生成 full multi-round RMSE learning curve 对比
 ```

@@ -125,7 +125,11 @@ Selection-level baseline:
   Round 1 random seed0 / seed1 / seed2
 
 Retraining baseline:
-  random seed0 Round 001
+  random seed0 / seed1 / seed2 Round 001
+  multi-seed random mean ± std (Round 001)
+
+Round 002/003:
+  数据准备脚本和复现命令已就绪，等待执行
 ```
 
 说明：
@@ -327,7 +331,20 @@ uncertainty branch vs random_seed* 对比
 
 ---
 
-### 6.5 `docs/results.md`
+### 6.5 `docs/paper_evidence.md`
+
+用于记录论文证据清单，主要包括：
+
+```text
+当前可支持的结论
+当前不可支持的结论
+已完成的实验
+待补充的实验
+```
+
+---
+
+### 6.6 `docs/results.md`
 
 用于记录实验结果和结果解释，主要包括：
 
@@ -351,7 +368,7 @@ candidate-pool uncertainty 对比
 
 ---
 
-### 6.6 `docs/data_and_git_policy.md`
+### 6.7 `docs/data_and_git_policy.md`
 
 用于记录数据管理和 Git 提交规则，主要包括：
 
@@ -366,7 +383,7 @@ GitHub 提交建议
 
 ---
 
-### 6.7 `docs/code_check.md`
+### 6.8 `docs/code_check.md`
 
 用于记录提交前检查命令，主要包括：
 
@@ -380,7 +397,7 @@ Git 状态检查
 
 ---
 
-### 6.8 `docs/profiling_h100.md`
+### 6.9 `docs/profiling_h100.md`
 
 用于记录后续系统性能分析和 H100 迁移计划，主要包括：
 
@@ -458,9 +475,97 @@ uncertainty sampling 相比 random seed0 baseline
 
 ---
 
-## 8. 主要结果文件索引
+## 8. 扩展 random baseline 到 Round 002/003
 
-### 8.1 主线 Active Learning 结果
+本节提供从 Round 001 扩展到 Round 002/003 的完整复现命令。
+
+### 8.1 前提条件
+
+每个 seed 需要先完成上一轮的 committee prediction。Round 001 已全部完成。
+
+### 8.2 使用自动化脚本生成数据和配置
+
+```bash
+# 为所有 seed 生成 Round 002 数据和配置
+for seed in seed0 seed1 seed2; do
+  python scripts/analysis/prepare_random_baseline_round.py \
+    --seed-label $seed --round-id 2
+done
+
+# Round 002 训练完成后，生成 Round 003 数据和配置
+for seed in seed0 seed1 seed2; do
+  python scripts/analysis/prepare_random_baseline_round.py \
+    --seed-label $seed --round-id 3
+done
+```
+
+`prepare_random_baseline_round.py` 自动完成：
+1. 从上轮 committee prediction 读取 selected indices
+2. 调用 `merge_selected_frames.py` 生成新 train set
+3. 调用 `make_remaining_candidate.py` 生成新 candidate pool
+4. 调用 `make_round_committee_configs.py` 生成 4-model configs
+
+### 8.3 手动分步执行
+
+以 seed0 Round 002 为例：
+
+```bash
+# Step 1: 生成 train set
+python scripts/data/merge_selected_frames.py \
+  --train data/toy_h2/random_seed0_round_001_train \
+  --candidate data/toy_h2/random_seed0_round_001_candidate \
+  --selection experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json \
+  --output data/toy_h2/random_seed0_round_002_train --overwrite
+
+# Step 2: 生成 remaining candidate
+python scripts/data/make_remaining_candidate.py \
+  --candidate data/toy_h2/random_seed0_round_001_candidate \
+  --selection experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json \
+  --output data/toy_h2/random_seed0_round_002_candidate --overwrite
+
+# Step 3: 生成 committee configs
+python scripts/config/make_round_committee_configs.py \
+  --base configs/deepmd/toy_h2_input.json \
+  --output-dir configs/deepmd/random_seed0_round_002_committee \
+  --train-system /data/zft/deepmd-al-hpc/data/toy_h2/random_seed0_round_002_train \
+  --valid-system /data/zft/deepmd-al-hpc/data/toy_h2/valid \
+  --round-id 2 --n-models 4 --base-seed 1201
+
+# Step 4: 训练
+bash scripts/train/train_round_committee_models.sh \
+  002 configs/deepmd/random_seed0_round_002_committee \
+  experiments/baselines/random_seed0_round002_committee_models \
+  /data/zft/deepmd-al-hpc/data/toy_h2/valid
+
+# Step 5: 预测
+python scripts/inference/predict_committee_models.py \
+  --data data/toy_h2/random_seed0_round_002_candidate \
+  --models \
+    experiments/baselines/random_seed0_round002_committee_models/model_000/frozen_model.pb \
+    experiments/baselines/random_seed0_round002_committee_models/model_001/frozen_model.pb \
+    experiments/baselines/random_seed0_round002_committee_models/model_002/frozen_model.pb \
+    experiments/baselines/random_seed0_round002_committee_models/model_003/frozen_model.pb \
+  --output experiments/baselines/random_seed0_round002_committee_prediction/committee_predictions.npz \
+  --selected-json experiments/baselines/random_seed0_round002_committee_prediction/selected_topk.json \
+  --top-k 10
+```
+
+对 seed1/seed2 和 Round 003 替换对应的路径和参数。
+
+### 8.4 汇总对比
+
+所有 round 完成后运行：
+
+```bash
+python scripts/analysis/summarize_random_vs_uncertainty.py
+python scripts/analysis/plot_random_vs_uncertainty.py
+```
+
+---
+
+## 9. 主要结果文件索引
+
+### 9.1 主线 Active Learning 结果
 
 ```text
 experiments/al_rounds_summary.csv
@@ -479,7 +584,7 @@ experiments/figures/validation_rmse_rounds.svg
 
 ---
 
-### 8.2 Selection-level Random Baseline
+### 9.2 Selection-level Random Baseline
 
 ```text
 experiments/baselines/selection_baseline_runs.csv
@@ -489,7 +594,7 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 8.3 Multi-seed Random Round 001 Retraining Baseline
+### 9.3 Multi-seed Random Round 001 Retraining Baseline
 
 ```text
 experiments/baselines/random_seed0_round001_metrics_summary.csv
@@ -503,7 +608,7 @@ experiments/baselines/random_round001_comparison.csv
 
 ---
 
-### 8.4 Random seed0 Candidate-pool Prediction
+### 9.4 Random seed0 Candidate-pool Prediction
 
 ```text
 experiments/baselines/random_seed0_round001_prediction_summary.csv
@@ -511,7 +616,7 @@ experiments/baselines/random_seed0_round001_prediction_summary.md
 experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
 ```
 
-### 8.5 Random seed1 / seed2 Candidate-pool Prediction
+### 9.5 Random seed1 / seed2 Candidate-pool Prediction
 
 ```text
 experiments/baselines/random_seed1_round001_prediction_summary.csv
@@ -524,7 +629,7 @@ experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.j
 
 ---
 
-## 9. 当前尚未完成内容
+## 10. 当前尚未完成内容
 
 当前仍需补充：
 
@@ -560,7 +665,7 @@ multi-seed Round 0–3 random baseline with full learning curve
 
 ---
 
-## 10. 当前限制
+## 11. 当前限制
 
 当前复现流程仍有以下限制：
 
@@ -575,7 +680,7 @@ multi-seed Round 0–3 random baseline with full learning curve
 
 ---
 
-## 11. 后续文档维护计划
+## 12. 后续文档维护计划
 
 下一阶段补充 random baseline 后，建议更新以下文档：
 
@@ -614,7 +719,7 @@ docs/real_dataset.md
 
 ---
 
-## 12. 总结
+## 13. 总结
 
 新的文档组织原则是：
 
