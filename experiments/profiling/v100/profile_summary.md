@@ -2,10 +2,14 @@
 
 | Stage | Elapsed (s) | Exit | Command |
 |---|---|---|---|
+| predict_diversity_round001_seed0 | 0.0 | 0 | echo [simulated] prediction would run here (~5s) |
+| smoke | 0.0 | 0 | echo ok |
 | smoke | 0.0 | 0 | echo ok |
 | smoke_test | 0.0 | 0 | echo hello profiling |
+| train_diversity_round001_seed0 | 0.0 | 0 | echo [simulated] training would run here (~22s on 2xV100) |
+| dataset_update_diversity_round001_seed0 | 0.0 | 0 | echo [simulated] dataset update would run here (~2s) |
 
-**Total elapsed**: 0.0s across 2 stages.
+**Total elapsed**: 0.0s across 6 stages.
 **Failures**: 0 stage(s) with non-zero exit code.
 
 ---
