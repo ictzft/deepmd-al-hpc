@@ -1,0 +1,50 @@
+strategy,seed,round,train_frames,candidate_frames,energy_rmse,force_rmse,remaining_candidate_force_dev_max_mean,remaining_candidate_force_dev_max_std,remaining_candidate_energy_dev_mean,metric_note
+uncertainty,—,0,200,50,7.357575e-01,1.821392e-01,1.496294e-01,1.595885e-01,8.283152e-01,remaining candidate pool
+uncertainty,—,1,210,40,7.292945e-01,1.617669e-01,1.264416e-01,1.078848e-01,4.482120e-01,remaining candidate pool
+uncertainty,—,2,220,30,1.206733e+00,1.938590e-01,1.336577e-01,4.951329e-02,1.552282e+00,remaining candidate pool
+uncertainty,—,3,230,20,9.990814e-01,1.742648e-01,1.365686e-01,4.192148e-02,1.080236e+00,remaining candidate pool
+random,seed0,1,210,40,6.908853e-01,2.553366e-01,3.554204e-01,3.399989e-01,6.565407e-01,remaining candidate pool
+random,seed1,1,210,40,2.488029e-01,2.288370e-01,2.447142e-01,2.034835e-01,3.965860e-01,remaining candidate pool
+random,seed2,1,210,40,4.284121e-01,1.494923e-01,1.554474e-01,2.136240e-01,4.412890e-01,remaining candidate pool
+random,mean,1,210,40,4.560335e-01,2.112220e-01,,,,cross-seed mean (3 seeds)
+random,std,1,210,40,2.223318e-01,5.507695e-02,,,,cross-seed std (3 seeds)
+random,seed0,2,220,30,1.977364e+00,2.120793e-01,1.362240e-01,5.301578e-02,1.155043e+00,remaining candidate pool
+random,seed1,2,220,30,1.847642e+00,1.796397e-01,1.219434e-01,4.601300e-02,1.051151e+00,remaining candidate pool
+random,seed2,2,220,30,9.067673e-01,1.968315e-01,1.611978e-01,7.822859e-02,1.027315e+00,remaining candidate pool
+random,mean,2,220,30,1.577258e+00,1.961835e-01,,,,cross-seed mean (3 seeds)
+random,std,2,220,30,5.842730e-01,1.622950e-02,,,,cross-seed std (3 seeds)
+random,seed0,3,230,20,1.369364e+00,2.373825e-01,1.578821e-01,5.405907e-02,1.493153e+00,remaining candidate pool
+random,seed1,3,230,20,1.707502e+00,1.417639e-01,1.352771e-01,6.210166e-02,1.823728e+00,remaining candidate pool
+random,seed2,3,230,20,1.310121e+00,1.879388e-01,1.239594e-01,2.666831e-02,1.492024e+00,remaining candidate pool
+random,mean,3,230,20,1.462329e+00,1.890284e-01,,,,cross-seed mean (3 seeds)
+random,std,3,230,20,2.143827e-01,4.781861e-02,,,,cross-seed std (3 seeds)
+diversity,seed0,1,210,40,8.768344e-01,2.691156e-01,2.181840e-01,1.285281e-01,8.084707e-01,remaining candidate pool
+diversity,seed1,1,210,40,1.510228e+00,1.900147e-01,1.233603e-01,7.746413e-02,2.212849e+00,remaining candidate pool
+diversity,seed2,1,210,40,1.025743e+00,1.563409e-01,8.258725e-02,4.099201e-02,8.645690e-01,remaining candidate pool
+diversity,mean,1,210,40,1.137602e+00,2.051571e-01,,,,cross-seed mean (3 seeds)
+diversity,std,1,210,40,3.311813e-01,5.789218e-02,,,,cross-seed std (3 seeds)
+diversity,seed0,2,220,30,3.221591e-01,1.803549e-01,1.874722e-01,7.211420e-02,4.557613e-01,remaining candidate pool
+diversity,seed1,2,220,30,1.197445e+00,1.632002e-01,1.560942e-01,5.871387e-02,1.410447e+00,remaining candidate pool
+diversity,seed2,2,220,30,9.481143e-01,1.779568e-01,1.138661e-01,4.820416e-02,8.911192e-01,remaining candidate pool
+diversity,mean,2,220,30,8.225728e-01,1.738373e-01,,,,cross-seed mean (3 seeds)
+diversity,std,2,220,30,4.509455e-01,9.289697e-03,,,,cross-seed std (3 seeds)
+diversity,seed0,3,230,20,2.560176e-01,1.642992e-01,9.861680e-02,3.513076e-02,3.243564e-01,remaining candidate pool
+diversity,seed1,3,230,20,1.154039e+00,1.421386e-01,1.060513e-01,2.956669e-02,1.338777e+00,remaining candidate pool
+diversity,seed2,3,230,20,1.804248e+00,2.212607e-01,1.122256e-01,5.943840e-02,1.912044e+00,remaining candidate pool
+diversity,mean,3,230,20,1.071435e+00,1.758995e-01,,,,cross-seed mean (3 seeds)
+diversity,std,3,230,20,7.774136e-01,4.081667e-02,,,,cross-seed std (3 seeds)
+trust_level,seed0,1,210,40,5.485861e-01,1.361609e-01,1.602445e-01,9.343819e-02,6.377296e-01,remaining candidate pool
+trust_level,seed1,1,210,40,1.185877e+00,1.625367e-01,1.423955e-01,6.455198e-02,1.482340e+00,remaining candidate pool
+trust_level,seed2,1,210,40,7.414146e-01,1.073275e-01,1.182569e-01,5.805039e-02,4.983175e-01,remaining candidate pool
+trust_level,mean,1,210,40,8.252926e-01,1.353417e-01,,,,cross-seed mean (3 seeds)
+trust_level,std,1,210,40,3.268206e-01,2.761368e-02,,,,cross-seed std (3 seeds)
+trust_level,seed0,2,220,30,7.078216e-01,1.254696e-01,7.291760e-02,2.687964e-02,8.736275e-01,remaining candidate pool
+trust_level,seed1,2,220,30,7.487853e-01,1.703999e-01,1.196653e-01,8.607029e-02,8.006001e-01,remaining candidate pool
+trust_level,seed2,2,220,30,1.116744e+00,1.514732e-01,6.757931e-02,4.247600e-02,1.567491e+00,remaining candidate pool
+trust_level,mean,2,220,30,8.577836e-01,1.491142e-01,,,,cross-seed mean (3 seeds)
+trust_level,std,2,220,30,2.251995e-01,2.255783e-02,,,,cross-seed std (3 seeds)
+trust_level,seed0,3,230,20,1.081612e+00,1.733044e-01,1.197788e-01,6.167765e-02,8.960624e-01,remaining candidate pool
+trust_level,seed1,3,230,20,6.706171e-01,1.855091e-01,8.084319e-02,3.238970e-02,7.988629e-01,remaining candidate pool
+trust_level,seed2,3,230,20,1.071314e+00,1.756827e-01,9.474638e-02,4.309757e-02,1.174369e+00,remaining candidate pool
+trust_level,mean,3,230,20,9.411811e-01,1.781654e-01,,,,cross-seed mean (3 seeds)
+trust_level,std,3,230,20,2.343719e-01,6.470044e-03,,,,cross-seed std (3 seeds)
