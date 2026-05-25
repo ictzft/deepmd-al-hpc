@@ -47,6 +47,8 @@ checkpoint
 # =========================
 logs/
 *.log
+train.log
+test.log
 runs/
 wandb/
 
@@ -75,3 +77,11 @@ out.json
 input_v2_compat.json
 
 # Local experiment outputs
+experiments/**/committee_predictions.npz
+experiments/**/committee_models/
+experiments/**/model_*/checkpoint
+experiments/**/model_*/model.ckpt*
+experiments/**/model_*/train.log
+experiments/**/model_*/test.log
+experiments/**/model_*/lcurve.out
+experiments/**/model_*/frozen_model.pb

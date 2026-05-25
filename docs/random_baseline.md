@@ -638,11 +638,169 @@ experiments/baselines/random_seed2_round001_metrics_summary.md
 
 ```text
 experiments/baselines/random_round001_comparison.csv
+experiments/baselines/random_round001_baseline_summary.csv
+experiments/baselines/random_round001_baseline_summary.md
 ```
 
 ---
 
-## 17. Random seed0 Candidate-pool Committee Prediction
+## 17. Random seed1 / seed2 Round001 Reproducibility Commands
+
+本节提供 random seed1 和 random seed2 Round001 retraining 的完整复现命令。
+
+### 17.1 生成 random seed1 / seed2 selection JSON
+
+```bash
+python scripts/active_learning/select_from_predictions.py \
+  --predictions experiments/exp_005_committee_prediction/committee_predictions.npz \
+  --strategy random \
+  --top-k 10 \
+  --seed 1 \
+  --template-json experiments/exp_005_committee_prediction/selected_topk.json \
+  --output experiments/exp_005_committee_prediction/selected_random_seed1.json
+
+python scripts/active_learning/select_from_predictions.py \
+  --predictions experiments/exp_005_committee_prediction/committee_predictions.npz \
+  --strategy random \
+  --top-k 10 \
+  --seed 2 \
+  --template-json experiments/exp_005_committee_prediction/selected_topk.json \
+  --output experiments/exp_005_committee_prediction/selected_random_seed2.json
+```
+
+### 17.2 构造 seed1 Round001 train / candidate
+
+```bash
+python scripts/data/merge_selected_frames.py \
+  --train data/toy_h2/train \
+  --candidate data/toy_h2/valid \
+  --selection experiments/exp_005_committee_prediction/selected_random_seed1.json \
+  --output data/toy_h2/random_seed1_round_001_train \
+  --overwrite
+
+python scripts/data/make_remaining_candidate.py \
+  --candidate data/toy_h2/valid \
+  --selection experiments/exp_005_committee_prediction/selected_random_seed1.json \
+  --output data/toy_h2/random_seed1_round_001_candidate \
+  --overwrite
+```
+
+### 17.3 构造 seed2 Round001 train / candidate
+
+```bash
+python scripts/data/merge_selected_frames.py \
+  --train data/toy_h2/train \
+  --candidate data/toy_h2/valid \
+  --selection experiments/exp_005_committee_prediction/selected_random_seed2.json \
+  --output data/toy_h2/random_seed2_round_001_train \
+  --overwrite
+
+python scripts/data/make_remaining_candidate.py \
+  --candidate data/toy_h2/valid \
+  --selection experiments/exp_005_committee_prediction/selected_random_seed2.json \
+  --output data/toy_h2/random_seed2_round_001_candidate \
+  --overwrite
+```
+
+### 17.4 生成 seed1 / seed2 committee configs
+
+```bash
+python scripts/config/make_round_committee_configs.py \
+  --base configs/deepmd/toy_h2_input.json \
+  --output-dir configs/deepmd/random_seed1_round_001_committee \
+  --train-system /data/zft/deepmd-al-hpc/data/toy_h2/random_seed1_round_001_train \
+  --valid-system /data/zft/deepmd-al-hpc/data/toy_h2/valid \
+  --round-id 1 \
+  --n-models 4 \
+  --base-seed 2101
+
+python scripts/config/make_round_committee_configs.py \
+  --base configs/deepmd/toy_h2_input.json \
+  --output-dir configs/deepmd/random_seed2_round_001_committee \
+  --train-system /data/zft/deepmd-al-hpc/data/toy_h2/random_seed2_round_001_train \
+  --valid-system /data/zft/deepmd-al-hpc/data/toy_h2/valid \
+  --round-id 1 \
+  --n-models 4 \
+  --base-seed 2201
+```
+
+### 17.5 训练 seed1 / seed2 committee models
+
+```bash
+bash scripts/train/train_round_committee_models.sh \
+  001 \
+  configs/deepmd/random_seed1_round_001_committee \
+  experiments/baselines/random_seed1_round001_committee_models \
+  /data/zft/deepmd-al-hpc/data/toy_h2/valid
+
+bash scripts/train/train_round_committee_models.sh \
+  001 \
+  configs/deepmd/random_seed2_round_001_committee \
+  experiments/baselines/random_seed2_round001_committee_models \
+  /data/zft/deepmd-al-hpc/data/toy_h2/valid
+```
+
+### 17.6 检查模型是否生成
+
+```bash
+find experiments/baselines/random_seed1_round001_committee_models \
+  -maxdepth 2 -name "frozen_model.pb" -type f | sort
+
+find experiments/baselines/random_seed2_round001_committee_models \
+  -maxdepth 2 -name "frozen_model.pb" -type f | sort
+```
+
+每个 seed 应该有 4 个模型：
+
+```text
+model_000/frozen_model.pb
+model_001/frozen_model.pb
+model_002/frozen_model.pb
+model_003/frozen_model.pb
+```
+
+### 17.7 对 seed1 / seed2 candidate pool 做 committee prediction
+
+```bash
+python scripts/inference/predict_committee_models.py \
+  --data data/toy_h2/random_seed1_round_001_candidate \
+  --models \
+  experiments/baselines/random_seed1_round001_committee_models/model_000/frozen_model.pb \
+  experiments/baselines/random_seed1_round001_committee_models/model_001/frozen_model.pb \
+  experiments/baselines/random_seed1_round001_committee_models/model_002/frozen_model.pb \
+  experiments/baselines/random_seed1_round001_committee_models/model_003/frozen_model.pb \
+  --output experiments/baselines/random_seed1_round001_committee_prediction/committee_predictions.npz \
+  --selected-json experiments/baselines/random_seed1_round001_committee_prediction/selected_topk.json \
+  --top-k 10
+
+python scripts/inference/predict_committee_models.py \
+  --data data/toy_h2/random_seed2_round_001_candidate \
+  --models \
+  experiments/baselines/random_seed2_round001_committee_models/model_000/frozen_model.pb \
+  experiments/baselines/random_seed2_round001_committee_models/model_001/frozen_model.pb \
+  experiments/baselines/random_seed2_round001_committee_models/model_002/frozen_model.pb \
+  experiments/baselines/random_seed2_round001_committee_models/model_003/frozen_model.pb \
+  --output experiments/baselines/random_seed2_round001_committee_prediction/committee_predictions.npz \
+  --selected-json experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.json \
+  --top-k 10
+```
+
+### 17.8 生成三 seed 汇总
+
+```bash
+python scripts/analysis/summarize_random_round001_baselines.py
+```
+
+输出文件：
+
+```text
+experiments/baselines/random_round001_baseline_summary.csv
+experiments/baselines/random_round001_baseline_summary.md
+```
+
+---
+
+## 18. Random seed0 Candidate-pool Committee Prediction
 
 使用 random seed0 Round 001 committee models 对剩余 candidate pool 进行 prediction。
 
@@ -677,7 +835,7 @@ selected_topk.json 可以提交到 GitHub。
 
 ---
 
-## 18. Random seed0 Candidate-pool Prediction 当前结果
+## 19. Random seed0 Candidate-pool Prediction 当前结果
 
 当前 random seed0 candidate-pool prediction 结果：
 
@@ -702,7 +860,7 @@ experiments/baselines/random_seed0_round001_prediction_summary.md
 
 ---
 
-## 19. Uncertainty Branch 与 Random Baseline 对比
+## 20. Uncertainty Branch 与 Random Baseline 对比
 
 对比对象：
 
@@ -738,9 +896,10 @@ random_seed2_round001:
 剩余 candidate pool 的平均 force model deviation (0.126442)
 低于所有三个 random seed baseline (seed0: 0.355420, seed1: 0.487795, seed2: 0.332138)。
 
-这初步表明 uncertainty sampling 比 random sampling
-更有效地降低了候选池不确定性，
-且该结论在 seed0 / seed1 / seed2 上表现一致。
+在当前 toy H2 和 Round 001 的 setting 下，
+uncertainty branch 的 remaining candidate-pool force_dev_max_mean
+在 seed0 / seed1 / seed2 三个对比中均低于对应的 random branch。
+这为后续多轮 retraining 对比提供了初步 baseline 参考。
 ```
 
 注意：
@@ -753,9 +912,9 @@ random_seed2_round001:
 
 ---
 
-## 20. 当前输出文件汇总
+## 21. 当前输出文件汇总
 
-### 20.1 Selection-level Baseline
+### 21.1 Selection-level Baseline
 
 ```text
 experiments/baselines/selection_baseline_runs.csv
@@ -765,7 +924,7 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 20.2 Random seed0 Round 001 Retraining Baseline
+### 21.2 Random seed0 Round 001 Retraining Baseline
 
 ```text
 experiments/baselines/random_seed0_round001_metrics_summary.csv
@@ -774,7 +933,7 @@ experiments/baselines/random_seed0_round001_metrics_summary.md
 
 ---
 
-### 20.3 Random seed1 Round 001 Retraining Baseline
+### 21.3 Random seed1 Round 001 Retraining Baseline
 
 ```text
 experiments/baselines/random_seed1_round001_metrics_summary.csv
@@ -783,7 +942,7 @@ experiments/baselines/random_seed1_round001_metrics_summary.md
 
 ---
 
-### 20.4 Random seed2 Round 001 Retraining Baseline
+### 21.4 Random seed2 Round 001 Retraining Baseline
 
 ```text
 experiments/baselines/random_seed2_round001_metrics_summary.csv
@@ -792,7 +951,7 @@ experiments/baselines/random_seed2_round001_metrics_summary.md
 
 ---
 
-### 20.5 Multi-seed Round 001 Comparison
+### 21.5 Multi-seed Round 001 Comparison
 
 ```text
 experiments/baselines/random_round001_comparison.csv
@@ -800,7 +959,7 @@ experiments/baselines/random_round001_comparison.csv
 
 ---
 
-### 20.6 Random seed0 Candidate-pool Prediction
+### 21.6 Random seed0 Candidate-pool Prediction
 
 ```text
 experiments/baselines/random_seed0_round001_prediction_summary.csv
@@ -810,7 +969,7 @@ experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.j
 
 ---
 
-### 20.7 Random seed1 Candidate-pool Prediction
+### 21.7 Random seed1 Candidate-pool Prediction
 
 ```text
 experiments/baselines/random_seed1_round001_prediction_summary.csv
@@ -820,7 +979,7 @@ experiments/baselines/random_seed1_round001_committee_prediction/selected_topk.j
 
 ---
 
-### 20.8 Random seed2 Candidate-pool Prediction
+### 21.8 Random seed2 Candidate-pool Prediction
 
 ```text
 experiments/baselines/random_seed2_round001_prediction_summary.csv
@@ -830,7 +989,7 @@ experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.j
 
 ---
 
-## 21. 大文件与轻量文件说明
+## 22. 大文件与轻量文件说明
 
 以下内容默认不提交 GitHub：
 
@@ -866,7 +1025,7 @@ random_seed0_round001_prediction_summary.md
 
 ---
 
-## 22. 后续 Random Baseline 补充计划
+## 23. 后续 Random Baseline 补充计划
 
 当前已完成：
 
@@ -912,7 +1071,7 @@ prediction time mean ± std
 
 ---
 
-## 23. 后续结果文件建议
+## 24. 后续结果文件建议
 
 后续可以新增：
 
@@ -937,7 +1096,7 @@ random mean ± std
 
 ---
 
-## 24. 注意事项
+## 25. 注意事项
 
 1. selection-level baseline 只比较“选出来的样本”，不能证明 retraining 后效果；
 2. retraining baseline 才能比较 Force RMSE、Energy RMSE 和 candidate-pool uncertainty；
@@ -952,7 +1111,7 @@ random mean ± std
 
 ---
 
-## 25. 小结
+## 26. 小结
 
 当前 random sampling baseline 已经完成 selection-level 对比和 random seed0 / seed1 / seed2 Round 001 retraining baseline。
 
