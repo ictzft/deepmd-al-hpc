@@ -25,10 +25,12 @@
 - Round 0–3 summary 与 learning curve 结果分析；
 - random sampling baseline 的 selection-level 对比；
 - random seed0 / seed1 / seed2 Round 001 retraining baseline；
-- multi-seed random baseline mean ± std (Round 001)；
-- uncertainty vs random Round 001 初步对比和 learning curve 图；
-- random Round 002/003 数据准备脚本和复现命令；
-- 初步文档体系整理，包括环境配置、复现实验、结果说明、baseline、paper evidence、profiling 计划和 Git 数据管理规范。
+- random seed0 / seed1 / seed2 Round 002 retraining baseline；
+- random seed0 / seed1 / seed2 Round 003 retraining baseline；
+- multi-seed random baseline mean ± std (Round 001/002/003)；
+- uncertainty vs random 完整多轮 comparison table 和 learning curve 图；
+- V100 profiling 方案和记录脚本；
+- 文档体系整理，包括环境配置、复现实验、结果说明、baseline、paper evidence、profiling 计划和 Git 数据管理规范。
 
 当前项目已经从：
 
@@ -44,7 +46,7 @@ dataset-level offline active learning closed-loop prototype
 
 并进一步补充了第一版 random sampling baseline。
 
-需要说明的是：当前 random sampling baseline 已经完成 selection-level random baseline 和 random seed0 / seed1 / seed2 Round 001 retraining baseline；Round 002/003 的数据准备脚本和复现命令已就绪，等待实际训练执行；完整 RMSE learning curve 对比和端到端耗时仍需后续补充。
+需要说明的是：当前 random sampling baseline 已经完成 selection-level baseline 和 random seed0 / seed1 / seed2 Round 001–003 完整 retraining baseline；uncertainty vs random 多轮对比表格和 learning curve 图已生成；但 V100 profiling 端到端耗时仍需后续系统记录；真实 DFT/AIMD 数据集和 H100 scaling 尚未开始。
 
 ---
 
@@ -190,79 +192,106 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 4.3 Multi-seed Random Round 001 Retraining Baseline 结果
+### 4.3 Multi-seed Random Round 001–003 Retraining Baseline 结果
 
-当前已经完成 random seed0 / seed1 / seed2 的 Round 001 retraining baseline。
+当前已经完成 random seed0 / seed1 / seed2 的 Round 001–003 retraining baseline。
 
-每个 seed 的数据规模为：
-
-```text
-random_seed*_round_001_train     : 210 frames
-random_seed*_round_001_candidate : 40 frames
-```
-
-三个 seed 的 Round 001 committee models 测试结果：
-
-| Seed | Energy RMSE Mean / eV | Energy RMSE Std / eV | Force RMSE Mean / eV/Å | Force RMSE Std / eV/Å |
-|---|---:|---:|---:|---:|
-| seed0 | 6.908853e-01 | 7.559906e-01 | 2.553366e-01 | 1.729852e-01 |
-| seed1 | 2.488029e-01 | 4.563935e-01 | 2.288370e-01 | 3.565438e-02 |
-| seed2 | 4.284121e-01 | 5.054377e-01 | 1.494923e-01 | 4.669047e-02 |
-| **Mean** | **4.560335e-01** | — | **2.112220e-01** | — |
-| **Std** | **2.223318e-01** | — | **5.507695e-02** | — |
-
-跨 seed 随机均值为：
+每轮数据规模：
 
 ```text
-Random Mean Energy RMSE: 0.456034 eV
-Random Mean Force RMSE : 0.211222 eV/Å
+Round 001: train 210, candidate 40
+Round 002: train 220, candidate 30
+Round 003: train 230, candidate 20
 ```
 
-该结果显示不同 random seed 的 committee 模型间存在较大方差，符合 toy 数据规模和 committee 随机初始化的预期。
+Random multi-seed mean Force RMSE across rounds：
+
+```text
+Random Mean Force RMSE:
+Round 001: 0.211222 eV/Å
+Round 002: 0.196183 eV/Å
+Round 003: 0.189028 eV/Å
+```
+
+三个 seed 的 Round 002 committee models 测试结果：
+
+| Seed | Energy RMSE Mean / eV | Force RMSE Mean / eV/Å |
+|---|---:|---:|
+| seed0 | 1.977364e+00 | 2.120793e-01 |
+| seed1 | 1.847642e+00 | 1.796397e-01 |
+| seed2 | 9.067673e-01 | 1.968315e-01 |
+| **Mean** | **1.577258e+00** | **1.961835e-01** |
+
+三个 seed 的 Round 003 committee models 测试结果：
+
+| Seed | Energy RMSE Mean / eV | Force RMSE Mean / eV/Å |
+|---|---:|---:|
+| seed0 | 1.369364e+00 | 2.373825e-01 |
+| seed1 | 1.707502e+00 | 1.417639e-01 |
+| seed2 | 1.310121e+00 | 1.879388e-01 |
+| **Mean** | **1.462329e+00** | **1.890284e-01** |
+
+完整 multi-seed multi-round 结果见：
+- `experiments/baselines/random_round001_baseline_summary.csv`
+- `experiments/baselines/random_round002_baseline_summary.csv`
+- `experiments/baselines/random_round003_baseline_summary.csv`
 
 相关结果文件：
 
 ```text
 experiments/baselines/random_seed0_round001_metrics_summary.csv
-experiments/baselines/random_seed0_round001_metrics_summary.md
 experiments/baselines/random_seed1_round001_metrics_summary.csv
-experiments/baselines/random_seed1_round001_metrics_summary.md
 experiments/baselines/random_seed2_round001_metrics_summary.csv
-experiments/baselines/random_seed2_round001_metrics_summary.md
-experiments/baselines/random_round001_comparison.csv
+experiments/baselines/random_seed0_round002_metrics_summary.csv
+experiments/baselines/random_seed1_round002_metrics_summary.csv
+experiments/baselines/random_seed2_round002_metrics_summary.csv
+experiments/baselines/random_seed0_round003_metrics_summary.csv
+experiments/baselines/random_seed1_round003_metrics_summary.csv
+experiments/baselines/random_seed2_round003_metrics_summary.csv
+experiments/baselines/random_round001_baseline_summary.csv
+experiments/baselines/random_round002_baseline_summary.csv
+experiments/baselines/random_round003_baseline_summary.csv
 ```
 
 ---
 
-### 4.4 Candidate Pool Uncertainty 对比结果
+### 4.4 Full Uncertainty vs Random Multi-Round Comparison
 
-各 branch Round 001 retraining 后，对剩余 candidate pool 进行 committee prediction 的对比结果。
-
-| Branch | force_dev_max mean | force_dev_max max | force_dev_max min | energy_dev mean |
-|---|---:|---:|---:|---:|
-| uncertainty_round001 | 0.126442 | 0.508339 | 0.042645 | 0.448212 |
-| random_seed0_round001 | 0.355420 | 1.586355 | 0.086667 | 0.656541 |
-| random_seed1_round001 | 0.487795 | 1.262038 | 0.327483 | 0.396726 |
-| random_seed2_round001 | 0.332138 | 1.117230 | 0.139321 | 0.446260 |
-| **random mean** | **0.391784** | — | — | **0.499842** |
-
-该结果初步表明：在当前 toy H2 offline active learning 设置下，加入 10 个 uncertainty-selected frames 后，剩余 candidate pool 的平均 force model deviation (0.126442) 低于所有三个 random seed baseline (seed0: 0.355420, seed1: 0.487795, seed2: 0.332138)。
-
-但该结论仍基于 toy H2 和 Round 001 单轮 retraining，后续需要补充 Round 002/003 多轮 random retraining 对比。
-
-相关结果文件：
+全轮次对比汇总见：
 
 ```text
-experiments/baselines/random_seed0_round001_prediction_summary.csv
-experiments/baselines/random_seed0_round001_prediction_summary.md
-experiments/baselines/random_seed1_round001_prediction_summary.csv
-experiments/baselines/random_seed1_round001_prediction_summary.md
-experiments/baselines/random_seed2_round001_prediction_summary.csv
-experiments/baselines/random_seed2_round001_prediction_summary.md
-experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
-experiments/baselines/random_seed1_round001_committee_prediction/selected_topk.json
-experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.json
+experiments/baselines/random_vs_uncertainty_summary.csv
+experiments/baselines/random_vs_uncertainty_summary.md
 ```
+
+Multi-seed random mean candidate-pool force_dev_max vs uncertainty branch：
+
+| Round | Uncertainty force_dev_max | Random mean force_dev_max | Random std |
+|---:|---:|---:|---:|
+| 1 | 2.693333e-01 | 3.917845e-01 | 8.395874e-02 |
+| 2 | 1.874125e-01 | 1.397884e-01 | 1.622950e-02 |
+| 3 | 1.701889e-01 | 1.390395e-01 | 4.781861e-02 |
+
+**注意**：该表将两个不同语义的指标放在一起对比——
+- **uncertainty** 行的 `force_dev_max_mean` 是 top-K **被选中** frames 的 mean
+- **random** 行的 `force_dev_max_mean` 是 **remaining candidate pool** 的 mean
+
+因此该表更适合用于观察各自分支的趋势，而非直接的 branch vs branch 数值对比。
+
+Learning curve 图：
+
+```text
+experiments/figures/random_vs_uncertainty_force_rmse.svg
+experiments/figures/random_vs_uncertainty_energy_rmse.svg
+experiments/figures/random_vs_uncertainty_candidate_force_dev.svg
+experiments/figures/random_vs_uncertainty_dataset_size.svg
+```
+
+该结果表明：
+- uncertainty branch 的 selected top-K force_dev_max 随轮次稳步下降（0.440 → 0.170）
+- random branch 的 remaining candidate-pool force_dev_max 在 Round 002–003 低于 Round 001，但没有明显进一步的逐轮下降趋势
+- random branch 的 validation Force RMSE 跨 seed 波动较大（0.142–0.255 eV/Å），符合 toy H2 数据规模和 committee 随机初始化的预期
+- 完整结论仍需要真实 DFT/AIMD 数据集和更多 baseline 验证
 
 ---
 
@@ -624,7 +653,7 @@ scripts/data/... should not be ignored.
 
 ## 12. 后续计划
 
-### 12.1 第一阶段：补完整 Random Sampling Baseline
+### 12.1 第一阶段：补完整 Random Sampling Baseline（已完成）
 
 当前 random baseline 进展：
 
@@ -632,17 +661,18 @@ scripts/data/... should not be ignored.
 已完成:
   selection-level random baseline
   random seed0 / seed1 / seed2 Round 001 retraining
-  random multi-seed mean ± std (Round 001)
-
-待完成:
   random seed0 / seed1 / seed2 Round 002 retraining
   random seed0 / seed1 / seed2 Round 003 retraining
-  Force RMSE / Energy RMSE learning curve
-  candidate-pool uncertainty curve
-  end-to-end active learning wall-clock time
+  random multi-seed mean ± std (Round 001/002/003)
+  Force RMSE / Energy RMSE learning curve 图
+  candidate-pool uncertainty 对比图
+  uncertainty vs random full comparison table
+
+待完成:
+  end-to-end active learning wall-clock time (profiling)
 ```
 
-目标是从：
+已从：
 
 ```text
 multi-seed Round 001 random baseline
@@ -774,7 +804,13 @@ selection-level random baseline
   ↓
 random seed0 / seed1 / seed2 Round 001 retraining baseline
   ↓
-multi-seed random mean ± std (Round 001)
+random seed0 / seed1 / seed2 Round 002 retraining baseline
+  ↓
+random seed0 / seed1 / seed2 Round 003 retraining baseline
+  ↓
+multi-seed random mean ± std (Round 001/002/003)
+  ↓
+uncertainty vs random full comparison + learning curves
 ```
 
 当前核心结论是：

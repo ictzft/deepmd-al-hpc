@@ -233,8 +233,8 @@ bash scripts/profiling/record_round_profiling.sh 002 seed0 random
 
 | Seed | Round 001 | Round 002 | Round 003 |
 |---|---|---|---|
-| seed0 | done | **pending** | **pending** |
-| seed1 | done | **pending** | **pending** |
-| seed2 | done | **pending** | **pending** |
+| seed0 | done | done | done |
+| seed1 | done | done | done |
+| seed2 | done | done | done |
 
-待执行完成一项后，将 `pending` 改为 `done`。
+所有 round 已执行完毕（2026-05-25，2×V100）。
