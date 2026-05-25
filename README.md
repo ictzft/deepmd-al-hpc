@@ -29,6 +29,7 @@
 - random seed0 / seed1 / seed2 Round 003 retraining baseline；
 - multi-seed random baseline mean ± std (Round 001/002/003)；
 - uncertainty vs random 完整多轮 comparison table 和 learning curve 图；
+- diversity 和 trust_level (DP-GEN-style) 四策略 multi-seed multi-round 完整对比 (2026-05-25)；
 - V100 profiling 方案和记录脚本；
 - 文档体系整理，包括环境配置、复现实验、结果说明、baseline、paper evidence、profiling 计划和 Git 数据管理规范。
 

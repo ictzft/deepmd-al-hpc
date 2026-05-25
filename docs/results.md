@@ -418,7 +418,23 @@ experiments/baselines/random_round001_comparison.csv
 
 ---
 
-## 9. 当前可以支持的结论
+## 9. Four-Strategy Multi-Seed Comparison (2026-05-25)
+
+Diversity 和 trust_level 策略已完成 seed0/seed1/seed2 Round 001–003 multi-seed retraining。四策略 Force RMSE 对比如下：
+
+| Strategy | R1 F_RMSE | R1 std | R2 F_RMSE | R2 std | R3 F_RMSE | R3 std |
+|---|---:|---:|---:|---:|---:|---:|
+| uncertainty | 1.618e-01 | — | 1.939e-01 | — | 1.743e-01 | — |
+| random | 2.112e-01 | 5.508e-02 | 1.962e-01 | 1.623e-02 | 1.890e-01 | 4.782e-02 |
+| diversity | 2.052e-01 | 5.789e-02 | 1.738e-01 | 9.290e-03 | 1.759e-01 | 4.082e-02 |
+| trust_level | 1.353e-01 | 2.761e-02 | 1.491e-01 | 2.256e-02 | 1.782e-01 | 6.470e-03 |
+
+完整数据见 `experiments/strategy_comparison_toy_h2/strategy_summary.md`。
+Random、diversity、trust_level 均为 3-seed mean ± std；uncertainty 当前为单次 run。
+
+---
+
+## 10. 当前可以支持的结论
 
 基于当前结果，可以支持以下结论：
 

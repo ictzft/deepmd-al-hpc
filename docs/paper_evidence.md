@@ -15,8 +15,8 @@ This document tracks the current evidence and pending experiments for the `deepm
 7. Uncertainty vs random comparison figures are generated across all rounds.
 8. 2×V100 model-level parallel training achieves ~1.97× speedup.
 9. Per-model training wall time is ~10.9s (1000 steps) for the toy H2 model.
-10. Four selection strategies are implemented and compared at selection level: random, uncertainty top-K, uncertainty-diversity (FPS), and DP-GEN-style trust-level.
-11. Uncertainty-diversity and trust-level strategies have been validated through Round 001 retraining.
+10. Four selection strategies are implemented with multi-seed multi-round comparison: random, uncertainty top-K, uncertainty-diversity (FPS), and DP-GEN-style trust-level (all Round 001–003, seed0/seed1/seed2 for random/diversity/trust_level).
+11. Full four-strategy comparison table with cross-seed mean ± std is available (2026-05-25, 2×V100).
 12. All experiments are reproducible via documented scripts and configs.
 
 ---
@@ -25,15 +25,15 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 1. **Uncertainty sampling reduces remaining candidate-pool uncertainty more effectively than random sampling.**
    - *Evidence:* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332). Trust_level Round 001 also shows lower remaining uncertainty (0.160).
-   - *Gap:* Single-run results for new strategies; multi-seed multi-round retraining needed.
+   - *Gap:* Comparison table currently mixes selected-K uncertainty with remaining candidate-pool uncertainty; needs metric alignment.
 
 2. **Uncertainty-diversity sampling improves structural coverage without severely degrading model quality.**
-   - *Evidence:* Selection-level comparison shows diversity selects frames with mean force_dev_max=0.254 (vs 0.441 for pure top-K) but with wider structural coverage. Round 001 retraining shows F_RMSE=0.269.
-   - *Gap:* Single-run only; need multi-round comparison and quantitative diversity metrics.
+   - *Evidence:* Multi-seed Round 001–003 shows diversity F_RMSE (2.05e-01, 1.74e-01, 1.76e-01) comparable to random baseline. Selection-level comparison confirms wider structural coverage.
+   - *Gap:* Quantitative diversity metrics not yet computed; toy H2 only.
 
 3. **DP-GEN-style trust-level sampling is feasible in the committee model framework.**
-   - *Evidence:* Trust-level correctly separates 50-frame pool into 25 accurate / 20 candidate / 5 failed. Round 001 retraining results are comparable to uncertainty top-K.
-   - *Gap:* Only uses force_dev_max; full DP-GEN uses both force and energy deviation with system-specific thresholds.
+   - *Evidence:* Trust-level correctly separates 50-frame pool into 25 accurate / 20 candidate / 5 failed. Multi-seed Round 001–003 F_RMSE (1.35e-01, 1.49e-01, 1.78e-01) is competitive.
+   - *Gap:* Only uses force_dev_max; full DP-GEN uses both force and energy deviation.
 
 ---
 

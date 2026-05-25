@@ -49,18 +49,18 @@
 
 **设计动机**：pure uncertainty top-K 容易选出结构相似的构型（例如 H2 中 bond length 相近的帧），导致信息冗余。uncertainty-diversity 在高不确定性候选中增加结构覆盖度。
 
-**当前状态**：策略已实现，Round 000 selection-level 验证已完成，Round 001 retraining 已完成（单次 run）。
+**当前状态**：策略已实现，Round 000 selection-level 验证已完成，multi-seed (seed0/seed1/seed2) Round 001–003 retraining 已完成 (2026-05-25, 2×V100)。
 
 **输入**：`force_dev_max` + `coord` (from committee_predictions.npz)
 
 **输出**：K 个兼顾高不确定性和结构多样性的 frame indices
 
-**Round 001 结果（toy H2）**：
+**Round 001–003 结果（toy H2, multi-seed mean ± std）**：
 
 ```text
-E_RMSE mean = 0.877 eV
-F_RMSE mean = 0.269 eV/Å
-Remaining candidate force_dev_max mean = 0.218
+Round 1: F_RMSE = 2.052e-01 +/- 5.789e-02 eV/Å
+Round 2: F_RMSE = 1.738e-01 +/- 9.290e-03 eV/Å
+Round 3: F_RMSE = 1.759e-01 +/- 4.082e-02 eV/Å
 ```
 
 ---
@@ -83,37 +83,38 @@ Remaining candidate force_dev_max mean = 0.218
 
 **设计动机**：DP-GEN 中使用模型偏差的 trust level 来确定哪些构型需要重新标注。本实现为简化原型，只使用 `force_dev_max` 一个指标（完整 DP-GEN 使用 `max_devi_f` 和 `max_devi_e`）。
 
-**当前状态**：策略已实现，Round 000 selection-level 验证已完成，Round 001 retraining 已完成（单次 run）。
+**当前状态**：策略已实现，Round 000 selection-level 验证已完成，multi-seed (seed0/seed1/seed2) Round 001–003 retraining 已完成 (2026-05-25, 2×V100)。
 
 **输入**：`force_dev_max` 数组
 
 **输出**：selected indices + 三区统计信息
 
-**Round 001 结果（toy H2）**：
+**Round 001–003 结果（toy H2, multi-seed mean ± std）**：
 
 ```text
-E_RMSE mean = 0.549 eV
-F_RMSE mean = 0.136 eV/Å
-Remaining candidate force_dev_max mean = 0.160
-Accurate/Candidate/Failed split: 25/20/5 (from 50-frame initial pool)
+Round 1: F_RMSE = 1.353e-01 +/- 2.761e-02 eV/Å
+Round 2: F_RMSE = 1.491e-01 +/- 2.256e-02 eV/Å
+Round 3: F_RMSE = 1.782e-01 +/- 6.470e-03 eV/Å
+Accurate/Candidate/Failed split (initial 50-frame pool): 25/20/5
 ```
 
 ---
 
-## 5. Strategy Comparison (Round 001 retraining)
+## 5. Strategy Comparison (Round 001–003, multi-seed mean Force RMSE)
 
-| Strategy | Energy RMSE / eV | Force RMSE / eV/Å | Cand force_dev_max mean |
-|---|---:|---:|---:|
-| uncertainty | 0.729 | 0.162 | 0.126 |
-| random (mean of 3) | 0.456 | 0.211 | 0.392 |
-| diversity | 0.877 | 0.269 | 0.218 |
-| trust_level | 0.549 | 0.136 | 0.160 |
+| Strategy | R1 F_RMSE | R1 std | R2 F_RMSE | R2 std | R3 F_RMSE | R3 std |
+|---|---:|---:|---:|---:|---:|---:|
+| uncertainty | 1.618e-01 | — | 1.939e-01 | — | 1.743e-01 | — |
+| random | 2.112e-01 | 5.508e-02 | 1.962e-01 | 1.623e-02 | 1.890e-01 | 4.782e-02 |
+| diversity | 2.052e-01 | 5.789e-02 | 1.738e-01 | 9.290e-03 | 1.759e-01 | 4.082e-02 |
+| trust_level | 1.353e-01 | 2.761e-02 | 1.491e-01 | 2.256e-02 | 1.782e-01 | 6.470e-03 |
+
+完整对比表见 `experiments/strategy_comparison_toy_h2/strategy_summary.md`。
 
 **注意**：
-- Random baseline 是 3-seed mean ± std，其他策略是单次 run
-- Toy H2 数据规模小，cross-model variance 大，单次 run 结果不具统计意义
-- Trust level Round 001 在 Energy RMSE 和 Force RMSE 上都较低，但这可能是特定 committee model 初始化的随机效应
-- 完整结论需要 multi-seed multi-round retraining + 真实数据集
+- Random、diversity、trust_level 均为 3-seed mean ± std；uncertainty 为单次 run
+- Toy H2 数据规模小，cross-model variance 大，Force RMSE 差异在 1σ 以内
+- 所有结论仍局限 toy H2，需真实 DFT/AIMD 数据集进一步验证
 
 ---
 
@@ -147,5 +148,5 @@ python scripts/selection/select_by_strategy.py \
 1. All strategies tested only on toy H2 (2 atoms, 250 frames).
 2. Diversity descriptor is limited to pairwise-distance; more sophisticated descriptors (SOAP, ACSF) are not yet implemented.
 3. Trust-level uses only `force_dev_max`; full DP-GEN uses both force and energy deviation.
-4. New strategies have only single-run Round 001 results; multi-seed multi-round retraining is pending.
+4. Diversity and trust_level now have multi-seed (seed0/seed1/seed2) Round 001–003 results (2026-05-25).
 5. Cross-model variance in committee models limits the reliability of per-run comparisons.
