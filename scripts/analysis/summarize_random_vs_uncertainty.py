@@ -2,8 +2,8 @@
 """Summarize uncertainty vs random baseline across all available rounds.
 
 Reads uncertainty branch results from experiments/al_rounds_summary.csv and
-random baseline results from experiments/baselines/random_round001_baseline_summary.csv
-(and future round002/003 files when available).
+random baseline results from auto-discovered random_round*_baseline_summary.csv files.
+Currently covers Round 001/002/003 (all completed 2026-05-25).
 
 Outputs:
   experiments/baselines/random_vs_uncertainty_summary.csv
@@ -248,9 +248,8 @@ def write_md(rows: list[dict[str, Any]]) -> None:
         "",
         "## Notes",
         "",
-        "- Uncertainty branch uses `force_dev_max` top-K selection across Round 0–3.",
-        "- Random baseline currently has Round 001 multi-seed data (seed0/seed1/seed2).",
-        "- Random Round 002/003 data is pending — scripts and configs are prepared for reproducibility.",
+        "- Uncertainty branch: `force_dev_max` top-K selection across Round 0–3.",
+        "- Random baseline: multi-seed (seed0/seed1/seed2) Round 001/002/003 retraining completed (2026-05-25, 2×V100).",
         "- This is a toy H2 workflow validation. Real DFT/AIMD datasets and H100 scaling are not yet included.",
         "",
         "**Field meaning note:** `force_dev_max_mean` has different semantics per branch:",
