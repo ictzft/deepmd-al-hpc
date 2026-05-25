@@ -23,9 +23,12 @@ FIELD_NAMES = [
 ]
 
 
-def collect_records(input_dir: Path) -> list[dict[str, Any]]:
+def collect_records(input_dir: Path, recursive: bool = False) -> list[dict[str, Any]]:
     records = []
-    json_files = sorted(input_dir.glob("*.json"))
+    if recursive:
+        json_files = sorted(input_dir.rglob("*.json"))
+    else:
+        json_files = sorted(input_dir.glob("*.json"))
     if not json_files:
         return records
     for f in json_files:
@@ -50,6 +53,7 @@ def main() -> None:
     parser.add_argument("--input-dir", required=True, help="Directory with profile JSON files.")
     parser.add_argument("--output-csv", required=True, help="Output CSV path.")
     parser.add_argument("--output-md", required=True, help="Output Markdown path.")
+    parser.add_argument("--recursive", action="store_true", help="Recursively scan for JSON files.")
     args = parser.parse_args()
 
     input_dir = Path(args.input_dir)
@@ -58,7 +62,7 @@ def main() -> None:
         print("No profile JSON files to parse.")
         return
 
-    records = collect_records(input_dir)
+    records = collect_records(input_dir, recursive=args.recursive)
 
     if not records:
         print(f"No JSON files found in {input_dir}.")
