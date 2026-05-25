@@ -20,7 +20,7 @@ env/
 # Data files
 # =========================
 /data/
-datasets/
+/datasets/
 raw_data/
 processed_data/
 
@@ -86,7 +86,14 @@ experiments/**/committee_models/
 experiments/**/model_*/
 
 # =========================
+# =========================
 # Profiling logs (large, auto-generated)
 # =========================
 experiments/profiling/*.log
 experiments/profiling/gpu_*.csv
+experiments/profiling/v100/gpu_logs/
+
+# =========================
+# Real datasets (large data arrays)
+# =========================
+data/real_datasets/

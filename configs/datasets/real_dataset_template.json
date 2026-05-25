@@ -1,0 +1,34 @@
+{
+  "dataset_name": "my_real_system",
+  "description": "Template configuration for a real DFT/AIMD dataset. Fill in actual values before use.",
+  "source": {
+    "type": "DFT_AIMD",
+    "system": "TODO: e.g. bulk_Cu_64atoms_300K",
+    "format": "deepmd_npy",
+    "path": "data/real_datasets/my_real_system/all_data"
+  },
+  "split": {
+    "initial_train": 100,
+    "candidate_pool": 1000,
+    "validation": 100,
+    "independent_test": 100,
+    "seed": 0
+  },
+  "active_learning": {
+    "n_rounds": 3,
+    "top_k": 10,
+    "n_committee_models": 4,
+    "selection_strategies": [
+      "random",
+      "uncertainty",
+      "uncertainty-diversity",
+      "trust-level"
+    ]
+  },
+  "evaluation": {
+    "metrics": ["energy_rmse", "force_rmse", "force_dev_max_mean"],
+    "independent_test_enabled": true,
+    "md_stability_enabled": false
+  },
+  "notes": "This is a template. Replace all TODO values before running."
+}
