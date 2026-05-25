@@ -377,7 +377,7 @@ deepmd-al-hpc/
 | `docs/profiling_h100.md` | H100 迁移和多 GPU scaling 实验计划（尚未执行） |
 | `docs/paper_evidence.md` | 论文证据清单，当前可支持/不可支持的结论 |
 | `docs/random_baseline_next_steps.md` | random baseline 完成后的下一步（profiling / diversity / trust-level / real data） |
-| `docs/random_baseline_execution_checklist.md` | random Round 002/003 实际执行命令清单（可直接复制粘贴） |
+| `docs/random_baseline_execution_checklist.md` | random baseline 完整执行清单和复现命令索引 |
 | `docs/selection_strategies.md` | 四类 selection strategy 说明、参数、设计动机和 Round 001 对比 |
 | `docs/diversity_and_trust_level_plan.md` | diversity 和 trust-level baseline 的后续多轮实验计划 |
 | `docs/current_project_status.md` | 当前项目全局状态总览、已完成/待完成清单、claim boundary |
@@ -622,7 +622,7 @@ scripts/data/... should not be ignored.
 2. 当前尚未引入真实 DFT / AIMD 数据集；
 3. random sampling baseline 已完成 selection-level 对比和 seed0/seed1/seed2 Round 001–003 multi-round retraining (2026-05-25)；
 4. selection-level random baseline 只能说明 uncertainty sampling 选出的构型平均不确定性更高，不能直接代表 retraining 后模型精度优势；
-5. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
+5. uncertainty-diversity（FPS）和 DP-GEN-style trust-level 策略已实现并完成 multi-seed Round 001–003 验证；
 6. 当前尚未进行 H100 多 GPU scaling 实验；
 7. 当前尚未进行真实 DFT labeling 或在线主动学习调度；
 8. 当前 V100 profiling 已记录训练耗时和代表性 GPU 利用率，但 prediction 和端到端耗时仍需更精确的系统测量；
@@ -670,17 +670,11 @@ multi-seed Round 0–3 random baseline with full learning curve
 
 ---
 
-### 12.2 第二阶段：加入 Uncertainty-Diversity Sampling
+### 12.2 第二阶段：加入 Uncertainty-Diversity 和 Trust-Level 策略（已完成）
 
-在 uncertainty top-K 的基础上加入结构多样性约束：
+uncertainty-diversity（FPS + pairwise-distance descriptor）和 DP-GEN-style trust-level selection 已实现并完成 multi-seed Round 001–003 验证，详见 `docs/selection_strategies.md`。
 
-```text
-Step 1: Select top-M high-uncertainty configurations.
-Step 2: Cluster or diversify selected candidates using structural descriptors.
-Step 3: Select final top-K configurations.
-```
-
-目标是减少 uncertainty-only selection 中可能出现的相似构型重复选择问题。
+Diversity 策略在 toy H2 上将选中帧的结构覆盖度（pairwise distance）提升了 3.1×。
 
 ---
 
@@ -792,29 +786,29 @@ random seed0 / seed1 / seed2 Round 002 retraining baseline
   ↓
 random seed0 / seed1 / seed2 Round 003 retraining baseline
   ↓
-multi-seed random mean ± std (Round 001/002/003)
+diversity + trust_level multi-seed Round 001–003
   ↓
-uncertainty vs random full comparison + learning curves
+four-strategy aligned comparison + learning curves
 ```
 
 当前核心结论是：
 
-> 在 toy H2 offline active learning 设置下，uncertainty sampling 能够更有效地选择高不确定性构型，并在 Round 001 的 random seed0 / seed1 / seed2 对比中一致显示出更低的剩余 candidate-pool force model deviation。
+> 在 toy H2 offline active learning 设置下，uncertainty sampling 能够更有效地选择高不确定性构型。四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 对齐对比已完成，全部策略均使用统一的 remaining candidate-pool 指标。
 
 但该结论仍基于 toy H2 数据集，尚未在真实 DFT / AIMD 数据集上验证，不能直接推广到真实材料体系，也不能直接作为完整论文级结论。
 
 下一步重点是：
 
 ```text
-fix and keep documentation consistent
+keep documentation consistent (done)
   ↓
-complete multi-seed random baseline
+complete multi-seed random baseline (done)
   ↓
-add uncertainty-diversity sampling
+add uncertainty-diversity + trust-level sampling (done)
   ↓
-move to real DFT / AIMD datasets
+add systematic profiling (done: 36-round end-to-end CSV)
   ↓
-add systematic profiling
+move to real DFT / AIMD datasets (next)
   ↓
 run H100 / multi-GPU scaling experiments
 ```
