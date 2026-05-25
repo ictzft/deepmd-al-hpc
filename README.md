@@ -363,6 +363,7 @@ deepmd-al-hpc/
 │   ├── eval/
 │   ├── inference/
 │   ├── profiling/
+│   ├── selection/
 │   └── train/
 └── src/
     ├── al/
@@ -400,7 +401,10 @@ deepmd-al-hpc/
 | `docs/random_baseline_next_steps.md` | random baseline 后续 Round 002/003 实验计划和目录组织 |
 | `docs/random_baseline_execution_checklist.md` | random Round 002/003 实际执行命令清单（可直接复制粘贴） |
 | `docs/selection_strategies.md` | 四类 selection strategy 说明、参数、设计动机和 Round 001 对比 |
-| `docs/profiling_v100.md` | V100 系统性能 profiling 方案、指标和输出格式 |
+| `docs/diversity_and_trust_level_plan.md` | diversity 和 trust-level baseline 的后续多轮实验计划 |
+| `docs/current_project_status.md` | 当前项目全局状态总览、已完成/待完成清单、claim boundary |
+| `docs/profiling_v100.md` | V100 系统性能 profiling 方案、实测数据和操作指南 |
+| `docs/profiling_h100.md` | H100 迁移计划（尚未执行） |
 
 推荐阅读顺序：
 
