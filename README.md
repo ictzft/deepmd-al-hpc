@@ -362,6 +362,8 @@ deepmd-al-hpc/
 | `docs/code_check.md` | 提交前代码检查、状态检查和大文件检查 |
 | `docs/profiling_h100.md` | V100 profiling、H100 迁移和多 GPU scaling 实验计划 |
 | `docs/paper_evidence.md` | 论文证据清单，当前可支持/不可支持的结论 |
+| `docs/random_baseline_next_steps.md` | random baseline 后续 Round 002/003 实验计划和执行清单 |
+| `docs/profiling_v100.md` | V100 系统性能 profiling 方案、指标和输出格式 |
 
 推荐阅读顺序：
 
