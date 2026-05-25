@@ -15,8 +15,8 @@ This document tracks the current evidence and pending experiments for the `deepm
 7. Uncertainty vs random comparison figures are generated across all rounds.
 8. 2×V100 model-level parallel training achieves ~1.97× speedup.
 9. Per-model training wall time is ~10.9s (1000 steps) for the toy H2 model.
-10. Four selection strategies are implemented with multi-seed multi-round comparison: random, uncertainty top-K, uncertainty-diversity (FPS), and DP-GEN-style trust-level (all Round 001–003, seed0/seed1/seed2 for random/diversity/trust_level).
-11. Full four-strategy comparison table with cross-seed mean ± std is available (2026-05-25, 2×V100).
+10. Four selection strategies are implemented with full multi-seed multi-round comparison: all four (uncertainty, random, diversity, trust_level) completed seed0/seed1/seed2 Round 001–003 (2026-05-25, 2×V100).
+11. Aligned four-strategy comparison table with cross-seed mean ± std uses consistent "remaining candidate-pool" metrics across all strategies.
 12. All experiments are reproducible via documented scripts and configs.
 
 ---

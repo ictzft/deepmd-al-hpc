@@ -22,13 +22,14 @@ Toy H2 offline active learning prototype with 4-model DeePMD committee, uncertai
 | 6 | Uncertainty top-K offline active learning | Round 0–3 | done |
 | 7 | Random sampling selection-level baseline | Round 0–1, seed0/1/2 | done |
 | 8 | Random retraining baseline | Round 001–003, seed0/1/2 | done |
-| 9 | Random multi-seed mean ± std | Round 001/002/003 | done |
-| 10 | Uncertainty vs random comparison table | 16 rows, all rounds | done |
-| 11 | Comparison learning curve figures | 4 SVG | done |
-| 12 | Uncertainty-diversity selector | prototype, Round 001 | done |
-| 13 | Trust-level (DP-GEN-style) selector | prototype, Round 001 | done |
-| 14 | V100 training wall-time profiling | 36 train.log | done |
-| 15 | V100 GPU utilization sample | representative | done |
+| 9 | Uncertainty multi-seed retraining | Round 001–003, seed0/1/2 | done |
+| 10 | Diversity multi-seed retraining | Round 001–003, seed0/1/2 | done |
+| 11 | Trust-level multi-seed retraining | Round 001–003, seed0/1/2 | done |
+| 12 | Multi-seed mean ± std | all 4 strategies | done |
+| 13 | Aligned four-strategy comparison | consistent metric | done |
+| 14 | Comparison learning curve figures | 4 SVG | done |
+| 15 | V100 training wall-time profiling | 36 train.log | done |
+| 16 | V100 GPU utilization sample | representative | done |
 
 ---
 
@@ -43,13 +44,16 @@ Toy H2 offline active learning prototype with 4-model DeePMD committee, uncertai
 | 2 | 220 | 30 | 0.194 | 0.187 |
 | 3 | 230 | 20 | 0.174 | 0.170 |
 
-### 3.2 Random baseline (multi-seed mean Force RMSE)
+### 3.2 Four-Strategy Aligned Force RMSE (3-seed mean ± std)
 
-| Round | Mean Force RMSE / eV/Å | Cross-seed std |
-|---:|---:|---:|
-| 001 | 0.211 | 0.055 |
-| 002 | 0.196 | 0.016 |
-| 003 | 0.189 | 0.048 |
+| Strategy | R1 | R2 | R3 |
+|---|---:|---:|---:|
+| uncertainty | 1.51e-01 ± 0.025 | 2.13e-01 ± 0.024 | 1.96e-01 ± 0.024 |
+| random | 2.11e-01 ± 0.055 | 1.96e-01 ± 0.016 | 1.89e-01 ± 0.048 |
+| diversity | 2.05e-01 ± 0.058 | 1.74e-01 ± 0.009 | 1.76e-01 ± 0.041 |
+| trust_level | 1.35e-01 ± 0.028 | 1.49e-01 ± 0.023 | 1.78e-01 ± 0.006 |
+
+See `experiments/baselines/aligned_comparison.md` for full aligned comparison.
 
 ### 3.3 Key result files
 

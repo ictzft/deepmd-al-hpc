@@ -47,7 +47,7 @@ dataset-level offline active learning closed-loop prototype
 
 并进一步补充了第一版 random sampling baseline。
 
-需要说明的是：当前 random sampling baseline 已经完成 selection-level baseline 和 random seed0 / seed1 / seed2 Round 001–003 完整 retraining baseline；uncertainty vs random 多轮对比表格和 learning curve 图已生成；但 V100 profiling 端到端耗时仍需后续系统记录；真实 DFT/AIMD 数据集和 H100 scaling 尚未开始。
+需要说明的是：当前全部四种 selection strategy（random / uncertainty / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；四策略对齐对比表（aligned comparison）和 learning curve 图已生成；但 V100 profiling 端到端耗时仍需后续系统记录；真实 DFT/AIMD 数据集和 H100 scaling 尚未开始。
 
 ---
 
@@ -193,9 +193,10 @@ experiments/baselines/selection_baseline_summary.md
 
 ---
 
-### 4.3 Multi-seed Random Round 001–003 Retraining Baseline 结果
+### 4.3 Four-Strategy Multi-Seed Round 001–003 Comparison
 
-当前已经完成 random seed0 / seed1 / seed2 的 Round 001–003 retraining baseline。
+当前全部四种策略均已完成 seed0/seed1/seed2 Round 001–003 multi-seed retraining baseline。
+对齐后的 Force RMSE 对比（3-seed mean ± std）见 `experiments/baselines/aligned_comparison.md`。
 
 每轮数据规模：
 
@@ -205,53 +206,27 @@ Round 002: train 220, candidate 30
 Round 003: train 230, candidate 20
 ```
 
-Random multi-seed mean Force RMSE across rounds：
+四策略对齐 Force RMSE 对比（3-seed mean ± std, toy H2, 2×V100）：
 
-```text
-Random Mean Force RMSE:
-Round 001: 0.211222 eV/Å
-Round 002: 0.196183 eV/Å
-Round 003: 0.189028 eV/Å
-```
+| Strategy | R1 F_RMSE | R2 F_RMSE | R3 F_RMSE |
+|---|---:|---:|---:|
+| uncertainty | 1.51e-01 ± 0.025 | 2.13e-01 ± 0.024 | 1.96e-01 ± 0.024 |
+| random | 2.11e-01 ± 0.055 | 1.96e-01 ± 0.016 | 1.89e-01 ± 0.048 |
+| diversity | 2.05e-01 ± 0.058 | 1.74e-01 ± 0.009 | 1.76e-01 ± 0.041 |
+| trust_level | 1.35e-01 ± 0.028 | 1.49e-01 ± 0.023 | 1.78e-01 ± 0.006 |
 
-三个 seed 的 Round 002 committee models 测试结果：
-
-| Seed | Energy RMSE Mean / eV | Force RMSE Mean / eV/Å |
-|---|---:|---:|
-| seed0 | 1.977364e+00 | 2.120793e-01 |
-| seed1 | 1.847642e+00 | 1.796397e-01 |
-| seed2 | 9.067673e-01 | 1.968315e-01 |
-| **Mean** | **1.577258e+00** | **1.961835e-01** |
-
-三个 seed 的 Round 003 committee models 测试结果：
-
-| Seed | Energy RMSE Mean / eV | Force RMSE Mean / eV/Å |
-|---|---:|---:|
-| seed0 | 1.369364e+00 | 2.373825e-01 |
-| seed1 | 1.707502e+00 | 1.417639e-01 |
-| seed2 | 1.310121e+00 | 1.879388e-01 |
-| **Mean** | **1.462329e+00** | **1.890284e-01** |
-
-完整 multi-seed multi-round 结果见：
-- `experiments/baselines/random_round001_baseline_summary.csv`
-- `experiments/baselines/random_round002_baseline_summary.csv`
-- `experiments/baselines/random_round003_baseline_summary.csv`
+所有策略使用统一的 "remaining candidate-pool" 指标，可直接对比。
+完整数据见 `experiments/baselines/aligned_comparison.md` 和 `experiments/strategy_comparison_toy_h2/strategy_summary.md`。
 
 相关结果文件：
 
 ```text
-experiments/baselines/random_seed0_round001_metrics_summary.csv
-experiments/baselines/random_seed1_round001_metrics_summary.csv
-experiments/baselines/random_seed2_round001_metrics_summary.csv
-experiments/baselines/random_seed0_round002_metrics_summary.csv
-experiments/baselines/random_seed1_round002_metrics_summary.csv
-experiments/baselines/random_seed2_round002_metrics_summary.csv
-experiments/baselines/random_seed0_round003_metrics_summary.csv
-experiments/baselines/random_seed1_round003_metrics_summary.csv
-experiments/baselines/random_seed2_round003_metrics_summary.csv
+experiments/baselines/aligned_comparison.csv
+experiments/baselines/aligned_comparison.md
 experiments/baselines/random_round001_baseline_summary.csv
 experiments/baselines/random_round002_baseline_summary.csv
 experiments/baselines/random_round003_baseline_summary.csv
+experiments/strategy_comparison_toy_h2/strategy_summary.md
 ```
 
 ---
