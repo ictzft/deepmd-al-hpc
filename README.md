@@ -636,12 +636,12 @@ scripts/data/... should not be ignored.
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
 2. 当前尚未引入真实 DFT / AIMD 数据集；
-3. random sampling baseline 已经完成 selection-level 对比和 Round 001 三 seed retraining，但尚未完成 Round 002/003 多轮 retraining；
+3. random sampling baseline 已完成 selection-level 对比和 seed0/seed1/seed2 Round 001–003 multi-round retraining (2026-05-25)；
 4. selection-level random baseline 只能说明 uncertainty sampling 选出的构型平均不确定性更高，不能直接代表 retraining 后模型精度优势；
 5. 当前尚未引入结构多样性选择策略，仅基于 `force_dev_max` 进行 top-K 选择；
 6. 当前尚未进行 H100 多 GPU scaling 实验；
 7. 当前尚未进行真实 DFT labeling 或在线主动学习调度；
-8. 当前 V100 profiling 只记录了部分训练与预测耗时，尚未系统记录所有 round 的端到端耗时；
+8. 当前 V100 profiling 已记录训练耗时和代表性 GPU 利用率，但 prediction 和端到端耗时仍需更精确的系统测量；
 9. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响；
 10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以直接支撑完整 CCF-B 论文实验结论。
 

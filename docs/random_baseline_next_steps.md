@@ -54,33 +54,31 @@ experiments/figures/random_vs_uncertainty_dataset_size.svg
 
 ## 2. 当前缺失内容
 
-### 2.1 Random Round 002 retraining（未执行）
+### 2.1 Random Round 002 retraining（已完成 2026-05-25）
 
-需要完成以下三个 seed 的 Round 002：
+三个 seed 的 Round 002 已全部执行：
 
 ```text
-random seed0 Round 002: train → config → committee models → prediction → summary
-random seed1 Round 002: train → config → committee models → prediction → summary
-random seed2 Round 002: train → config → committee models → prediction → summary
+random seed0 Round 002: 完成
+random seed1 Round 002: 完成
+random seed2 Round 002: 完成
 ```
 
-### 2.2 Random Round 003 retraining（未执行）
+### 2.2 Random Round 003 retraining（已完成 2026-05-25）
 
-依赖 Round 002 完成后执行：
+三个 seed 的 Round 003 已全部执行：
 
 ```text
-random seed0 Round 003: train → config → committee models → prediction → summary
-random seed1 Round 003: train → config → committee models → prediction → summary
-random seed2 Round 003: train → config → committee models → prediction → summary
+random seed0 Round 003: 完成
+random seed1 Round 003: 完成
+random seed2 Round 003: 完成
 ```
 
-### 2.3 完整 multi-round 汇总（未完成）
-
-所有 round 完成后需要更新：
+### 2.3 完整 multi-round 汇总（已完成）
 
 ```text
-experiments/baselines/random_vs_uncertainty_summary.csv  → 增加 Round 002/003 行
-experiments/figures/random_vs_uncertainty_*.svg           → 增加 Round 1/2/3 数据点
+experiments/baselines/random_vs_uncertainty_summary.csv  — 16 行，含 Round 0–3 完整数据
+experiments/figures/random_vs_uncertainty_*.svg           — 已包含 Round 1/2/3 数据点
 ```
 
 ---
@@ -102,13 +100,13 @@ experiments/figures/random_vs_uncertainty_*.svg           → 增加 Round 1/2/3
 data/toy_h2/
   random_seed0_round_001_train/       # 210 frames（已完成）
   random_seed0_round_001_candidate/   # 40 frames （已完成）
-  random_seed0_round_002_train/       # 220 frames（待生成）
-  random_seed0_round_002_candidate/   # 30 frames （待生成）
-  random_seed0_round_003_train/       # 230 frames（待生成）
-  random_seed0_round_003_candidate/   # 20 frames （待生成）
+  random_seed0_round_002_train/       # 220 frames（已完成）
+  random_seed0_round_002_candidate/   # 30 frames （已完成）
+  random_seed0_round_003_train/       # 230 frames（已完成）
+  random_seed0_round_003_candidate/   # 20 frames （已完成）
   random_seed1_round_001_train/       # 同上（已完成）
   ...
-  random_seed2_round_003_candidate/   # 同上（待生成）
+  random_seed2_round_003_candidate/   # 同上（已完成）
 ```
 
 ### 4.2 配置目录
@@ -116,8 +114,8 @@ data/toy_h2/
 ```text
 configs/deepmd/
   random_seed0_round_001_committee/   # base_seed=1101（已完成）
-  random_seed0_round_002_committee/   # base_seed=1201（待生成）
-  random_seed0_round_003_committee/   # base_seed=1301（待生成）
+  random_seed0_round_002_committee/   # base_seed=1201（已完成）
+  random_seed0_round_003_committee/   # base_seed=1301（已完成）
   random_seed1_round_001_committee/   # base_seed=1101（已完成）
   ...
 ```
@@ -128,8 +126,8 @@ configs/deepmd/
 experiments/baselines/
   random_seed0_round001_committee_models/       # 4 frozen_model.pb（已完成）
   random_seed0_round001_committee_prediction/   # selected_topk.json + .npz（已完成）
-  random_seed0_round002_committee_models/       # 待训练
-  random_seed0_round002_committee_prediction/   # 待预测
+  random_seed0_round002_committee_models/       # 4 frozen_model.pb（已完成）
+  random_seed0_round002_committee_prediction/   # selected_topk.json + .npz（已完成）
   ...
 ```
 
@@ -244,8 +242,8 @@ random_{seed}_round{XXX}_prediction_summary.md
 
 ```text
 random_round001_baseline_summary.csv  # 已完成
-random_round002_baseline_summary.csv  # 待生成
-random_round003_baseline_summary.csv  # 待生成
+random_round002_baseline_summary.csv  # 已完成
+random_round003_baseline_summary.csv  # 已完成
 ```
 
 ### 7.3 最终对比

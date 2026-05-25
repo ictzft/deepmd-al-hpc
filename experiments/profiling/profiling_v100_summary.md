@@ -49,11 +49,27 @@ Speedup is near-perfect (~2.0×) for 2-GPU model-level parallelism. The bottlene
 
 Training dominates (~71%). Prediction and I/O are minor in the toy H2 setting (small model, small dataset).
 
+## GPU Utilization and Memory (representative sample)
+
+Recorded via `nvidia-smi dmon -s pucvmet -d 1` inside Docker during a single-model training run (seed0, 1000 steps, 9.7s wall time).
+
+| Metric | Value |
+|---|---|
+| GPU model | Tesla V100-SXM2-16GB |
+| SM utilization (avg) | 23% |
+| SM utilization (max) | 28% |
+| Memory utilization (avg) | 33% |
+| Memory used | ~5407 MiB / 16384 MiB |
+| Power draw (avg) | 32.6 W |
+| Power draw (idle) | ~27–30 W |
+
+The low GPU utilization is expected for the toy H2 model (2 atoms, very small network). The DeePMD computation is CPU-dominated at this scale. GPU memory of ~5.4 GB is mostly TensorFlow runtime overhead, not model parameters. For realistic DFT systems with larger networks and more atoms, GPU utilization and memory will be significantly higher.
+
 ## Notes
 
 - All training wall times extracted from `train.log` (`wall time:` field).
 - Freeze and test times are estimates from Docker container stdout timestamps.
-- GPU utilization and memory were not systematically recorded (nvidia-smi dmon was not running during these rounds).
+- GPU utilization/memory data is from a representative single-model training run (nvidia-smi dmon at 1s interval inside Docker).
 - The toy H2 model is tiny (2 atoms, small network); training time is ~11s for 1000 steps.
 - For realistic DFT systems (hundreds of atoms, larger networks), training will be the dominant cost by a wider margin, and the relative cost of prediction and I/O will be even smaller.
 - This profiling serves as the V100 baseline. Future H100 profiling should use identical training configs for fair comparison.

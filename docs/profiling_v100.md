@@ -453,9 +453,22 @@ Avg time per batch: 8.7 ms/batch (1000 steps)
 - DeepMD-kit: v3.1.4.dev81
 - TensorFlow: 2.21.0
 
+### 6.4 GPU Utilization and Memory (representative sample)
+
+Recorded via `nvidia-smi dmon -s pucvmet -d 1` inside Docker during single-model training:
+
+| Metric | Value |
+|---|---|
+| SM utilization (avg) | 23% |
+| SM utilization (max) | 28% |
+| Memory used | ~5407 MiB / 16384 MiB (33%) |
+| Power draw (avg) | 32.6 W |
+
+The low GPU utilization is expected for the toy H2 model (2 atoms, tiny network). GPU memory is mostly TensorFlow runtime overhead. Realistic DFT systems will show higher utilization.
+
 完整 profiling 数据见 `experiments/profiling/profiling_v100_rounds.csv` 和 `experiments/profiling/profiling_v100_summary.md`。
 
-仍未记录的内容：GPU 利用率曲线、GPU 显存占用曲线、prediction 阶段精确耗时（当前为估算）。
+仍未记录的内容：prediction 阶段精确 GPU 耗时（当前为估算）、多模型并行时的 GPU 利用率分配。
 
 ---
 

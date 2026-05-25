@@ -132,7 +132,7 @@ Retraining baseline:
   uncertainty vs random comparison figures
 
 Round 002/003:
-  数据准备脚本和复现命令已就绪，等待执行
+  已执行完毕（2026-05-25），summary 和 comparison 已生成
 
 当前可复现的 random baseline 范围为：
   Round 001 single-round multi-seed comparison
@@ -659,12 +659,9 @@ experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.j
 当前仍需补充：
 
 ```text
-random Round 002/003 多轮 retraining
-完整 RMSE learning curve 对比
-candidate-pool uncertainty curve (multi-round)
 真实 DFT / AIMD 数据集
 uncertainty-diversity sampling
-V100 / H100 profiling
+系统 GPU utilization / memory profiling
 H100 / 多 GPU scaling
 MD 稳定性验证
 ```
@@ -672,20 +669,9 @@ MD 稳定性验证
 其中近期优先级最高的是：
 
 ```text
-random Round 002/003 retraining
-full RMSE learning curve 对比
-```
-
-也就是先把 random baseline 从：
-
-```text
-multi-seed Round 001 random baseline
-```
-
-推进到：
-
-```text
-multi-seed Round 0–3 random baseline with full learning curve
+GPU utilization / memory profiling (nvidia-smi dmon)
+uncertainty-diversity selection
+真实 DFT / AIMD 数据集
 ```
 
 ---
@@ -696,7 +682,7 @@ multi-seed Round 0–3 random baseline with full learning curve
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. 当前尚未引入真实 DFT / AIMD 数据集；
-3. random sampling baseline 已经完成 Round 001 三 seed retraining，但尚未完成 Round 002/003 多轮 retraining；
+3. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
 4. 当前尚未形成完整 RMSE learning curve 对比；
 5. 当前尚未加入结构多样性选择策略；
 6. 当前尚未进行 H100 / 多 GPU scaling 实验；
