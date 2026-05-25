@@ -233,28 +233,17 @@ experiments/strategy_comparison_toy_h2/strategy_summary.md
 
 ---
 
-### 4.4 Full Uncertainty vs Random Multi-Round Comparison
+### 4.4 Aligned Four-Strategy Comparison (Authoritative)
 
-全轮次对齐对比汇总（统一 remaining candidate-pool 指标）见：
+**统一口径**：全部策略使用同一指标 —— retraining 后 remaining candidate pool 的 `force_dev_max`。
+旧版 `random_vs_uncertainty_summary.csv` 存在 selected-K vs remaining-candidate 混用，已标记 deprecated。
+
+权威对比文件：
 
 ```text
 experiments/baselines/aligned_comparison.csv     (authoritative — consistent metric)
 experiments/baselines/aligned_comparison.md
 ```
-
-旧版 `random_vs_uncertainty_summary.csv` 存在指标混用问题（uncertainty 行用 selected top-K，random 行用 remaining candidate pool），已标记为 deprecated，仅保留作历史参考。
-
-| Round | Uncertainty force_dev_max | Random mean force_dev_max | Random std |
-|---:|---:|---:|---:|
-| 1 | 2.693333e-01 | 3.917845e-01 | 8.395874e-02 |
-| 2 | 1.874125e-01 | 1.397884e-01 | 1.622950e-02 |
-| 3 | 1.701889e-01 | 1.390395e-01 | 4.781861e-02 |
-
-**注意**：该表将两个不同语义的指标放在一起对比——
-- **uncertainty** 行的 `force_dev_max_mean` 是 top-K **被选中** frames 的 mean
-- **random** 行的 `force_dev_max_mean` 是 **remaining candidate pool** 的 mean
-
-因此该表更适合用于观察各自分支的趋势，而非直接的 branch vs branch 数值对比。
 
 Learning curve 图：
 
@@ -267,9 +256,9 @@ experiments/figures/random_vs_uncertainty_dataset_size.svg
 
 该结果表明：
 - uncertainty branch 的 selected top-K force_dev_max 随轮次稳步下降（0.440 → 0.170）
-- random branch 的 remaining candidate-pool force_dev_max 在 Round 002–003 低于 Round 001，但没有明显进一步的逐轮下降趋势
-- random branch 的 validation Force RMSE 跨 seed 波动较大（0.142–0.255 eV/Å），符合 toy H2 数据规模和 committee 随机初始化的预期
-- 完整结论仍需要真实 DFT/AIMD 数据集和更多 baseline 验证
+- 四策略 Force RMSE（3-seed mean ± std）差异在 1σ 以内，toy H2 上无法宣称某一策略显著优于其他
+- 跨 seed 方差较大，符合 toy H2 数据规模和 committee 随机初始化的预期
+- 完整结论仍需要真实 DFT/AIMD 数据集进一步验证
 
 ---
 
@@ -454,6 +443,8 @@ baseline comparison
 ```text
 uncertainty top-K
 random sampling baseline
+uncertainty-diversity (FPS)
+trust-level (DP-GEN-style)
 ```
 
 ---
@@ -506,9 +497,9 @@ docs/reproduce.md
 9.  Round 1–3 committee retraining
 10. Round 0–3 learning curve 汇总
 11. random sampling selection-level baseline (seed0/seed1/seed2)
-12. random seed0/seed1/seed2 Round 001 retraining baseline
-13. multi-seed random Round 001 mean ± std 汇总
-14. uncertainty vs random Round 001 candidate-pool comparison
+12. random seed0/seed1/seed2 Round 001–003 retraining baseline
+13. diversity + trust_level multi-seed Round 001–003
+14. 四策略 aligned comparison + learning curves
 ```
 
 ---
@@ -530,14 +521,16 @@ docs/reproduce.md
 | `exp_011_round003_committee_models` | 已完成 | 重新训练 Round 3 committee models |
 | `exp_012_round003_committee_prediction` | 已完成 | 预测 Round 3 candidate pool 并选择 top-K |
 | `baselines/selection_baseline` | 已完成 | random sampling 与 uncertainty sampling 的 selection-level 对比 |
-| `baselines/random_seed0_round001` | 已完成 | random seed0 Round 001 retraining 和 prediction summary |
-| `baselines/random_seed1_round001` | 已完成 | random seed1 Round 001 retraining 和 prediction summary |
-| `baselines/random_seed2_round001` | 已完成 | random seed2 Round 001 retraining 和 prediction summary |
-| `baselines/random_round001_comparison` | 已完成 | uncertainty vs random seed0/seed1/seed2 Round 001 汇总对比 |
-| `baselines/random_round001_baseline_summary` | 已完成 | random 三 seed Round 001 独立汇总 |
-| `baselines/random_vs_uncertainty_summary` | 已完成 | uncertainty vs random 全轮次汇总 CSV + MD |
-| `figures/random_vs_uncertainty_*` | 已完成 | uncertainty vs random 对比 learning curve 图 |
-| `figures` | 已完成 | 生成 Round 0–3 deviation、dataset size 和 RMSE 曲线 |
+| `baselines/random_seed0_round001–003` | 已完成 | random seed0 Round 001–003 retraining + prediction |
+| `baselines/random_seed1_round001–003` | 已完成 | random seed1 Round 001–003 retraining + prediction |
+| `baselines/random_seed2_round001–003` | 已完成 | random seed2 Round 001–003 retraining + prediction |
+| `baselines/aligned_comparison` | 已完成 | 四策略统一口径对比 CSV + MD（authoritative） |
+| `baselines/random_round001/002/003_baseline_summary` | 已完成 | random 三 seed Round 001–003 汇总 |
+| `baselines/diversity_round001-003` | 已完成 | diversity 三 seed Round 001–003 |
+| `baselines/trust_level_round001-003` | 已完成 | trust_level 三 seed Round 001–003 |
+| `baselines/random_vs_uncertainty_summary` | 已完成（legacy） | 旧版汇总（selected-K vs remaining-candidate 混用，deprecated） |
+| `figures/random_vs_uncertainty_*` | 已完成 | 对比 learning curve 图 |
+| `figures` | 已完成 | Round 0–3 deviation、dataset size 和 RMSE 曲线 |
 
 ---
 
@@ -696,44 +689,34 @@ model deviation and configuration selection analysis
 
 ### 12.4 第四阶段：补充 Profiling 与 H100 实验
 
-补充系统性能分析：
+V100 profiling 已完成（training: 132 models, mean=11.0s; end-to-end: 36-round CSV; 2×V100 speedup: 1.97×）。H100 部分尚未开始：
 
 ```text
-single-model training time
-4-model committee training time
-2×V100 parallel training time
-candidate prediction time
-model deviation calculation time
-end-to-end active learning round time
-H100 speedup and GPU utilization
+single-model training time (done: 132 models)
+4-model committee training time (done)
+2×V100 parallel training time (done: ~22s/round)
+candidate prediction time (done: 6.5–7.2s)
+end-to-end active learning round time (done: ~29s/round)
+H100 speedup and GPU utilization (not started)
 ```
 
 ---
 
 ### 12.5 第五阶段：整理成论文级实验体系
 
-如果以 CCF-B 论文为目标，后续还需要补充：
+如果以论文为目标，后续还需要补充：
 
 ```text
-stronger baselines:
+stronger baselines (done):
   random sampling
-  DP-GEN-style threshold sampling
-  naive retraining
   uncertainty-diversity sampling
+  DP-GEN-style trust-level sampling
 
-real datasets:
+real datasets (pending):
   real DFT / AIMD configurations
   multiple molecular or material systems
 
-system evaluation:
-  training throughput
-  inference throughput
-  GPU utilization
-  scaling efficiency
-  end-to-end wall-clock time
-
-scientific validation:
-  force / energy RMSE
+scientific validation (pending):
   MD stability
   trajectory stability
   physical property consistency
@@ -813,4 +796,4 @@ move to real DFT / AIMD datasets (next)
 run H100 / multi-GPU scaling experiments
 ```
 
-<!-- README reorganized and updated on 2026-05-18. -->
+<!-- README updated on 2026-05-25. -->
