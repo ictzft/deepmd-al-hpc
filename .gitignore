@@ -47,9 +47,6 @@ checkpoint
 # =========================
 logs/
 *.log
-train.log
-test.log
-freeze.log
 runs/
 wandb/
 events.out.tfevents*
@@ -78,12 +75,12 @@ lcurve.out
 out.json
 input_v2_compat.json
 
+# =========================
 # Local experiment outputs
+# (top-level patterns like *.pb, *.npz, checkpoint, model.ckpt*, *.log
+#  already cover individual files; directory-level ignores below are
+#  for performance — git skips scanning these dirs entirely.)
+# =========================
 experiments/**/committee_predictions.npz
 experiments/**/committee_models/
-experiments/**/model_*/checkpoint
-experiments/**/model_*/model.ckpt*
-experiments/**/model_*/train.log
-experiments/**/model_*/test.log
-experiments/**/model_*/lcurve.out
-experiments/**/model_*/frozen_model.pb
+experiments/**/model_*/

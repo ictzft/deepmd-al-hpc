@@ -8,6 +8,13 @@ random baseline results from experiments/baselines/random_round001_baseline_summ
 Outputs:
   experiments/baselines/random_vs_uncertainty_summary.csv
   experiments/baselines/random_vs_uncertainty_summary.md
+
+Field naming convention:
+  - energy_rmse_mean/std → validation set RMSE (committee mean ± cross-model std)
+  - force_rmse_mean/std  → validation set Force RMSE
+  - force_dev_max_mean    → for uncertainty branch: top-K selected frames' force_dev_max mean
+                             for random branch: remaining candidate-pool force_dev_max mean
+  - force_dev_max_std     → cross-seed std of force_dev_max_mean (random mean row only)
 """
 
 from __future__ import annotations
@@ -228,7 +235,13 @@ def write_md(rows: list[dict[str, Any]]) -> None:
         "- Random baseline currently has Round 001 multi-seed data (seed0/seed1/seed2).",
         "- Random Round 002/003 data is pending — scripts and configs are prepared for reproducibility.",
         "- This is a toy H2 workflow validation. Real DFT/AIMD datasets and H100 scaling are not yet included.",
-        "- `force_dev_max_mean` for uncertainty refers to top-K selected frames; for random it refers to the candidate-pool mean after retraining.",
+        "",
+        "**Field meaning note:** `force_dev_max_mean` has different semantics per branch:",
+        "- For **uncertainty**: mean `force_dev_max` of the top-K **selected** frames from committee prediction.",
+        "- For **random**: mean `force_dev_max` of the **remaining candidate pool** after retraining.",
+        "- These are not directly comparable; for a fair remaining candidate-pool comparison,",
+        "  see the per-seed `random_seed*_round001_prediction_summary.csv` files (which include",
+        "  the uncertainty_round001 remaining candidate-pool row).",
         "",
     ])
 

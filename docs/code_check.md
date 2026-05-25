@@ -60,6 +60,10 @@ python -m py_compile \
   scripts/analysis/summarize_al_rounds.py \
   scripts/analysis/plot_al_rounds.py \
   scripts/analysis/summarize_selection_baselines.py \
+  scripts/analysis/summarize_random_round001_baselines.py \
+  scripts/analysis/summarize_random_vs_uncertainty.py \
+  scripts/analysis/plot_random_vs_uncertainty.py \
+  scripts/analysis/prepare_random_baseline_round.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
   src/al/selector.py \
@@ -87,6 +91,10 @@ python3 -m py_compile \
   scripts/analysis/summarize_al_rounds.py \
   scripts/analysis/plot_al_rounds.py \
   scripts/analysis/summarize_selection_baselines.py \
+  scripts/analysis/summarize_random_round001_baselines.py \
+  scripts/analysis/summarize_random_vs_uncertainty.py \
+  scripts/analysis/plot_random_vs_uncertainty.py \
+  scripts/analysis/prepare_random_baseline_round.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
   src/al/selector.py \
@@ -201,6 +209,42 @@ done
 
 ---
 
+### 4.5 检查 random seed1 配置
+
+```bash
+for f in configs/deepmd/random_seed1_round_001_committee/*.json; do
+  python -m json.tool "$f" > /tmp/check_random_seed1_config.json
+done
+```
+
+如果使用 `python3`：
+
+```bash
+for f in configs/deepmd/random_seed1_round_001_committee/*.json; do
+  python3 -m json.tool "$f" > /tmp/check_random_seed1_config.json
+done
+```
+
+---
+
+### 4.6 检查 random seed2 配置
+
+```bash
+for f in configs/deepmd/random_seed2_round_001_committee/*.json; do
+  python -m json.tool "$f" > /tmp/check_random_seed2_config.json
+done
+```
+
+如果使用 `python3`：
+
+```bash
+for f in configs/deepmd/random_seed2_round_001_committee/*.json; do
+  python3 -m json.tool "$f" > /tmp/check_random_seed2_config.json
+done
+```
+
+---
+
 ## 5. 检查 DeepMD 配置中的训练数据路径
 
 如果修改了 committee 配置，建议检查配置中的训练数据路径是否正确。
@@ -265,6 +309,36 @@ data/toy_h2/random_seed0_round_001_train
 
 ---
 
+### 5.5 检查 random seed1 配置
+
+```bash
+grep -R "training_data\|systems\|random_seed1_round_001_train" -n \
+  configs/deepmd/random_seed1_round_001_committee
+```
+
+预期应看到：
+
+```text
+data/toy_h2/random_seed1_round_001_train
+```
+
+---
+
+### 5.6 检查 random seed2 配置
+
+```bash
+grep -R "training_data\|systems\|random_seed2_round_001_train" -n \
+  configs/deepmd/random_seed2_round_001_committee
+```
+
+预期应看到：
+
+```text
+data/toy_h2/random_seed2_round_001_train
+```
+
+---
+
 ## 6. 检查 toy H2 数据生成脚本是否被跟踪
 
 确认 `scripts/data/make_toy_h2_deepmd.py` 已经被 Git 跟踪：
@@ -304,7 +378,7 @@ git ls-tree -r origin/main scripts/data | grep make_toy_h2_deepmd
 查看 random baseline 相关文件是否已经被 Git 跟踪：
 
 ```bash
-git ls-files | grep -E "random_seed0|selection_baseline|selected_random|selected_uncertainty"
+git ls-files | grep -E "random_seed[012]|random_round|random_vs_uncertainty|selection_baseline|selected_random|selected_uncertainty"
 ```
 
 期望看到类似：
@@ -317,10 +391,27 @@ experiments/baselines/random_seed0_round001_metrics_summary.csv
 experiments/baselines/random_seed0_round001_metrics_summary.md
 experiments/baselines/random_seed0_round001_prediction_summary.csv
 experiments/baselines/random_seed0_round001_prediction_summary.md
+experiments/baselines/random_seed1_round001_metrics_summary.csv
+experiments/baselines/random_seed1_round001_metrics_summary.md
+experiments/baselines/random_seed1_round001_prediction_summary.csv
+experiments/baselines/random_seed1_round001_prediction_summary.md
+experiments/baselines/random_seed2_round001_metrics_summary.csv
+experiments/baselines/random_seed2_round001_metrics_summary.md
+experiments/baselines/random_seed2_round001_prediction_summary.csv
+experiments/baselines/random_seed2_round001_prediction_summary.md
+experiments/baselines/random_round001_baseline_summary.csv
+experiments/baselines/random_round001_baseline_summary.md
+experiments/baselines/random_round001_comparison.csv
+experiments/baselines/random_round001_comparison.md
+experiments/baselines/random_vs_uncertainty_summary.csv
+experiments/baselines/random_vs_uncertainty_summary.md
 experiments/exp_005_committee_prediction/selected_random_seed0.json
 experiments/exp_005_committee_prediction/selected_random_seed1.json
 experiments/exp_005_committee_prediction/selected_random_seed2.json
 experiments/exp_005_committee_prediction/selected_uncertainty.json
+experiments/baselines/random_seed0_round001_committee_prediction/selected_topk.json
+experiments/baselines/random_seed1_round001_committee_prediction/selected_topk.json
+experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.json
 ```
 
 说明：
@@ -344,15 +435,17 @@ find docs -maxdepth 1 -type f | sort
 ```text
 docs/code_check.md
 docs/data_and_git_policy.md
+docs/paper_evidence.md
 docs/profiling_h100.md
+docs/profiling_v100.md
 docs/random_baseline.md
+docs/random_baseline_next_steps.md
 docs/reproduce.md
 docs/reproduce_legacy.md
 docs/results.md
 docs/setup.md
 docs/toy_h2_pipeline.md
 docs/uncertainty_rounds.md
-docs/week2_single_model_baseline.md
 ```
 
 其中：
@@ -368,9 +461,12 @@ docs/setup.md
 docs/toy_h2_pipeline.md
 docs/uncertainty_rounds.md
 docs/random_baseline.md
+docs/random_baseline_next_steps.md
+docs/paper_evidence.md
 docs/results.md
 docs/data_and_git_policy.md
 docs/code_check.md
+docs/profiling_v100.md
 docs/profiling_h100.md
   拆分后的专题文档
 ```
@@ -561,6 +657,10 @@ python -m py_compile \
   scripts/analysis/summarize_al_rounds.py \
   scripts/analysis/plot_al_rounds.py \
   scripts/analysis/summarize_selection_baselines.py \
+  scripts/analysis/summarize_random_round001_baselines.py \
+  scripts/analysis/summarize_random_vs_uncertainty.py \
+  scripts/analysis/plot_random_vs_uncertainty.py \
+  scripts/analysis/prepare_random_baseline_round.py \
   src/metrics/deviation.py \
   src/al/scheduler.py \
   src/al/selector.py \
@@ -591,7 +691,9 @@ for f in configs/deepmd/committee/*.json \
          configs/deepmd/round_001_committee/*.json \
          configs/deepmd/round_002_committee/*.json \
          configs/deepmd/round_003_committee/*.json \
-         configs/deepmd/random_seed0_round_001_committee/*.json; do
+         configs/deepmd/random_seed0_round_001_committee/*.json \
+         configs/deepmd/random_seed1_round_001_committee/*.json \
+         configs/deepmd/random_seed2_round_001_committee/*.json; do
   python -m json.tool "$f" > /tmp/check_config.json
 done
 ```

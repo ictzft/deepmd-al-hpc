@@ -126,10 +126,17 @@ Selection-level baseline:
 
 Retraining baseline:
   random seed0 / seed1 / seed2 Round 001
-  multi-seed random mean ± std (Round 001)
+  multi-seed random Round 001 mean ± std
+  random Round 001 candidate-pool prediction summary (seed0/seed1/seed2)
+  uncertainty vs random Round 001 candidate-pool comparison
+  uncertainty vs random comparison figures
 
 Round 002/003:
   数据准备脚本和复现命令已就绪，等待执行
+
+当前可复现的 random baseline 范围为：
+  Round 001 single-round multi-seed comparison
+  尚未覆盖 Round 002/003 多轮 learning curve
 ```
 
 说明：
@@ -154,11 +161,14 @@ Step 4: 初始 committee prediction
 Step 5: uncertainty top-K selection
 Step 6: uncertainty branch Round 0–3 多轮闭环
 Step 7: Round 0–3 summary 与 learning curve
-Step 8: random sampling selection-level baseline
+Step 8: random sampling selection-level baseline (seed0/seed1/seed2)
 Step 9: random seed0 Round 001 retraining baseline
-Step 10: 结果解释与当前限制分析
-Step 11: 代码、配置和 Git 状态检查
-Step 12: profiling 与 H100 迁移计划
+Step 10: random seed1/seed2 Round 001 retraining baseline
+Step 11: multi-seed random Round 001 mean ± std 汇总
+Step 12: uncertainty vs random Round 001 candidate-pool 对比
+Step 13: 结果解释与当前限制分析
+Step 14: 代码、配置和 Git 状态检查
+Step 15: profiling 与 H100 迁移计划
 ```
 
 对应文档如下：
@@ -168,10 +178,10 @@ Step 12: profiling 与 H100 迁移计划
 | Step 0 | 环境准备、Docker、GPU 检查 | `docs/setup.md` |
 | Step 1–5 | toy H2 数据、单模型、初始 committee、prediction、top-K | `docs/toy_h2_pipeline.md` |
 | Step 6 | uncertainty branch Round 0–3 多轮闭环 | `docs/uncertainty_rounds.md` |
-| Step 7、10 | 结果汇总、learning curve、当前结论与限制 | `docs/results.md` |
-| Step 8–9 | random sampling baseline 与 retraining baseline | `docs/random_baseline.md` |
-| Step 11 | Python / Shell / JSON / Git 检查 | `docs/code_check.md` |
-| Step 12 | V100 profiling 与 H100 迁移计划 | `docs/profiling_h100.md` |
+| Step 7、13 | 结果汇总、learning curve、当前结论与限制 | `docs/results.md` |
+| Step 8–12 | random sampling baseline、seed0/1/2 retraining、multi-seed 汇总、uncertainty vs random 对比 | `docs/random_baseline.md` |
+| Step 14 | Python / Shell / JSON / Git 检查 | `docs/code_check.md` |
+| Step 15 | V100 profiling 与 H100 迁移计划 | `docs/profiling_h100.md` |
 
 ---
 
@@ -229,9 +239,10 @@ learning curve summary
 committee training
 committee prediction
 uncertainty branch Round 0–3
-selection-level random baseline
-random seed0 Round 001 retraining baseline
-candidate-pool uncertainty comparison
+selection-level random baseline (seed0/seed1/seed2)
+random seed0/seed1/seed2 Round 001 retraining baseline
+random multi-seed Round 001 mean ± std 汇总
+uncertainty vs random Round 001 candidate-pool comparison
 结果汇总
 代码与配置检查
 Git 状态检查
@@ -319,14 +330,16 @@ Round 1 random seed0 / seed1 / seed2
 random seed0 / seed1 / seed2 Round 001 retraining
 random seed0 / seed1 / seed2 candidate-pool prediction
 multi-seed random mean ± std (Round 001)
-uncertainty branch vs random_seed* 对比
+uncertainty branch vs random_seed* Round 001 comparison
+uncertainty vs random comparison figures
 后续 random Round 002/003 计划
 ```
 
 该文档回答：
 
 ```text
-如何构造 random baseline，并与 uncertainty branch 进行初步对比？
+如何构造 random baseline，并与 uncertainty branch 进行 Round 001 初步对比？
+后续如何扩展到 Round 002/003？
 ```
 
 ---
@@ -448,29 +461,41 @@ Round 3: 0.174265
 
 > 多轮主动学习后，候选池不确定性呈持续下降趋势；验证集 Force RMSE 整体处于同一量级，但受 toy 数据规模、随机初始化和 committee 模型差异影响，存在一定波动。
 
-当前 random seed0 Round 001 candidate-pool uncertainty 对比结果为：
+当前 random Round 001 candidate-pool uncertainty 对比结果为：
 
 ```text
 uncertainty_round001:
-force_dev_max_mean = 0.126442
+  force_dev_max_mean = 0.126442
 
 random_seed0_round001:
-force_dev_max_mean = 0.355420
+  force_dev_max_mean = 0.355420
+
+random_seed1_round001:
+  force_dev_max_mean = 0.487795
+
+random_seed2_round001:
+  force_dev_max_mean = 0.332138
+
+random mean (seed0/seed1/seed2):
+  force_dev_max_mean = 0.391784
 ```
 
 该结果初步表明：
 
 ```text
-在 toy H2 offline active learning 设置下，
-uncertainty sampling 相比 random seed0 baseline
-更有效地降低了剩余 candidate pool 的平均 force model deviation。
+在 toy H2 offline active learning 和 Round 001 设置下，
+uncertainty branch 的 remaining candidate-pool force_dev_max_mean
+在 seed0 / seed1 / seed2 三个对比中均低于对应的 random branch。
 ```
 
 但需要注意：
 
 ```text
-该结论目前仍基于 toy H2 数据集和 Round 001 单轮 retraining。
-后续需要补充 Round 002/003 多轮 random retraining 完成完整对比。
+Round 001 random baseline provides an initial multi-seed comparison;
+uncertainty selection reduces remaining candidate-pool uncertainty more clearly
+in the current toy H2 Round 001 comparison;
+validation RMSE still fluctuates and requires more rounds for robust conclusion;
+random Round 002/003 are still needed for complete learning-curve comparison.
 ```
 
 ---

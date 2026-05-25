@@ -29,4 +29,10 @@
 - Random baseline currently has Round 001 multi-seed data (seed0/seed1/seed2).
 - Random Round 002/003 data is pending — scripts and configs are prepared for reproducibility.
 - This is a toy H2 workflow validation. Real DFT/AIMD datasets and H100 scaling are not yet included.
-- `force_dev_max_mean` for uncertainty refers to top-K selected frames; for random it refers to the candidate-pool mean after retraining.
+
+**Field meaning note:** `force_dev_max_mean` has different semantics per branch:
+- For **uncertainty**: mean `force_dev_max` of the top-K **selected** frames from committee prediction.
+- For **random**: mean `force_dev_max` of the **remaining candidate pool** after retraining.
+- These are not directly comparable; for a fair remaining candidate-pool comparison,
+  see the per-seed `random_seed*_round001_prediction_summary.csv` files (which include
+  the uncertainty_round001 remaining candidate-pool row).

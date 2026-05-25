@@ -287,9 +287,11 @@ deepmd-al-hpc/
 ├── docs/
 │   ├── code_check.md
 │   ├── data_and_git_policy.md
-│   ├── profiling_h100.md
 │   ├── paper_evidence.md
+│   ├── profiling_h100.md
+│   ├── profiling_v100.md
 │   ├── random_baseline.md
+│   ├── random_baseline_next_steps.md
 │   ├── reproduce.md
 │   ├── reproduce_legacy.md
 │   ├── results.md
@@ -476,18 +478,20 @@ docs/reproduce.md
 该文档包含：
 
 ```text
-1. DeepMD-kit Docker 环境验证
-2. toy H2 数据生成
-3. 单模型 DeePMD baseline
-4. 4-model committee training
-5. committee prediction
-6. force / energy model deviation 计算
-7. selected frames 合并
-8. candidate pool 更新
-9. Round 1–3 committee retraining
+1.  DeepMD-kit Docker 环境验证
+2.  toy H2 数据生成
+3.  单模型 DeePMD baseline
+4.  4-model committee training
+5.  committee prediction
+6.  force / energy model deviation 计算
+7.  selected frames 合并
+8.  candidate pool 更新
+9.  Round 1–3 committee retraining
 10. Round 0–3 learning curve 汇总
-11. random sampling baseline 对比
-12. random seed0 Round 001 retraining baseline
+11. random sampling selection-level baseline (seed0/seed1/seed2)
+12. random seed0/seed1/seed2 Round 001 retraining baseline
+13. multi-seed random Round 001 mean ± std 汇总
+14. uncertainty vs random Round 001 candidate-pool comparison
 ```
 
 ---
