@@ -128,18 +128,35 @@ The `metadata.json` and associated config files ARE suitable for Git.
 
 ## 10. Current Status (2026-05-26)
 
-rMD17 ethanol dataset pipeline has been started:
+rMD17 ethanol dataset pipeline — uncertainty branch Round 0–3 active learning loop is nearly complete:
+
+**Data** (27 atoms/frame, C₂H₅OH):
+| Split | Frames | Path |
+|---|---|---|
+| Initial train | 1000 | `data/rmd17/ethanol/train` |
+| Validation | 5000 | `data/rmd17/ethanol/valid` |
+| Test | 10000 | `data/rmd17/ethanol/test` |
+| Initial candidate | 60000 | `data/rmd17/ethanol/candidate` |
+
+**Active learning rounds (uncertainty branch)**:
+| Round | Train frames | Candidate frames | Training | Prediction |
+|---|---:|---:|---|---|
+| 0 | 1000 | 60000 | done | done |
+| 1 | 2000 | 59000 | done | done |
+| 2 | 3000 | 58000 | done | done |
+| 3 | 4000 | 57000 | done | **pending** |
+
+Each round selects 1000 uncertainty top-K frames from the candidate pool.
 
 **Done:**
-- Data conversion script: `scripts/data/convert_rmd17_to_deepmd.py` — converts rMD17 `.npz` to DeepMD npy format
-- Data splitting script: `scripts/data/split_rmd17_to_deepmd.py` — splits converted data into train/valid/test/candidate
-- Round 0 committee configs: `configs/deepmd/rmd17_ethanol_round000_committee/`
-- Round 1–3 committee configs: `configs/deepmd/rmd17_ethanol_round001_committee/` through `round003_committee/`
-- Base model config: `configs/deepmd/rmd17_ethanol_base.json`
-- Round 0–2 committee predictions: `experiments/rmd17_ethanol_round000_committee_prediction/` through `round002_committee_prediction/`
+- Data conversion script: `scripts/data/convert_rmd17_to_deepmd.py`
+- Data splitting script: `scripts/data/split_rmd17_to_deepmd.py`
+- Round 0–3 committee configs (4 models × 4 rounds = 16 configs)
+- Round 0–3 committee model training (16 frozen models)
+- Round 0–2 committee predictions with uncertainty top-K selection
 
 **Pending:**
-- Round 0–3 committee model training
-- Multi-round active learning loop on ethanol
+- Round 3 committee prediction (next step)
+- Round 0–3 summary and learning curve
 - Independent test evaluation
-- 4-strategy comparison on real dataset
+- Multi-strategy comparison on real dataset

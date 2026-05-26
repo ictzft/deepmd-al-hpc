@@ -676,19 +676,29 @@ Diversity 策略在 toy H2 上将选中帧的结构覆盖度（pairwise distance
 迁移到更接近真实应用的数据集：
 
 ```text
-rMD17 ethanol 数据集
+rMD17 ethanol 数据集 (27 atoms, C₂H₅OH)
   ↓
 DeepMD npy format conversion (done: convert_rmd17_to_deepmd.py)
   ↓
 train/valid/test/candidate split (done: split_rmd17_to_deepmd.py)
   ↓
-Round 0–3 committee configs 生成 (done)
+Round 0 committee training (done: 4 models, train 1000, candidate 60000)
   ↓
-Round 0–2 committee prediction (done)
+Round 0 committee prediction + uncertainty top-K selection (done: 1000 frames selected)
   ↓
-offline active learning pipeline (pending: multi-round training + selection loop)
+Round 1 committee training (done: 4 models, train 2000, candidate 59000)
   ↓
-model deviation and configuration selection analysis
+Round 1 committee prediction + selection (done)
+  ↓
+Round 2 committee training (done: 4 models, train 3000, candidate 58000)
+  ↓
+Round 2 committee prediction + selection (done)
+  ↓
+Round 3 committee training (done: 4 models, train 4000, candidate 57000)
+  ↓
+Round 3 committee prediction (pending — next step)
+  ↓
+summary + learning curve + independent test evaluation (pending)
 ```
 
 ---
