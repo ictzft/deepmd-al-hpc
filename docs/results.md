@@ -1,22 +1,22 @@
 # 实验结果汇总与解释
 
-本文档用于汇总 `deepmd-al-hpc` 当前 toy H2 offline active learning 原型实验结果，并说明当前能够支持的结论与仍需补充的实验。
+本文档汇总 `deepmd-al-hpc` 在 toy H2 和 rMD17 ethanol 上的主动学习实验结果，说明当前能够支持的结论与仍需补充的实验。
 
 当前结果主要来自：
 
 ```text
+【toy H2】
 uncertainty branch Round 0–3
 selection-level random baseline
-random seed0 / seed1 / seed2 Round 001–003 retraining baseline
-multi-seed random mean ± std (Round 001/002/003)
-uncertainty vs random full multi-round comparison
-```
+random / diversity / trust_level 四策略 multi-seed Round 001–003 retraining
+V100 profiling baseline
 
-需要说明的是：
-
-```text
-当前 toy H2 数据集只用于流程验证，
-不能代表真实材料或分子体系上的最终模型性能。
+【rMD17 ethanol】
+uncertainty branch Round 0–3
+random baseline (3 seeds × 3 rounds)
+independent test evaluation (52 models)
+MD stability (10K/100K NVE)
+pipeline profiling (all stages)
 ```
 
 ---
@@ -24,6 +24,8 @@ uncertainty vs random full multi-round comparison
 ## 1. 当前实验范围
 
 当前已经完成的实验范围包括：
+
+**toy H2 阶段**：
 
 ```text
 toy H2 数据生成
@@ -42,15 +44,31 @@ Round 0–3 summary 与 learning curve
   ↓
 selection-level random baseline
   ↓
-random seed0 / seed1 / seed2 Round 001 retraining baseline
+random seed0 / seed1 / seed2 Round 001–003 retraining baseline
   ↓
-random seed0 / seed1 / seed2 Round 002 retraining baseline
+diversity + trust_level multi-seed Round 001–003
   ↓
-random seed0 / seed1 / seed2 Round 003 retraining baseline
+四策略 aligned comparison + learning curves
   ↓
-multi-seed random mean ± std (Round 001/002/003)
+V100 profiling baseline
+```
+
+**rMD17 ethanol 阶段**：
+
+```text
+数据格式转换 (convert_rmd17_to_deepmd.py)
   ↓
-uncertainty vs random full comparison + learning curves
+train/valid/test/candidate 数据划分 (split_rmd17_to_deepmd.py)
+  ↓
+uncertainty branch Round 0–3 (1000→4000 训练帧, 60000→57000 候选帧)
+  ↓
+independent test evaluation (10000 帧, 52 模型)
+  ↓
+random baseline (3 seeds × 3 rounds, 36 模型)
+  ↓
+MD stability (NVE 10K/100K)
+  ↓
+pipeline profiling (all stages, unified CSV)
 ```
 
 当前尚未完成：
@@ -526,7 +544,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 ---
 
-## 10. 当前不能过度声称的结论
+## 13. 当前不能过度声称的结论
 
 当前结果还不能支持以下过强结论：
 
@@ -544,34 +562,35 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 更严谨的说法：
 
 ```text
-当前结果说明主动学习闭环和 baseline 对比流程可行；
-但仍需要真实 DFT / AIMD 数据、系统 GPU profiling 和 H100 scaling 进一步验证。
+toy H2 上已完成四策略 multi-seed multi-round 完整对比；
+rMD17 ethanol 上 uncertainty vs random 对比已完成，
+在独立测试集上 uncertainty 显著优于 random（Round 3: 0.327 vs 0.580 eV/Å）；
+diversity/trust_level 在真实数据上待验证；
+仍需要多个真实体系和 H100 scaling 进一步验证。
 ```
 
 ---
 
-## 11. 当前实验限制
+## 14. 当前实验限制
 
 当前项目仍处于原型验证阶段，主要限制包括：
 
-1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
-2. 当前 valid set 同时承担 candidate pool 和 validation/test 的角色；
-3. rMD17 ethanol 真实数据集 uncertainty branch + random baseline + independent test 已完成（2026-05-26, 2×V100）；diversity/trust_level baselines 待完成；
-4. random sampling baseline 已完成 Round 001–003 三 seed multi-round retraining (2026-05-25, 2×V100)；
-5. uncertainty vs random full RMSE learning curve 对比已生成；
-6. uncertainty-diversity 和 trust-level 策略已完成 multi-seed Round 001–003（2026-05-25, 2×V100）；
-7. 当前尚未进行 H100 / 多 GPU scaling 实验；
-8. V100 training wall-clock profiling 已记录；GPU utilization 和端到端系统测量仍需补充；
-9. MD 稳定性在 10K NVE 通过验证，100K+ 解离——需提高模型精度后重新评估；
-10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
+1. toy H2 数据集仅用于流程验证；rMD17 ethanol 已提供真实分子体系证据，但仅覆盖单一分子；
+2. toy H2 中 valid set 同时承担 candidate pool 和 validation/test 角色（rMD17 已通过 independent test 修正）；
+3. rMD17 ethanol uncertainty + random baseline + independent test 已完成；diversity/trust_level 在真实数据上待完成；
+4. toy H2 上 diversity 和 trust-level 已完成 multi-seed Round 001–003；rMD17 上待运行；
+5. 当前尚未进行 H100 / 多 GPU scaling 实验；
+6. V100 training wall-clock profiling 已全量记录（52 模型）；GPU utilization 曲线未记录；
+7. MD 稳定性在 10K NVE 通过验证，100K+ 解离——需提高模型精度后重新评估；
+8. 当前结果已能证明 uncertainty-based AL 在 toy H2 和单分子真实体系上优于 random baseline；multi-system 验证仍需补充。
 
 ---
 
-## 12. 后续需要补充的结果
+## 15. 后续需要补充的结果
 
 为了进一步支撑 CCF-B 投稿，后续需要补充以下结果。
 
-### 12.1 Random Baseline（已完成）
+### 15.1 Random Baseline（已完成）
 
 ```text
 random seed0 / seed1 / seed2 Round 001–003 ✓
@@ -582,7 +601,7 @@ training time per model ✓
 prediction time per round ✓
 ```
 
-### 12.2 Four-Strategy Comparison（已完成）
+### 15.2 Four-Strategy Comparison（已完成）
 
 ```text
 uncertainty / random / diversity / trust_level multi-seed Round 001–003 ✓
@@ -590,7 +609,7 @@ aligned comparison table (remaining candidate-pool metric) ✓
 structural diversity analysis ✓
 ```
 
-### 12.3 V100 Profiling（已完成）
+### 15.3 V100 Profiling（已完成）
 
 ```text
 single-model training time (132 models, mean=11.0s) ✓
@@ -602,7 +621,7 @@ GPU utilization sample (SM 23%, 5407 MiB) ✓
 
 ---
 
-### 12.4 rMD17 Ethanol 真实数据集（已完成主要部分）
+### 15.4 rMD17 Ethanol 真实数据集（已完成主要部分）
 
 ```text
 rMD17 ethanol data conversion ✓
@@ -630,7 +649,7 @@ realistic first-principles dataset validation
 
 ---
 
-## 13. 建议论文表述
+## 16. 建议论文表述
 
 当前阶段可以使用的论文式表述：
 
@@ -680,26 +699,45 @@ uncertainty branch 的 remaining candidate-pool force_dev_max_mean
 一致低于所有三个 random branch (0.126 vs random mean 0.392)。
 ```
 
-注意必须补充限制：
+关于 rMD17 ethanol 结果的表述：
 
 ```text
-However, this observation is still based on a toy H2 dataset.
-Round 001–003 multi-round random retraining has been completed,
-but real DFT / AIMD datasets and systematic profiling are still needed
-before drawing general conclusions.
+On rMD17 ethanol (9-atom organic molecule, 60000-frame candidate pool),
+the uncertainty-based active learning branch shows monotonically decreasing
+Force RMSE on both validation (0.374 to 0.354 eV/Å) and independent test sets
+(0.344 to 0.327 eV/Å). In contrast, the random baseline (3 seeds × 3 rounds)
+degrades significantly, with independent test Force RMSE increasing from
+0.346 to 0.580 eV/Å by Round 3 (1.78× worse than uncertainty).
 ```
 
 中文表述：
 
 ```text
-然而，该观察目前仍基于 toy H2 数据集。Round 001–003 multi-round random retraining
-已补充完成（2026-05-26），但仍需更多真实体系验证。
-在得出一般性结论之前，仍需真实 DFT / AIMD 数据集和系统性能分析。
+在 rMD17 ethanol（9 原子有机分子，60000 帧候选池）上，
+uncertainty-based active learning 的 Force RMSE 在 validation 和 independent test
+上均单调下降（valid: 0.374→0.354 eV/Å, test: 0.344→0.327 eV/Å）。
+相比之下，random baseline（3 seeds × 3 rounds）的 independent test Force RMSE
+从 0.346 恶化到 0.580 eV/Å（Round 3 为 uncertainty 的 1.78 倍）。
+```
+
+注意必须补充限制：
+
+```text
+These observations are from a single molecular system (rMD17 ethanol).
+Multi-system validation and diversity/trust-level baselines on real data
+are still required before drawing general conclusions.
+```
+
+中文表述：
+
+```text
+当前结论基于单一分子体系（rMD17 ethanol）。
+仍需要多个真实体系和 diversity/trust-level baselines 进一步验证。
 ```
 
 ---
 
-## 14. 结果文件索引
+## 17. 结果文件索引
 
 主线 active learning 结果：
 
@@ -771,9 +809,24 @@ experiments/baselines/random_seed2_round001_prediction_summary.md
 experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.json
 ```
 
+rMD17 ethanol 结果：
+
+```text
+experiments/rmd17_ethanol_summary/al_rounds_summary.csv
+experiments/rmd17_ethanol_summary/al_rounds_summary.md
+experiments/rmd17_ethanol_summary/al_model_level_summary.csv
+experiments/rmd17_ethanol_summary/independent_test_all_summary.csv
+experiments/rmd17_ethanol_summary/independent_test_all_models.csv
+experiments/rmd17_ethanol_summary/random_baseline_round_summary.csv
+experiments/rmd17_ethanol_summary/random_baseline_model_level.csv
+experiments/rmd17_ethanol_summary/profiling_unified.csv
+experiments/rmd17_ethanol_summary/profiling_all_models.csv
+experiments/rmd17_ethanol_summary/md_stability/md_summary.json
+```
+
 ---
 
-## 15. 小结
+## 18. 小结
 
 当前结果说明：
 
