@@ -181,5 +181,20 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 - Test Force RMSE decreases monotonically (0.344→0.327 eV/Å), confirming genuine improvement
 - Test RMSE consistently ~0.028 eV/Å lower than validation
 
+**Random Baseline (3 seeds × 3 rounds)**:
+| Round | Uncertainty F_RMSE | Random F_RMSE (mean±std) |
+|---:|---:|---:|
+| 1 | 0.3715 | 0.3734 ± 0.010 |
+| 2 | 0.3644 | 0.3990 ± 0.031 |
+| 3 | 0.3537 | 0.6067 ± 0.385 |
+
+- Uncertainty Force RMSE monotonically decreases, random worsens significantly
+- Random Round 3 shows catastrophic degradation (0.607 vs 0.354 eV/Å)
+
+**MD Stability (NVE, 10K)**:
+- All models stable at 10K with drift ~0.035 eV/ps
+- At 100K+, all models dissociate immediately (Force RMSE ~0.35 eV/Å insufficient for MD)
+- Uncertainty Round 3 has marginally lowest drift (-0.0338 eV/ps)
+
 **Pending:**
-- Multi-strategy comparison on real dataset
+- Diversity and trust-level baselines on real dataset
