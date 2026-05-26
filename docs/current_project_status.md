@@ -63,13 +63,19 @@ See `experiments/baselines/aligned_comparison.md` for full aligned comparison.
 
 ### 3.3 Key result files
 
+**toy H2:**
 - `experiments/al_rounds_summary.csv` — uncertainty Round 0–3
 - `experiments/baselines/random_round001_baseline_summary.csv`
 - `experiments/baselines/random_round002_baseline_summary.csv`
 - `experiments/baselines/random_round003_baseline_summary.csv`
 - `experiments/baselines/aligned_comparison.csv` — 统一 remaining-candidate-pool 指标的四策略对比（authoritative）
-- `experiments/baselines/random_vs_uncertainty_summary.csv` — 旧版（legacy，存在 selected-K vs remaining-candidate 指标混用）
-- `experiments/baselines/strategy_comparison_round000.csv` — selection-level 4-strategy comparison
+
+**rMD17 ethanol:**
+- `experiments/rmd17_ethanol_summary/al_rounds_summary.csv`
+- `experiments/rmd17_ethanol_summary/independent_test_all_summary.csv`
+- `experiments/rmd17_ethanol_summary/random_baseline_round_summary.csv`
+- `experiments/rmd17_ethanol_summary/profiling_unified.csv`
+- `experiments/rmd17_ethanol_summary/md_stability/md_summary.json`
 
 ---
 
@@ -77,19 +83,20 @@ See `experiments/baselines/aligned_comparison.md` for full aligned comparison.
 
 | Category | Key Scripts |
 |---|---|
-| Data | `make_toy_h2_deepmd.py`, `merge_selected_frames.py`, `make_remaining_candidate.py` |
+| Data | `make_toy_h2_deepmd.py`, `merge_selected_frames.py`, `make_remaining_candidate.py`, `convert_rmd17_to_deepmd.py`, `split_rmd17_to_deepmd.py` |
 | Training | `train_single_model.sh`, `train_committee_models.sh`, `train_round_committee_models.sh` |
 | Inference | `predict_committee_models.py` |
 | Selection | `select_from_predictions.py`, `select_by_strategy.py` |
-| Analysis | `summarize_al_rounds.py`, `summarize_random_round_baselines.py`, `summarize_random_vs_uncertainty.py`, `plot_random_vs_uncertainty.py`, `compare_strategies_selection.py` |
+| Analysis | `summarize_al_rounds.py`, `summarize_rmd17_random_baseline.py`, `plot_rmd17_ethanol.py`, `plot_rmd17_final_comparison.py` |
+| Evaluation | `quick_md_test.py`, `run_md_stability.py`, `test_rmd17_all_independent.sh` |
 | Profiling | `record_round_profiling.sh` |
-| Inventory | `check_local_data_inventory.py`, `check_local_experiment_artifacts.py` |
-| Runner | `run_random_baseline_round.sh` |
+| Runner | `run_random_baseline_round.sh`, `run_rmd17_random_baseline.sh` |
 
 ---
 
 ## 5. Available Figures
 
+**toy H2:**
 ```
 experiments/figures/
   dataset_size_rounds.svg
@@ -101,28 +108,43 @@ experiments/figures/
   random_vs_uncertainty_dataset_size.svg
 ```
 
+**rMD17 ethanol:**
+```
+experiments/rmd17_ethanol_summary/
+  rmd17_ethanol_force_model_deviation_rounds.svg
+  rmd17_ethanol_validation_rmse_rounds.svg
+  rmd17_ethanol_dataset_size_rounds.svg
+  rmd17_ethanol_independent_test_force_rmse.svg
+  rmd17_ethanol_independent_test_energy_rmse.svg
+  rmd17_ethanol_final_comparison.svg
+  rmd17_ethanol_valid_vs_test.svg
+```
+
 ---
 
 ## 6. V100 Profiling Progress
 
-**Done:**
+**Done (toy H2):**
 - Training wall time: 132 models, mean=11.0s ± 0.5s, 8.7ms/batch (1000 steps)
 - 2×V100 parallel speedup: 1.97× (near-linear), ~22s/round
 - Estimated end-to-end: ~32s/round (train + predict + I/O)
-- GPU utilization sample: SM 23%, memory 5407 MiB (33%)
-- Per-model wall time CSV: `experiments/profiling/training_wall_time_summary.csv`
-- Diversity descriptor analysis: FPS achieves 3.1x greater structural spread
-- Environment: Tesla V100-SXM2-16GB, DeepMD-kit v3.1.4.dev81
+
+**Done (rMD17 ethanol):**
+- Training wall time: 52 models, uncertainty mean=50.4s, random mean=56.7s (2000 steps, 1000-4000 frames)
+- Prediction: 57k-60k frames × 4 models = ~176s/round
+- Per-round end-to-end: uncertainty ~5 min, random (3 seeds) ~10 min
+- Full uncertainty branch (4 rounds): ~20 min; random baseline (3 seeds × 3 rounds): ~29 min
+- Unified per-stage CSV: `experiments/rmd17_ethanol_summary/profiling_unified.csv`
+- Per-model CSV: `experiments/rmd17_ethanol_summary/profiling_all_models.csv`
 
 **Not done:**
 - Full GPU utilization curves across entire rounds
-- Per-stage (prediction/I/O) exact wall time in real training
 
 ---
 
 ## 7. Remaining V100 Tasks
 
-1. Systematic end-to-end profiling (prediction, I/O, dataset update)
+1. (done) Systematic end-to-end profiling (training + prediction + I/O, 52 models, unified CSV)
 2. GPU utilization/memory curves for a full training round
 3. (done) Uncertainty-diversity multi-round (Round 002–003)
 4. (done) Trust-level multi-round (Round 002–003)
@@ -142,17 +164,22 @@ experiments/figures/
 ## 9. Claim Boundary
 
 **Can claim:**
-- Toy H2 prototype with reproducible active learning pipeline
-- Uncertainty top-K selects higher-uncertainty frames than random
-- Multi-seed multi-round random baseline for comparison
-- 2×V100 model-level parallel training is near-linear
+- Toy H2 prototype with reproducible active learning pipeline on 2×V100
+- Uncertainty top-K selects higher-uncertainty frames than random (both toy H2 and rMD17)
+- Multi-seed multi-round four-strategy comparison completed on toy H2
+- 2×V100 model-level parallel training is near-linear (1.97× speedup)
+- rMD17 ethanol uncertainty branch shows monotonically decreasing Force RMSE on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å)
+- rMD17 ethanol random baseline (3 seeds × 3 rounds) shows uncertainty has more stable RMSE improvement than random (Round 3: 0.354 vs 0.607 eV/Å, random std = 0.385)
+- NVE MD at 10K stable with drift ~0.035 eV/ps; 100K+ dissociation indicates more training data needed
+- Pipeline profiling complete (52 models, all stages, unified CSV)
 
-**Cannot claim:**
-- Method works on real DFT/AIMD systems
-- Uncertainty sampling significantly outperforms random on realistic datasets
-- CCF-B paper-level evidence
-- H100 scaling results
-- MD stability validation
+**Cannot claim (yet):**
+- Method works on multiple real DFT/AIMD systems (only rMD17 ethanol tested)
+- Uncertainty sampling significantly outperforms random on multiple realistic datasets
+- Diversity/trust_level strategies validated on real data (toy H2 only)
+- High-temperature MD stability (100K+ dissociation)
+- H100 multi-GPU scaling results
+- Full CCF-B paper-level evidence
 
 ---
 
@@ -164,4 +191,7 @@ experiments/figures/
 4. (done) Uncertainty-diversity Round 002–003
 5. (done) Trust-level Round 002–003
 6. (done) Full 4-strategy comparison
-7. (started) Small real DFT/AIMD dataset migration — rMD17 ethanol: uncertainty branch Round 0–3 done, summary done, independent test pending
+7. (done) rMD17 ethanol: uncertainty + random baseline + independent test + MD + profiling done
+8. rMD17 ethanol: diversity + trust_level baselines
+9. GPU utilization curves
+10. H100 scaling
