@@ -212,5 +212,15 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 - At 100K+, all models dissociate immediately (Force RMSE ~0.35 eV/Å insufficient for MD)
 - Uncertainty Round 3 has marginally lowest drift (-0.0338 eV/ps)
 
+**Four-Strategy Comparison (Round 3, 3-seed mean ± std)**:
+| Strategy | Force RMSE | Std |
+|---|---:|---:|
+| uncertainty | 0.3537 | 0.0247 |
+| diversity | 0.3555 | 0.0143 |
+| trust_level | 0.3616 | 0.0166 |
+| random | 0.6067 | 0.6826 |
+
+All three active strategies within 1σ, all outperform random. Consistent with toy H2.
+
 **Pending:**
-- Diversity and trust-level baselines on real dataset
+- Multi-system validation (beyond rMD17 ethanol)

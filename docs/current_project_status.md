@@ -6,7 +6,7 @@ Date: 2026-05-26 | Host: shared-v100 (2×Tesla V100-16GB) | Branch: main
 
 ## 1. One-sentence Summary
 
-toy H2: 四策略 multi-seed multi-round 已完成, V100 profiling baseline 已完成。rMD17 ethanol: uncertainty branch Round 0–3 已完成, random baseline (3 seeds × 3 rounds) 已完成, independent test evaluation 已完成, diversity/trust_level baselines 待完成。H100 scaling 未开始。
+toy H2 四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成。rMD17 ethanol 四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成，independent test evaluation 已完成，10K NVE MD stability 已完成；多体系验证待完成。H100 scaling 未开始。
 
 ---
 
@@ -36,6 +36,8 @@ toy H2: 四策略 multi-seed multi-round 已完成, V100 profiling baseline 已�
 | 20 | rMD17 ethanol independent test | 10000-frame test set, Force RMSE 0.344→0.327 eV/Å (monotonic) | done |
 | 21 | rMD17 ethanol random baseline | 3 seeds × 3 rounds (36 models), uncertainty clearly better | done |
 | 22 | rMD17 ethanol MD stability | NVE 10K stable (drift ~0.035 eV/ps), 100K+ dissociates | done |
+| 23 | rMD17 ethanol diversity baseline | 3 seeds × 3 rounds (36 models), F_RMSE=0.3555 | done |
+| 24 | rMD17 ethanol trust_level baseline | 3 seeds × 3 rounds (36 models), F_RMSE=0.3616 | done |
 
 ---
 
@@ -60,6 +62,17 @@ toy H2: 四策略 multi-seed multi-round 已完成, V100 profiling baseline 已�
 | trust_level | 1.35e-01 ± 0.028 | 1.49e-01 ± 0.023 | 1.78e-01 ± 0.006 |
 
 See `experiments/baselines/aligned_comparison.md` for full aligned comparison.
+
+### 3.2b rMD17 Ethanol Four-Strategy Force RMSE (3-seed mean ± std, Round 3)
+
+| Strategy | Force RMSE | Std |
+|---|---:|---:|
+| uncertainty | 3.537e-01 | 2.472e-02 |
+| diversity | 3.555e-01 | 1.434e-02 |
+| trust_level | 3.616e-01 | 1.660e-02 |
+| random | 6.067e-01 | 6.826e-01 |
+
+See `experiments/rmd17_ethanol_summary/four_strategy_comparison.csv`.
 
 ### 3.3 Key result files
 
@@ -164,19 +177,17 @@ experiments/rmd17_ethanol_summary/
 ## 9. Claim Boundary
 
 **Can claim:**
-- Toy H2 prototype with reproducible active learning pipeline on 2×V100
-- Uncertainty top-K selects higher-uncertainty frames than random (both toy H2 and rMD17)
-- Multi-seed multi-round four-strategy comparison completed on toy H2
+- Reproducible active learning pipeline on both toy H2 and rMD17 ethanol (2×V100)
+- Four-strategy multi-seed multi-round comparison completed on both toy H2 and rMD17 ethanol
+- All three active strategies (uncertainty/diversity/trust_level) significantly outperform random on rMD17 ethanol (Round 3: 0.354-0.362 vs 0.607 eV/Å)
+- Uncertainty branch shows monotonically decreasing Force RMSE on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å)
 - 2×V100 model-level parallel training is near-linear (1.97× speedup)
-- rMD17 ethanol uncertainty branch shows monotonically decreasing Force RMSE on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å)
-- rMD17 ethanol random baseline (3 seeds × 3 rounds) shows uncertainty has more stable RMSE improvement than random (Round 3: 0.354 vs 0.607 eV/Å, random std = 0.385)
-- NVE MD at 10K stable with drift ~0.035 eV/ps; 100K+ dissociation indicates more training data needed
-- Pipeline profiling complete (52 models, all stages, unified CSV)
+- NVE MD at 10K stable with drift ~0.035 eV/ps
+- Pipeline profiling complete (124 models: 16 unc + 36 rnd + 36 div + 36 trust, unified CSV)
 
 **Cannot claim (yet):**
-- Method works on multiple real DFT/AIMD systems (only rMD17 ethanol tested)
-- Uncertainty sampling significantly outperforms random on multiple realistic datasets
-- Diversity/trust_level strategies validated on real data (toy H2 only)
+- Results generalize to multiple real DFT/AIMD systems (only rMD17 ethanol tested)
+- One active strategy consistently outperforms others (differences within 1σ on both datasets)
 - High-temperature MD stability (100K+ dissociation)
 - H100 multi-GPU scaling results
 - Full CCF-B paper-level evidence

@@ -77,7 +77,7 @@ docs/profiling_h100.md
 
 **toy H2**：四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成。
 
-**rMD17 ethanol**：uncertainty branch Round 0–3 已完成，random baseline (3 seeds × 3 rounds) 已完成，independent test evaluation 已完成，10K NVE MD stability 已完成，diversity/trust_level baselines 待完成。
+**rMD17 ethanol**：四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成；independent test evaluation 已完成；10K NVE MD stability 已完成。
 
 **H100 scaling**：未开始。
 

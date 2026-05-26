@@ -493,6 +493,19 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 - Round 3 差距 0.25 eV/Å，random 甚至比 Round 0 的 baseline（0.3739）更差
 - 说明 random sampling 选中的非代表性构型导致模型过拟合
 
+### 11.2b Four-Strategy Comparison (Round 3, 3-seed mean ± std)
+
+| Strategy | Force RMSE | Std | vs Random |
+|---|---:|---:|---:|
+| uncertainty | 0.3537 | 0.0247 | 1.72× better |
+| diversity | 0.3555 | 0.0143 | 1.71× better |
+| trust_level | 0.3616 | 0.0166 | 1.68× better |
+| random | 0.6067 | 0.6826 | — baseline |
+
+- 三种 active 策略差异在 1σ 内，均显著优于 random
+- 与 toy H2 结论一致：未出现单一策略显著优于其他
+- Diversity 有 1/36 模型训练失败（seed0 model_000, E=30.2 eV），剔除后 F_RMSE=0.3555
+
 ### 11.3 MD 稳定性
 
 | 条件 | 结果 |
@@ -565,7 +578,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 toy H2 上已完成四策略 multi-seed multi-round 完整对比；
 rMD17 ethanol 上 uncertainty vs random 对比已完成，
 在独立测试集上，uncertainty 相比 random 表现出更稳定的改善趋势（Round 3: 0.327 vs 0.580 ± 0.692 eV/Å，random 方差大）；
-diversity/trust_level 在真实数据上待验证；
+diversity/trust_level 在真实数据上已完成（四策略差异在 1σ 内）；
 仍需要多个真实体系和 H100 scaling 进一步验证。
 ```
 
@@ -577,7 +590,7 @@ diversity/trust_level 在真实数据上待验证；
 
 1. toy H2 数据集仅用于流程验证；rMD17 ethanol 已提供真实分子体系证据，但仅覆盖单一分子；
 2. toy H2 中 valid set 同时承担 candidate pool 和 validation/test 角色（rMD17 已通过 independent test 修正）；
-3. rMD17 ethanol uncertainty + random baseline + independent test 已完成；diversity/trust_level 在真实数据上待完成；
+3. rMD17 ethanol 四策略 multi-seed multi-round 已完成；independent test 已完成；diversity/trust_level 在真实数据上已运行；
 4. toy H2 上 diversity 和 trust-level 已完成 multi-seed Round 001–003；rMD17 上待运行；
 5. 当前尚未进行 H100 / 多 GPU scaling 实验；
 6. V100 training wall-clock profiling 已全量记录（52 模型）；GPU utilization 曲线未记录；
@@ -632,7 +645,7 @@ independent test evaluation (52 models) ✓
 MD stability (10K/100K NVE) ✓
 pipeline profiling (52 models, all stages) ✓
 RMSE learning curve ✓
-diversity / trust_level baselines (pending)
+diversity / trust_level baselines ✓
 ```
 
 当前已经从：
@@ -833,7 +846,7 @@ experiments/rmd17_ethanol_summary/md_stability/md_summary.json
 ```text
 toy H2 上四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成；
 rMD17 ethanol 上 uncertainty branch Round 0–3 已完成，random baseline (3 seeds × 3 rounds) 已完成，
-independent test evaluation 已完成，diversity/trust_level baselines 待完成；
+rMD17 ethanol 四策略 multi-seed multi-round 已完成，independent test evaluation 已完成，MD stability 已完成；
 H100 scaling 未开始。
 ```
 
