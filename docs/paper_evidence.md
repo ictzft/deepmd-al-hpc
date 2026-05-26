@@ -19,8 +19,10 @@ This document tracks the current evidence and pending experiments for the `deepm
 11. Aligned four-strategy comparison table with cross-seed mean ± std uses consistent "remaining candidate-pool" metrics across all strategies.
 12. V100 training wall-time profiling: 132 models, mean=11.0s, 2×V100 parallel ~22s/round.
 13. Structural diversity analysis: diversity (FPS) achieves 3.1x greater structural spread vs uncertainty top-K in toy H2.
-14. rMD17 ethanol (real molecule, 9 atoms, 60000-frame candidate pool) uncertainty branch Round 0–3 active learning loop completed; Force RMSE decreases monotonically (0.374→0.354 eV/Å).
-15. All experiments are reproducible via documented scripts and configs.
+14. rMD17 ethanol uncertainty branch Round 0–3 active learning loop completed; Force RMSE decreases monotonically on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å).
+15. rMD17 ethanol random baseline (3 seeds × 3 rounds): uncertainty Force RMSE monotonically improves while random degrades (Round 3: 0.354 vs 0.607 eV/Å), confirming uncertainty-based AL is more effective than random selection on real data.
+16. MD stability test (NVE 10K): all models stable with drift ~0.035 eV/ps; 100K+ dissociation indicates current Force RMSE ~0.35 eV/Å is insufficient for high-T MD.
+17. All experiments are reproducible via documented scripts and configs.
 
 ---
 

@@ -34,6 +34,8 @@ Toy H2 offline active learning prototype with 4-model DeePMD committee, uncertai
 | 18 | Profiling scripts + summary | profile_command, parse, summarize | done |
 | 19 | rMD17 ethanol uncertainty branch | Round 0–3 training + prediction + summary + independent test done | done |
 | 20 | rMD17 ethanol independent test | 10000-frame test set, Force RMSE 0.344→0.327 eV/Å (monotonic) | done |
+| 21 | rMD17 ethanol random baseline | 3 seeds × 3 rounds (36 models), uncertainty clearly better | done |
+| 22 | rMD17 ethanol MD stability | NVE 10K stable (drift ~0.035 eV/ps), 100K+ dissociates | done |
 
 ---
 
