@@ -629,17 +629,15 @@ experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.j
 当前仍需补充：
 
 ```text
-真实 DFT / AIMD 数据集
+rMD17 ethanol diversity / trust_level baselines
 全流程 GPU utilization 曲线记录 (nvidia-smi dmon)
 H100 / 多 GPU scaling
-MD 稳定性验证
-independent_test 独立评估
 ```
 
 其中近期优先级最高的是：
 
 ```text
-真实 DFT / AIMD 数据集（框架已就绪，见 docs/real_dataset_execution_guide.md）
+rMD17 ethanol diversity + trust_level baselines（random baseline 已完成）
 全流程 GPU monitoring 曲线记录
 ```
 
@@ -650,7 +648,7 @@ independent_test 独立评估
 当前复现流程仍有以下限制：
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
-2. rMD17 ethanol 真实数据集 uncertainty branch 已完成，多策略对比和 independent test 待完成；
+2. rMD17 ethanol 真实数据集 uncertainty branch + random baseline + independent test 已完成（2026-05-26）；
 3. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
 4. uncertainty vs random full RMSE learning curve 对比已生成；
 5. diversity 和 trust-level 策略已完成 multi-seed Round 001–003 完整实验（2026-05-25, 2×V100）；
@@ -734,4 +732,4 @@ docs/profiling_h100.md:
 
 这样可以避免 `reproduce.md` 继续膨胀，也更符合论文型开源项目的文档组织方式。
 
-<!-- reproduce.md updated on 2026-05-25. -->
+<!-- reproduce.md updated on 2026-05-26. -->

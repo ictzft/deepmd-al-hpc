@@ -56,9 +56,8 @@ uncertainty vs random full comparison + learning curves
 当前尚未完成：
 
 ```text
-真实 DFT / AIMD 数据集多策略对比和 independent test（uncertainty branch 已完成）
+rMD17 ethanol diversity / trust_level baselines
 H100 / 多 GPU scaling
-MD 稳定性验证
 系统 GPU utilization / memory 曲线记录
 ```
 
@@ -563,7 +562,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 6. uncertainty-diversity 和 trust-level 策略已完成 multi-seed Round 001–003（2026-05-25, 2×V100）；
 7. 当前尚未进行 H100 / 多 GPU scaling 实验；
 8. V100 training wall-clock profiling 已记录；GPU utilization 和端到端系统测量仍需补充；
-9. 当前尚未进行 MD 稳定性验证；
+9. MD 稳定性在 10K NVE 通过验证，100K+ 解离——需提高模型精度后重新评估；
 10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
 
 ---
@@ -603,21 +602,21 @@ GPU utilization sample (SM 23%, 5407 MiB) ✓
 
 ---
 
-### 12.5 真实 DFT / AIMD 数据集
-
-需要迁移到真实数据集：
+### 12.4 rMD17 Ethanol 真实数据集（已完成主要部分）
 
 ```text
-real DFT / AIMD configurations
-DeepMD npy format conversion
-train / candidate / test split
-uncertainty branch
-random baseline
-RMSE learning curve
-candidate-pool uncertainty curve
+rMD17 ethanol data conversion ✓
+train / candidate / test split ✓
+uncertainty branch Round 0–3 ✓
+random baseline (3 seeds × 3 rounds) ✓
+independent test evaluation (52 models) ✓
+MD stability (10K/100K NVE) ✓
+pipeline profiling (52 models, all stages) ✓
+RMSE learning curve ✓
+diversity / trust_level baselines (pending)
 ```
 
-目标是从：
+当前已经从：
 
 ```text
 toy H2 workflow validation
@@ -694,7 +693,7 @@ before drawing general conclusions.
 
 ```text
 然而，该观察目前仍基于 toy H2 数据集。Round 001–003 multi-round random retraining
-已补充完成（2026-05-25），但仍不能直接推广到真实 DFT/AIMD 体系。
+已补充完成（2026-05-26），但仍需更多真实体系验证。
 在得出一般性结论之前，仍需真实 DFT / AIMD 数据集和系统性能分析。
 ```
 
@@ -791,10 +790,10 @@ H100 scaling 未开始。
 toy workflow validation + real molecule validation (rMD17 ethanol)
 ```
 
-而不仅仅是：
+而不是：
 
 ```text
-final paper-level validation on real datasets
+final paper-level validation on real datasets (multi-system, multi-strategy still needed)
 ```
 
 下一步重点是：
