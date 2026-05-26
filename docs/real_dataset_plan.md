@@ -222,5 +222,27 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 
 All three active strategies within 1σ, all outperform random. Consistent with toy H2.
 
+**Top-K Labeling Budget Ablation (Round 3, 3-seed mean ± std)**:
+| K | Force RMSE | Std | vs K=1000 |
+|---:|---:|---:|---:|
+| 250 | 0.3408 | 0.0141 | 3.6% better |
+| 500 | 0.4146 | 0.1790 | one outlier seed |
+| 1000 | 0.3537 | 0.0247 | baseline |
+| 2000 | 0.3315 | 0.0176 | 6.3% better |
+
+- K=250 (most selective) and K=2000 (most data) both outperform K=1000
+- Larger K benefits from more training data; smaller K benefits from higher selection precision
+
+**Committee Size Ablation (Round 1, 3-seed mean ± std)**:
+| Committee | Force RMSE | Std | Train Time/round |
+|---:|---:|---:|---:|
+| 2 models | 0.3436 | 0.0155 | ~55s (1 batch) |
+| 4 models | 0.3715 | 0.0146 | ~110s (2 batches) |
+| 8 models | 0.3392 | 0.0206 | ~220s (4 batches) |
+
+- 8-model best Force RMSE but 2× training cost vs 4-model
+- 2-model competitive with 4-model at half the cost
+- Diminishing returns: 4→8 models gives only 8.7% RMSE improvement for 2× cost
+
 **Pending:**
-- Multi-system validation (beyond rMD17 ethanol)
+- Multi-system validation (beyond rMD17 ethanol, e.g., benzene)
