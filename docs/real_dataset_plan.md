@@ -154,8 +154,22 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 - Round 0–3 committee configs (4 models × 4 rounds = 16 configs)
 - Round 0–3 committee model training (16 frozen models)
 - Round 0–3 committee predictions with uncertainty top-K selection
+- Round 0–3 summary CSV + MD + learning curve figures
+
+**Key Results (uncertainty branch)**:
+
+| Round | Train | Candidate | Force RMSE mean | force_dev_max (selected top-1000) |
+|---:|---:|---:|---:|---:|
+| 0 | 1000 | 60000 | 3.739e-01 | 6.129e-01 |
+| 1 | 2000 | 59000 | 3.715e-01 | 4.570e-01 |
+| 2 | 3000 | 58000 | 3.644e-01 | 3.906e-01 |
+| 3 | 4000 | 57000 | 3.537e-01 | 4.569e-01 |
+
+- Force RMSE monotonically decreasing (0.374 → 0.354 eV/Å), unlike toy H2
+- top-1000 force_dev_max_mean decreased Round 0→2 (0.613 → 0.391), then bounced to 0.457 in Round 3
+- Energy RMSE stable at ~0.12–0.13 eV across all rounds
+- Summary files: `experiments/rmd17_ethanol_summary/`
 
 **Pending:**
-- Round 0–3 summary and learning curve
-- Independent test evaluation
+- Independent test evaluation (10000-frame test set)
 - Multi-strategy comparison on real dataset

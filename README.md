@@ -698,7 +698,9 @@ Round 3 committee training (done: 4 models, train 4000, candidate 57000)
   ↓
 Round 3 committee prediction (done: 57000 frames, top-1000 selected)
   ↓
-summary + learning curve + independent test evaluation (pending)
+summary + learning curve (done: al_rounds_summary.csv + 3 SVG figures)
+  ↓
+independent test evaluation (pending)
 ```
 
 ---

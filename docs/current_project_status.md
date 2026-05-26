@@ -32,7 +32,7 @@ Toy H2 offline active learning prototype with 4-model DeePMD committee, uncertai
 | 16 | V100 GPU utilization sample | representative | done |
 | 17 | Diversity descriptor analysis | H-H bond length, 3 strategies | done |
 | 18 | Profiling scripts + summary | profile_command, parse, summarize | done |
-| 19 | rMD17 ethanol data pipeline | uncertainty branch Round 0–3 training + prediction done | done |
+| 19 | rMD17 ethanol uncertainty branch | Round 0–3 training + prediction + summary done | done |
 
 ---
 
