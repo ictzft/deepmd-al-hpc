@@ -1037,53 +1037,34 @@ random_seed0_round001_prediction_summary.md
 
 ## 23. 后续 Random Baseline 补充计划
 
-当前已完成：
+已完成（2026-05-25, 2×V100）：
 
 ```text
-random seed0 / seed1 / seed2 Round 001 retraining
-multi-seed random mean ± std (Round 001)
+random seed0 / seed1 / seed2 Round 001 retraining ✓
+random seed0 / seed1 / seed2 Round 002 retraining ✓
+random seed0 / seed1 / seed2 Round 003 retraining ✓
+multi-seed random mean ± std (Round 001/002/003) ✓
 ```
 
-下一步需要从：
-
-```text
-multi-seed Round 001 random baseline
-```
-
-推进到：
-
-```text
-multi-seed Round 0–3 random baseline with full learning curve
-```
-
-需要补充：
-
-```text
-random seed0 Round 002 retraining
-random seed1 Round 002 retraining
-random seed2 Round 002 retraining
-random seed0 Round 003 retraining
-random seed1 Round 003 retraining
-random seed2 Round 003 retraining
-```
-
-最终应形成：
+最终已形成：
 
 ```text
 random seed0 / seed1 / seed2
 Round 0 / Round 1 / Round 2 / Round 3
-Force RMSE mean ± std
-Energy RMSE mean ± std
-candidate-pool uncertainty mean ± std
-training time mean ± std
-prediction time mean ± std
+Force RMSE mean ± std ✓
+Energy RMSE mean ± std ✓
+candidate-pool uncertainty mean ± std ✓
+training time mean ± std ✓
+prediction time mean ± std ✓
 ```
+
+Multi-round random baseline 已全部完成，完整 learning curve 和 uncertainty vs random 对比已生成。
 
 ---
 
 ## 24. 后续结果文件建议
 
-后续可以新增：
+已生成（2026-05-25）：
 
 ```text
 experiments/baselines/random_seed0_round002_metrics_summary.md
@@ -1126,7 +1107,7 @@ experiments/figures/random_vs_uncertainty_dataset_size.svg
 
 ## 26. 小结
 
-当前 random sampling baseline 已经完成 selection-level 对比和 random seed0 / seed1 / seed2 Round 001 retraining baseline。Round 002/003 的数据准备脚本 (`prepare_random_baseline_round.py`) 和完整复现命令已就绪。
+当前 random sampling baseline 已经全部完成（2026-05-25, 2×V100）：selection-level 对比、random seed0 / seed1 / seed2 Round 001–003 retraining baseline、multi-seed random mean ± std、以及 uncertainty vs random full comparison + learning curves 均已生成。
 
 当前完成链路为：
 
@@ -1145,7 +1126,17 @@ random seed0 / seed1 / seed2 Round 001 committee retraining
   ↓
 random seed0 / seed1 / seed2 candidate-pool prediction
   ↓
-uncertainty_round001 vs random_seed*_round001 multi-seed comparison
+random seed0 / seed1 / seed2 Round 002 committee retraining
+  ↓
+random seed0 / seed1 / seed2 Round 002 candidate-pool prediction
+  ↓
+random seed0 / seed1 / seed2 Round 003 committee retraining
+  ↓
+random seed0 / seed1 / seed2 Round 003 candidate-pool prediction
+  ↓
+uncertainty vs random full multi-round comparison + learning curves
+  ↓
+四策略 aligned comparison (uncertainty / random / diversity / trust_level)
 ```
 
 当前结论应谨慎表述为：
@@ -1159,13 +1150,9 @@ uncertainty sampling 一致显示出更低的 remaining candidate-pool force mod
 下一阶段重点是：
 
 ```text
-运行 prepare_random_baseline_round.py 生成 Round 002/003 数据和配置
+迁移到真实 DFT / AIMD 数据集（rMD17 ethanol 已启动）
   ↓
-运行 train_round_committee_models.sh 训练 Round 002/003 committee models
+GPU utilization / memory 系统曲线记录
   ↓
-运行 predict_committee_models.py 进行 committee prediction
-  ↓
-运行 summarize_random_vs_uncertainty.py + plot_random_vs_uncertainty.py
-  ↓
-生成 full multi-round RMSE learning curve 对比
+H100 / 多 GPU scaling
 ```

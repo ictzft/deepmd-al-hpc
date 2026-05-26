@@ -49,7 +49,7 @@ dataset-level offline active learning closed-loop prototype
 
 并进一步补充了第一版 random sampling baseline。
 
-需要说明的是：当前全部四种 selection strategy（random / uncertainty / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；四策略对齐对比表（aligned comparison）和 learning curve 图已生成；V100 training profiling 已完成（132 models, mean=11.0s/model），端到端 per-round 约 32s；预测和 I/O 分阶段耗时已记录；真实 DFT/AIMD 数据集和 H100 scaling 尚未开始。
+需要说明的是：当前全部四种 selection strategy（random / uncertainty / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；四策略对齐对比表（aligned comparison）和 learning curve 图已生成；V100 training profiling 已完成（132 models, mean=11.0s/model），端到端 per-round 约 32s；预测和 I/O 分阶段耗时已记录；rMD17 ethanol 真实数据集数据管道已启动（数据转换、划分、configs 生成、Round 0–2 预测已完成）；H100 scaling 尚未开始。
 
 ---
 
@@ -612,7 +612,7 @@ scripts/data/... should not be ignored.
 当前项目仍处于原型验证阶段，主要限制包括：
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
-2. 当前尚未引入真实 DFT / AIMD 数据集；
+2. rMD17 ethanol 真实数据集数据管道已启动（转换/划分/configs/predictions），但完整的 multi-round active learning 尚未执行；
 3. random sampling baseline 已完成 selection-level 对比和 seed0/seed1/seed2 Round 001–003 multi-round retraining (2026-05-25)；
 4. selection-level random baseline 只能说明 uncertainty sampling 选出的构型平均不确定性更高，不能直接代表 retraining 后模型精度优势；
 5. uncertainty-diversity（FPS）和 DP-GEN-style trust-level 策略已实现并完成 multi-seed Round 001–003 验证；
@@ -671,16 +671,22 @@ Diversity 策略在 toy H2 上将选中帧的结构覆盖度（pairwise distance
 
 ---
 
-### 12.3 第三阶段：迁移到真实 DFT / AIMD 数据集
+### 12.3 第三阶段：迁移到真实 DFT / AIMD 数据集（已启动）
 
 迁移到更接近真实应用的数据集：
 
 ```text
-real DFT / AIMD configurations
+rMD17 ethanol 数据集
   ↓
-DeepMD npy format conversion
+DeepMD npy format conversion (done: convert_rmd17_to_deepmd.py)
   ↓
-offline active learning pipeline
+train/valid/test/candidate split (done: split_rmd17_to_deepmd.py)
+  ↓
+Round 0–3 committee configs 生成 (done)
+  ↓
+Round 0–2 committee prediction (done)
+  ↓
+offline active learning pipeline (pending: multi-round training + selection loop)
   ↓
 model deviation and configuration selection analysis
 ```
@@ -791,7 +797,7 @@ add uncertainty-diversity + trust-level sampling (done)
   ↓
 add systematic profiling (done: 36-round end-to-end CSV)
   ↓
-move to real DFT / AIMD datasets (next)
+move to real DFT / AIMD datasets (started: rMD17 ethanol data pipeline)
   ↓
 run H100 / multi-GPU scaling experiments
 ```

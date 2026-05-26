@@ -123,3 +123,23 @@ The `metadata.json` and associated config files ARE suitable for Git.
 5. Run 4-strategy comparison on real data
 6. Perform independent test evaluation
 7. (Future) Run MD stability validation
+
+---
+
+## 10. Current Status (2026-05-26)
+
+rMD17 ethanol dataset pipeline has been started:
+
+**Done:**
+- Data conversion script: `scripts/data/convert_rmd17_to_deepmd.py` — converts rMD17 `.npz` to DeepMD npy format
+- Data splitting script: `scripts/data/split_rmd17_to_deepmd.py` — splits converted data into train/valid/test/candidate
+- Round 0 committee configs: `configs/deepmd/rmd17_ethanol_round000_committee/`
+- Round 1–3 committee configs: `configs/deepmd/rmd17_ethanol_round001_committee/` through `round003_committee/`
+- Base model config: `configs/deepmd/rmd17_ethanol_base.json`
+- Round 0–2 committee predictions: `experiments/rmd17_ethanol_round000_committee_prediction/` through `round002_committee_prediction/`
+
+**Pending:**
+- Round 0–3 committee model training
+- Multi-round active learning loop on ethanol
+- Independent test evaluation
+- 4-strategy comparison on real dataset

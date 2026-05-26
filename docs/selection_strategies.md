@@ -104,7 +104,7 @@ Accurate/Candidate/Failed split (initial 50-frame pool): 25/20/5
 
 | Strategy | R1 F_RMSE | R1 std | R2 F_RMSE | R2 std | R3 F_RMSE | R3 std |
 |---|---:|---:|---:|---:|---:|---:|
-| uncertainty | 1.618e-01 | — | 1.939e-01 | — | 1.743e-01 | — |
+| uncertainty | 1.515e-01 | 2.496e-02 | 2.132e-01 | 2.242e-02 | 1.965e-01 | 2.421e-02 |
 | random | 2.112e-01 | 5.508e-02 | 1.962e-01 | 1.623e-02 | 1.890e-01 | 4.782e-02 |
 | diversity | 2.052e-01 | 5.789e-02 | 1.738e-01 | 9.290e-03 | 1.759e-01 | 4.082e-02 |
 | trust_level | 1.353e-01 | 2.761e-02 | 1.491e-01 | 2.256e-02 | 1.782e-01 | 6.470e-03 |
@@ -112,7 +112,7 @@ Accurate/Candidate/Failed split (initial 50-frame pool): 25/20/5
 完整对比表见 `experiments/strategy_comparison_toy_h2/strategy_summary.md`。
 
 **注意**：
-- Random、diversity、trust_level 均为 3-seed mean ± std；uncertainty 为单次 run
+- 全部四策略（uncertainty / random / diversity / trust_level）均为 3-seed mean ± std
 - Toy H2 数据规模小，cross-model variance 大，Force RMSE 差异在 1σ 以内
 - 所有结论仍局限 toy H2，需真实 DFT/AIMD 数据集进一步验证
 
