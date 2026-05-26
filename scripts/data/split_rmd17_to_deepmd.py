@@ -33,6 +33,11 @@ def write_deepmd_system(out_dir, z, coords, energies, forces, indices, type_map)
 
     open(os.path.join(out_dir, "nopbc"), "w").close()
 
+    # non-periodic molecule: generate dummy cubic box (20 A)
+    box_size = 20.0
+    box = np.tile(np.diag([box_size, box_size, box_size]), (nframes, 1))
+    np.save(os.path.join(set_dir, "box.npy"), box.astype(np.float64))
+
     np.save(os.path.join(set_dir, "coord.npy"), sub_coords.reshape(nframes, natoms * 3))
     np.save(os.path.join(set_dir, "energy.npy"), sub_energies.reshape(nframes))
     np.save(os.path.join(set_dir, "force.npy"), sub_forces.reshape(nframes, natoms * 3))

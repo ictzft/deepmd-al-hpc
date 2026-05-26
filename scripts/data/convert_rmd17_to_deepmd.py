@@ -45,7 +45,11 @@ def convert(input_npz, output_dir, train_frames=None):
     with open(os.path.join(output_dir, "type_map.raw"), "w") as f:
         f.write("\n".join(type_map) + "\n")
 
-    # non-periodic molecule
+    # non-periodic molecule: generate dummy cubic box (20 A)
+    box_size = 20.0
+    box = np.tile(np.diag([box_size, box_size, box_size]), (nframes, 1))
+    np.save(os.path.join(set_dir, "box.npy"), box.astype(np.float64))
+
     open(os.path.join(output_dir, "nopbc"), "w").close()
 
     np.save(os.path.join(set_dir, "coord.npy"), coords.reshape(nframes, natoms * 3))

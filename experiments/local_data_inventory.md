@@ -1,5 +1,10 @@
 # Local Data Inventory
 
+> **Note**: This inventory was generated on host `shared-v100` at `/data/zft/deepmd-al-hpc`.
+> The `READ_ERROR` entries indicate data directories that exist on that host but whose
+> frame counts could not be read by the inventory script at generation time.
+> Paths are host-dependent; data files are gitignored and not tracked in this repository.
+
 Generated: 2026-05-25 | Host: shared-v100 | Path: /data/zft/deepmd-al-hpc/data/toy_h2
 
 | Directory | Status | Frames |

@@ -45,12 +45,12 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 ## 3. Claims not yet supported (尚不支持的结论)
 
-1. The method significantly outperforms random sampling across multiple datasets or multiple rounds.
-2. The method is validated on real DFT/AIMD datasets.
+1. The method significantly outperforms random sampling across multiple datasets or multiple rounds (single-system rMD17 ethanol evidence available, multi-system needed).
+2. The method is validated on multiple real DFT/AIMD systems (only rMD17 ethanol tested).
 3. The framework has demonstrated H100 or multi-node scaling.
-4. The framework has been validated through MD stability tests.
+4. The framework has been validated through high-temperature MD stability tests (10K NVE stable; 100K+ dissociation).
 5. The framework is production-ready or meets CCF-B submission standards.
-7. The active learning workflow reduces total DFT labeling cost compared to random or systematic sampling on realistic systems.
+6. The active learning workflow reduces total DFT labeling cost compared to random or systematic sampling on realistic systems (offline AL simulates labeling; online validation needed).
 
 ---
 

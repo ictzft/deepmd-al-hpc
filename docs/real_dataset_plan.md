@@ -130,7 +130,7 @@ The `metadata.json` and associated config files ARE suitable for Git.
 
 rMD17 ethanol dataset pipeline — uncertainty branch Round 0–3 active learning loop is nearly complete:
 
-**Data** (27 atoms/frame, C₂H₅OH):
+**Data** (C₂H₅OH, 9 atoms, 27 Cartesian force components):
 | Split | Frames | Path |
 |---|---|---|
 | Initial train | 1000 | `data/rmd17/ethanol/train` |
