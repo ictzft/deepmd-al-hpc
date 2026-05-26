@@ -696,7 +696,7 @@ Round 2 committee prediction + selection (done)
   ↓
 Round 3 committee training (done: 4 models, train 4000, candidate 57000)
   ↓
-Round 3 committee prediction (pending — next step)
+Round 3 committee prediction (done: 57000 frames, top-1000 selected)
   ↓
 summary + learning curve + independent test evaluation (pending)
 ```

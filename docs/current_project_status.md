@@ -32,7 +32,7 @@ Toy H2 offline active learning prototype with 4-model DeePMD committee, uncertai
 | 16 | V100 GPU utilization sample | representative | done |
 | 17 | Diversity descriptor analysis | H-H bond length, 3 strategies | done |
 | 18 | Profiling scripts + summary | profile_command, parse, summarize | done |
-| 19 | rMD17 ethanol data pipeline | uncertainty branch Round 0–3 training done, Round 0–2 predictions done, Round 3 prediction pending | in progress |
+| 19 | rMD17 ethanol data pipeline | uncertainty branch Round 0–3 training + prediction done | done |
 
 ---
 
@@ -161,4 +161,4 @@ experiments/figures/
 4. (done) Uncertainty-diversity Round 002–003
 5. (done) Trust-level Round 002–003
 6. (done) Full 4-strategy comparison
-7. (started) Small real DFT/AIMD dataset migration — rMD17 ethanol: Round 0–3 training done (16 models), Round 0–2 predictions done, Round 3 prediction next
+7. (started) Small real DFT/AIMD dataset migration — rMD17 ethanol: uncertainty branch Round 0–3 closed loop done, summary pending

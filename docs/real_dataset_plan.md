@@ -144,7 +144,7 @@ rMD17 ethanol dataset pipeline — uncertainty branch Round 0–3 active learnin
 | 0 | 1000 | 60000 | done | done |
 | 1 | 2000 | 59000 | done | done |
 | 2 | 3000 | 58000 | done | done |
-| 3 | 4000 | 57000 | done | **pending** |
+| 3 | 4000 | 57000 | done | done |
 
 Each round selects 1000 uncertainty top-K frames from the candidate pool.
 
@@ -153,10 +153,9 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 - Data splitting script: `scripts/data/split_rmd17_to_deepmd.py`
 - Round 0–3 committee configs (4 models × 4 rounds = 16 configs)
 - Round 0–3 committee model training (16 frozen models)
-- Round 0–2 committee predictions with uncertainty top-K selection
+- Round 0–3 committee predictions with uncertainty top-K selection
 
 **Pending:**
-- Round 3 committee prediction (next step)
 - Round 0–3 summary and learning curve
 - Independent test evaluation
 - Multi-strategy comparison on real dataset
