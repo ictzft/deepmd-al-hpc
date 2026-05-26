@@ -19,6 +19,34 @@ V100 阶段的 profiling 目标不是追求极限性能，而是：
 - 识别主要性能瓶颈（training vs inference vs I/O）；
 - 为后续 H100 迁移和多 GPU scaling 提供 baseline 对比数据。
 
+## 1.5 GPU Utilization Summary (2026-05-26)
+
+nvidia-smi dmon 实测数据：
+
+| Profile | GPU0 SM% | GPU0 Mem% | GPU1 SM% | GPU1 Mem% | Max SM% |
+|---|---|---|---|---|---|
+| toy H2 train (1000 steps) | 0.5 | 31.0 | 32.6 | 31.4 | 34.0 |
+| rmd17 train (2000 steps) | 0.5 | 45.0 | 33.9 | 32.0 | 35.0 |
+| rmd17 predict (57k frames) | 0.5 | 48.9 | 34.9 | 32.8 | 36.0 |
+
+- GPU SM 利用率 ~33%（单 GPU 训练时），V100 远未饱和——模型/batch 太小
+- GPU 内存使用 ~33%（5.4 GB / 16 GB），有空间放更大模型或更大 batch
+- 2-GPU 并行训练时总利用率约 2×33% = 66%，加速比 1.97×
+- 原始数据：`experiments/profiling/gpu_monitor/*.log`
+
+**Per-Round Pipeline Timeline (rMD17 ethanol, 2×V100)**：
+
+| Stage | Time (s) | % | GPU |
+|---|---:|---:|---|
+| Training (4 models, 2GPU) | 106 | 35% | Yes |
+| Freeze + Test (4 models) | 15 | 5% | Yes |
+| Prediction (57k frames) | 176 | 58% | Yes |
+| Selection / Merge / I/O | 6 | 2% | No |
+| **Total** | **303** | **100%** | |
+
+- 主要瓶颈：prediction（58%），不是 training
+- 数据来源：`experiments/rmd17_ethanol_summary/profiling_unified.csv` + nvidia-smi dmon
+
 已完成：training wall-clock time（132 个 train.log，mean=11.0s/model, std=0.5s, range 10.1–12.5s），2×V100 并行加速比（1.97×），estimated end-to-end per round ~32s，representative GPU utilization/memory sample（SM 23%, 5407 MiB），prediction/dataset update 分阶段 profiling 工具已就绪。
 待完成：全流程 GPU utilization 曲线记录（nvidia-smi dmon 配合完整 round），prediction/I/O 阶段在真实训练中的精确耗时。
 
