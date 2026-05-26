@@ -1,0 +1,71 @@
+{
+  "model": {
+    "type_map": [
+      "C",
+      "H",
+      "O"
+    ],
+    "descriptor": {
+      "type": "se_e2_a",
+      "sel": [
+        16,
+        16,
+        4
+      ],
+      "rcut_smth": 5.5,
+      "rcut": 6.0,
+      "neuron": [
+        16,
+        32,
+        64
+      ],
+      "resnet_dt": false,
+      "axis_neuron": 8,
+      "seed": 1703
+    },
+    "fitting_net": {
+      "neuron": [
+        64,
+        64,
+        64
+      ],
+      "resnet_dt": true,
+      "seed": 1703
+    }
+  },
+  "learning_rate": {
+    "type": "exp",
+    "decay_steps": 1000,
+    "start_lr": 0.001,
+    "stop_lr": 1e-06
+  },
+  "loss": {
+    "type": "ener",
+    "start_pref_e": 0.02,
+    "limit_pref_e": 1.0,
+    "start_pref_f": 100.0,
+    "limit_pref_f": 1.0,
+    "start_pref_v": 0.0,
+    "limit_pref_v": 0.0
+  },
+  "training": {
+    "training_data": {
+      "systems": [
+        "/data/guyida/deepmd-al-hpc/data/rmd17/ethanol/train_round002_diversity_seed0"
+      ],
+      "batch_size": 8
+    },
+    "validation_data": {
+      "systems": [
+        "/data/guyida/deepmd-al-hpc/data/rmd17/ethanol/valid"
+      ],
+      "batch_size": 8,
+      "numb_btch": 10
+    },
+    "numb_steps": 2000,
+    "seed": 1703,
+    "disp_file": "lcurve.out",
+    "disp_freq": 100,
+    "save_freq": 1000
+  }
+}
