@@ -2,9 +2,13 @@
 
 本文档记录在 2×Tesla V100 GPU 平台上对 `deepmd-al-hpc` 主动学习闭环的性能 profiling 方案和实测数据。
 
-**当前状态：Wall-clock training time 已从 36 个 train.log 完整提取（2026-05-25）。GPU utilization/memory 已有 representative sample（nvidia-smi dmon 单次训练记录）。Prediction 和 I/O 阶段耗时为估算值。** 详细数据见 `experiments/profiling/profiling_v100_summary.md`。
+**当前状态（2026-05-26）：**
+- **toy H2**: 132 models training wall time 已提取（mean=11.0s）；2×V100 并行加速比 1.97×
+- **rMD17 ethanol**: 124 models（16 unc + 36 rnd + 36 div + 36 trust）training wall time 已提取（mean=50-57s）；prediction（57k-60k frames, ~176s/round）已实测；统一 pipeline CSV 已生成
+- **GPU utilization**: representative sample 可用（SM 23%, 5407 MiB）；全流程曲线未记录
+- **Prediction / I/O**: rMD17 上已实测，toy H2 上为估算值
 
-The current V100 profiling should be treated as a **wall-clock baseline** rather than a complete performance characterization.
+The current V100 profiling should be treated as a **wall-clock baseline** rather than a complete performance characterization. GPU utilization curves and per-stage I/O latency breakdown are not yet available.
 
 ## 1. 为什么 V100 阶段需要做 profiling
 

@@ -30,12 +30,13 @@ This document tracks the current evidence and pending experiments for the `deepm
 ## 2. Claims partially supported, requiring further validation (部分支持但仍需验证的结论)
 
 1. **Uncertainty sampling reduces remaining candidate-pool uncertainty more effectively than random sampling.**
-   - *Evidence:* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332). Trust_level Round 001 also shows lower remaining uncertainty (0.160).
-   - *Gap:* Aligned comparison now uses consistent metric (remaining candidate-pool) for all four strategies. Differences in Force RMSE are within 1σ on toy H2; real datasets needed for statistical significance.
+   - *Evidence (toy H2):* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332).
+   - *Evidence (rmd17):* Four-strategy Round 3 comparison shows all three active strategies (0.354-0.362) outperform random (0.607 eV/Å) on both validation and independent test sets.
+   - *Gap:* Differences among active strategies are within 1σ on both datasets; single-system evidence for real data.
 
 2. **Uncertainty-diversity sampling improves structural coverage without severely degrading model quality.**
-   - *Evidence:* Multi-seed Round 001–003 shows diversity F_RMSE (2.05e-01, 1.74e-01, 1.76e-01) comparable to random baseline. Selection-level comparison confirms wider structural coverage.
-   - *Gap:* Selection-level analysis shows 3.1x structural spread improvement; multi-round diversity analysis not yet done; toy H2 only (H-H distance).
+   - *Evidence:* Multi-seed Round 001–003 on toy H2 shows diversity F_RMSE comparable to random. On rmd17 ethanol, diversity F_RMSE (0.3555) is competitive with uncertainty (0.3537). Selection-level comparison confirms wider structural coverage (3.1x on toy H2).
+   - *Gap:* Structural diversity descriptor analysis limited to H-H distance on toy H2; richer descriptors (SOAP, ACSF) not yet tested on real molecular systems.
 
 3. **DP-GEN-style trust-level sampling is feasible in the committee model framework.**
    - *Evidence:* Trust-level correctly separates 50-frame pool into 25 accurate / 20 candidate / 5 failed. Multi-seed Round 001–003 F_RMSE (1.35e-01, 1.49e-01, 1.78e-01) is competitive.
@@ -57,13 +58,13 @@ This document tracks the current evidence and pending experiments for the `deepm
 ## 4. Current limitations (当前限制)
 
 1. Toy H2 dataset (2 atoms, 250 frames) — cannot represent realistic material systems.
-2. Valid set also serves as candidate pool — no independent test set.
-3. rMD17 ethanol four-strategy comparison completed; all three active strategies outperform random (differences within 1σ).
+2. Toy H2: valid set also serves as candidate pool (no independent test). rMD17 ethanol: independent test available (10000 frames).
+3. rMD17 ethanol four-strategy comparison completed on a single molecular system; multi-system validation pending.
 4. Uncertainty-diversity (FPS) and trust-level (DP-GEN-style) implemented and validated on both toy H2 and rMD17 ethanol.
 5. No H100 or multi-node scaling experiments.
-6. No MD stability verification.
+6. MD stability only verified at 10K NVE; 100K+ dissociation — high-T MD stability not yet achieved.
 7. Full GPU utilization curves not yet recorded (representative sample available).
-8. Prediction and I/O profiling measured for representative cases; not recorded for all 36 rounds.
+8. Profiling covers 124 models (all strategies); GPU utilization curves and per-stage I/O latency pending.
 
 ---
 
@@ -74,4 +75,4 @@ This document tracks the current evidence and pending experiments for the `deepm
 3. **Add uncertainty-diversity selection** — DONE (FPS + pairwise-distance descriptor, 3.1x structural spread).
 4. **Move to real DFT/AIMD dataset** — rMD17 ethanol four-strategy multi-seed multi-round completed; independent test done; MD stability done. Next: multi-system validation.
 5. **Run H100 / multi-GPU scaling** — Benchmark training throughput and end-to-end round time.
-6. **MD stability tests** — Validate committee model quality through MD trajectory stability.
+6. **MD stability tests** — 10K NVE done (stable, drift ~0.035 eV/ps); high-T (>100K) MD stability pending.
