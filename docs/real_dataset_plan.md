@@ -155,6 +155,22 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 - Round 0–3 committee model training (16 frozen models)
 - Round 0–3 committee predictions with uncertainty top-K selection
 - Round 0–3 summary CSV + MD + learning curve figures
+- Unified profiling CSV (52 models, all pipeline stages)
+
+**End-to-End Pipeline Profiling (2x V100)**:
+| Round | Train (s) | Pred (s) | Other (s) | Total (s) |
+|---:|---:|---:|---:|---:|
+| 0 | 87 | 185 | 21 | 293 |
+| 1 | 104 | 182 | 21 | 307 |
+| 2 | 107 | 179 | 21 | 307 |
+| 3 | 106 | 176 | 21 | 303 |
+
+- Training: 4 models / 2 GPUs parallel, mean 50.4s/model (uncertainty), 56.7s/model (random)
+- Prediction: 57k–60k frames × 4 models, ~3 min per round
+- Per-round total: ~5 min (uncertainty), ~10 min (random, 3 seeds)
+- Full uncertainty branch (Round 0–3): ~20 min
+- Full random baseline (3 seeds × 3 rounds): ~29 min
+- Data: `experiments/rmd17_ethanol_summary/profiling_unified.csv`, `profiling_all_models.csv`
 
 **Key Results (uncertainty branch)**:
 
