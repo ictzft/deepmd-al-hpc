@@ -700,7 +700,9 @@ Round 3 committee prediction (done: 57000 frames, top-1000 selected)
   ↓
 summary + learning curve (done: al_rounds_summary.csv + 3 SVG figures)
   ↓
-independent test evaluation (pending)
+independent test evaluation (done: 10000-frame test, Force RMSE 0.344→0.327 eV/Å monotonic)
+  ↓
+multi-strategy comparison on real dataset (pending)
 ```
 
 ---

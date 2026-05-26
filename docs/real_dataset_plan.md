@@ -170,6 +170,16 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 - Energy RMSE stable at ~0.12–0.13 eV across all rounds
 - Summary files: `experiments/rmd17_ethanol_summary/`
 
+**Independent Test Results (10000 frames, never used in AL)**:
+| Round | Force RMSE (test) | Force RMSE (valid) |
+|---:|---:|---:|
+| 0 | 0.343914 | 0.373912 |
+| 1 | 0.343304 | 0.371493 |
+| 2 | 0.335249 | 0.364440 |
+| 3 | 0.326594 | 0.353702 |
+
+- Test Force RMSE decreases monotonically (0.344→0.327 eV/Å), confirming genuine improvement
+- Test RMSE consistently ~0.028 eV/Å lower than validation
+
 **Pending:**
-- Independent test evaluation (10000-frame test set)
 - Multi-strategy comparison on real dataset
