@@ -73,9 +73,15 @@ docs/profiling_h100.md
 
 ## 2. 当前可复现范围
 
-当前仓库主要复现 toy H2 上的 offline active learning 原型实验。
+当前仓库已完成：
 
-已经完成的主线流程包括：
+**toy H2**：四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成。
+
+**rMD17 ethanol**：uncertainty branch Round 0–3 已完成，random baseline (3 seeds × 3 rounds) 已完成，independent test evaluation 已完成，diversity/trust_level baselines 待完成。
+
+**H100 scaling**：未开始。
+
+toy H2 主线流程包括：
 
 ```text
 DeepMD-kit 环境验证

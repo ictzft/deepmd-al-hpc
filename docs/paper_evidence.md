@@ -57,8 +57,8 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 1. Toy H2 dataset (2 atoms, 250 frames) — cannot represent realistic material systems.
 2. Valid set also serves as candidate pool — no independent test set.
-3. rMD17 ethanol tested (uncertainty branch only); multi-strategy comparison on real dataset pending.
-4. Uncertainty-diversity (FPS) and trust-level (DP-GEN-style) are implemented and tested on toy H2; real-system validation started on rMD17 ethanol (uncertainty branch done, multi-strategy pending).
+3. rMD17 ethanol tested (uncertainty + random baseline + independent test done); diversity/trust_level on real dataset pending.
+4. Uncertainty-diversity (FPS) and trust-level (DP-GEN-style) implemented and tested on toy H2; rMD17 ethanol real-system validation started (uncertainty + random done, diversity/trust_level pending).
 5. No H100 or multi-node scaling experiments.
 6. No MD stability verification.
 7. Full GPU utilization curves not yet recorded (representative sample available).
@@ -71,6 +71,6 @@ This document tracks the current evidence and pending experiments for the `deepm
 1. **Align comparison metrics** — DONE (aligned_comparison.csv uses consistent remaining candidate-pool metric).
 2. **Add GPU monitoring curves** — Run nvidia-smi dmon during one complete round (representative sample done, full curves pending).
 3. **Add uncertainty-diversity selection** — DONE (FPS + pairwise-distance descriptor, 3.1x structural spread).
-4. **Move to real DFT/AIMD dataset** — rMD17 ethanol uncertainty branch Round 0–3 done (Force RMSE 0.374→0.354 eV/Å). Multi-strategy comparison and independent test pending.
+4. **Move to real DFT/AIMD dataset** — rMD17 ethanol uncertainty + random baseline + independent test done; diversity/trust_level baselines pending.
 5. **Run H100 / multi-GPU scaling** — Benchmark training throughput and end-to-end round time.
 6. **MD stability tests** — Validate committee model quality through MD trajectory stability.

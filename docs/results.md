@@ -557,7 +557,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. 当前 valid set 同时承担 candidate pool 和 validation/test 的角色；
-3. rMD17 ethanol 真实数据集 uncertainty branch Round 0–3 已完成（2026-05-26, 2×V100）；多策略对比和 independent test 待完成；
+3. rMD17 ethanol 真实数据集 uncertainty branch + random baseline + independent test 已完成（2026-05-26, 2×V100）；diversity/trust_level baselines 待完成；
 4. random sampling baseline 已完成 Round 001–003 三 seed multi-round retraining (2026-05-25, 2×V100)；
 5. uncertainty vs random full RMSE learning curve 对比已生成；
 6. uncertainty-diversity 和 trust-level 策略已完成 multi-seed Round 001–003（2026-05-25, 2×V100）；
@@ -779,20 +779,19 @@ experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.j
 当前结果说明：
 
 ```text
-deepmd-al-hpc 已经完成 toy H2 上的 dataset-level offline active learning 原型验证；
-uncertainty branch 已经跑通 Round 0–3；
-random sampling baseline 已经完成 selection-level 对比和 seed0/seed1/seed2 Round 001–003 retraining；
-multi-seed random mean ± std 已在 Round 001/002/003 上完成；
-uncertainty vs random full comparison table + learning curves 已生成。
+toy H2 上四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成；
+rMD17 ethanol 上 uncertainty branch Round 0–3 已完成，random baseline (3 seeds × 3 rounds) 已完成，
+independent test evaluation 已完成，diversity/trust_level baselines 待完成；
+H100 scaling 未开始。
 ```
 
-但当前结果仍然属于：
+当前结果已经属于：
 
 ```text
-toy workflow validation with multi-round random baseline
+toy workflow validation + real molecule validation (rMD17 ethanol)
 ```
 
-而不是：
+而不仅仅是：
 
 ```text
 final paper-level validation on real datasets
@@ -801,11 +800,9 @@ final paper-level validation on real datasets
 下一步重点是：
 
 ```text
-rMD17 ethanol: independent test evaluation + 多策略对比 (uncertainty branch 已完成)
+rMD17 ethanol: diversity + trust_level baselines
   ↓
 full GPU utilization curves (nvidia-smi dmon)
-  ↓
-MD stability validation
   ↓
 H100 scaling
 ```

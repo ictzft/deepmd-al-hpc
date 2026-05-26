@@ -49,7 +49,7 @@ dataset-level offline active learning closed-loop prototype
 
 并进一步补充了第一版 random sampling baseline。
 
-需要说明的是：当前全部四种 selection strategy 均已完成 toy H2 上 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；rMD17 ethanol 真实数据集上 uncertainty branch Round 0–3 多轮闭环已完成（Force RMSE 单调下降 0.374→0.354 eV/Å），random baseline（3 seeds × 3 rounds）已完成并显示 uncertainty 随轮次显著优于 random（Round 3: 0.354 vs 0.607 eV/Å），independent test 确认模型精度提升（0.344→0.327 eV/Å），MD 稳定性测试完成（10K NVE 稳定，100K+ 解离）；H100 scaling 尚未开始。
+需要说明的是：toy H2 上四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成；rMD17 ethanol uncertainty branch Round 0–3 已完成，random baseline (3 seeds × 3 rounds) 已完成，independent test evaluation 已完成，diversity/trust_level baselines 待完成；H100 scaling 未开始。
 
 ---
 

@@ -6,7 +6,7 @@ Date: 2026-05-25 | Host: shared-v100 (2×Tesla V100-16GB) | Branch: main
 
 ## 1. One-sentence Summary
 
-Toy H2 offline active learning prototype with 4-model DeePMD committee, uncertainty top-K selection, multi-seed multi-round random baseline, and preliminary V100 training profiling — all completed on 2×V100.
+toy H2: 四策略 multi-seed multi-round 已完成, V100 profiling baseline 已完成。rMD17 ethanol: uncertainty branch Round 0–3 已完成, random baseline (3 seeds × 3 rounds) 已完成, independent test evaluation 已完成, diversity/trust_level baselines 待完成。H100 scaling 未开始。
 
 ---
 
