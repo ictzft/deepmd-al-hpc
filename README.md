@@ -49,7 +49,7 @@ dataset-level offline active learning closed-loop prototype
 
 并进一步补充了第一版 random sampling baseline。
 
-需要说明的是：当前全部四种 selection strategy（random / uncertainty / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；四策略对齐对比表（aligned comparison）和 learning curve 图已生成；V100 training profiling 已完成（132 models, mean=11.0s/model），端到端 per-round 约 32s；预测和 I/O 分阶段耗时已记录；rMD17 ethanol 真实数据集数据管道已启动（数据转换、划分、configs 生成、Round 0–2 预测已完成）；H100 scaling 尚未开始。
+需要说明的是：当前全部四种 selection strategy（random / uncertainty / diversity / trust_level）均已完成 seed0/seed1/seed2 Round 001–003 multi-seed multi-round retraining baseline；四策略对齐对比表（aligned comparison）和 learning curve 图已生成；V100 training profiling 已完成（132 models, mean=11.0s/model），端到端 per-round 约 32s；预测和 I/O 分阶段耗时已记录；rMD17 ethanol 真实数据集 uncertainty branch Round 0–3 多轮闭环已完成（1000→4000 帧, Force RMSE 单调下降 0.374→0.354 eV/Å）；H100 scaling 尚未开始。
 
 ---
 
@@ -612,12 +612,12 @@ scripts/data/... should not be ignored.
 当前项目仍处于原型验证阶段，主要限制包括：
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
-2. rMD17 ethanol 真实数据集数据管道已启动（转换/划分/configs/predictions），但完整的 multi-round active learning 尚未执行；
+2. rMD17 ethanol 真实数据集 uncertainty branch Round 0–3 闭环已完成，Force RMSE 单调下降；多策略对比和 independent test 待完成；
 3. random sampling baseline 已完成 selection-level 对比和 seed0/seed1/seed2 Round 001–003 multi-round retraining (2026-05-25)；
 4. selection-level random baseline 只能说明 uncertainty sampling 选出的构型平均不确定性更高，不能直接代表 retraining 后模型精度优势；
 5. uncertainty-diversity（FPS）和 DP-GEN-style trust-level 策略已实现并完成 multi-seed Round 001–003 验证；
 6. 当前尚未进行 H100 多 GPU scaling 实验；
-7. 当前尚未进行真实 DFT labeling 或在线主动学习调度；
+7. rMD17 ethanol 已完成 uncertainty branch 验证，但多策略对比和 online active learning 调度尚未进行；
 8. 当前 V100 profiling 已记录训练耗时和代表性 GPU 利用率，但 prediction 和端到端耗时仍需更精确的系统测量；
 9. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响；
 10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以直接支撑完整 CCF-B 论文实验结论。

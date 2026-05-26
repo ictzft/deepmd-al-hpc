@@ -1,6 +1,6 @@
 # Paper Evidence Checklist
 
-This document tracks the current evidence and pending experiments for the `deepmd-al-hpc` project. Last updated: 2026-05-25.
+This document tracks the current evidence and pending experiments for the `deepmd-al-hpc` project. Last updated: 2026-05-26.
 
 ---
 
@@ -19,7 +19,8 @@ This document tracks the current evidence and pending experiments for the `deepm
 11. Aligned four-strategy comparison table with cross-seed mean ± std uses consistent "remaining candidate-pool" metrics across all strategies.
 12. V100 training wall-time profiling: 132 models, mean=11.0s, 2×V100 parallel ~22s/round.
 13. Structural diversity analysis: diversity (FPS) achieves 3.1x greater structural spread vs uncertainty top-K in toy H2.
-14. All experiments are reproducible via documented scripts and configs.
+14. rMD17 ethanol (real molecule, 9 atoms, 60000-frame candidate pool) uncertainty branch Round 0–3 active learning loop completed; Force RMSE decreases monotonically (0.374→0.354 eV/Å).
+15. All experiments are reproducible via documented scripts and configs.
 
 ---
 
@@ -54,8 +55,8 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 1. Toy H2 dataset (2 atoms, 250 frames) — cannot represent realistic material systems.
 2. Valid set also serves as candidate pool — no independent test set.
-3. No real DFT/AIMD dataset has been tested.
-4. Uncertainty-diversity (FPS) and trust-level (DP-GEN-style) are implemented and tested on toy H2, but real-system validation is pending.
+3. rMD17 ethanol tested (uncertainty branch only); multi-strategy comparison on real dataset pending.
+4. Uncertainty-diversity (FPS) and trust-level (DP-GEN-style) are implemented and tested on toy H2; real-system validation started on rMD17 ethanol (uncertainty branch done, multi-strategy pending).
 5. No H100 or multi-node scaling experiments.
 6. No MD stability verification.
 7. Full GPU utilization curves not yet recorded (representative sample available).
@@ -68,6 +69,6 @@ This document tracks the current evidence and pending experiments for the `deepm
 1. **Align comparison metrics** — DONE (aligned_comparison.csv uses consistent remaining candidate-pool metric).
 2. **Add GPU monitoring curves** — Run nvidia-smi dmon during one complete round (representative sample done, full curves pending).
 3. **Add uncertainty-diversity selection** — DONE (FPS + pairwise-distance descriptor, 3.1x structural spread).
-4. **Move to real DFT/AIMD dataset** — Convert and validate on realistic first-principles data (pipeline ready, data pending).
+4. **Move to real DFT/AIMD dataset** — rMD17 ethanol uncertainty branch Round 0–3 done (Force RMSE 0.374→0.354 eV/Å). Multi-strategy comparison and independent test pending.
 5. **Run H100 / multi-GPU scaling** — Benchmark training throughput and end-to-end round time.
 6. **MD stability tests** — Validate committee model quality through MD trajectory stability.

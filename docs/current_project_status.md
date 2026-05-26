@@ -161,4 +161,4 @@ experiments/figures/
 4. (done) Uncertainty-diversity Round 002–003
 5. (done) Trust-level Round 002–003
 6. (done) Full 4-strategy comparison
-7. (started) Small real DFT/AIMD dataset migration — rMD17 ethanol: uncertainty branch Round 0–3 closed loop done, summary pending
+7. (started) Small real DFT/AIMD dataset migration — rMD17 ethanol: uncertainty branch Round 0–3 done, summary done, independent test pending

@@ -56,7 +56,7 @@ uncertainty vs random full comparison + learning curves
 当前尚未完成：
 
 ```text
-真实 DFT / AIMD 数据集
+真实 DFT / AIMD 数据集多策略对比和 independent test（uncertainty branch 已完成）
 H100 / 多 GPU scaling
 MD 稳定性验证
 系统 GPU utilization / memory 曲线记录
@@ -505,7 +505,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. 当前 valid set 同时承担 candidate pool 和 validation/test 的角色；
-3. 当前尚未引入真实 DFT / AIMD 数据集；
+3. rMD17 ethanol 真实数据集 uncertainty branch Round 0–3 已完成（2026-05-26, 2×V100）；多策略对比和 independent test 待完成；
 4. random sampling baseline 已完成 Round 001–003 三 seed multi-round retraining (2026-05-25, 2×V100)；
 5. uncertainty vs random full RMSE learning curve 对比已生成；
 6. uncertainty-diversity 和 trust-level 策略已完成 multi-seed Round 001–003（2026-05-25, 2×V100）；
@@ -749,7 +749,7 @@ final paper-level validation on real datasets
 下一步重点是：
 
 ```text
-real DFT / AIMD dataset
+rMD17 ethanol: independent test evaluation + 多策略对比 (uncertainty branch 已完成)
   ↓
 full GPU utilization curves (nvidia-smi dmon)
   ↓

@@ -459,7 +459,7 @@ Round 3: 0.174265
 该结论仍基于 toy H2 数据集；
 所有四策略 multi-seed multi-round comparison 已生成；
 validation RMSE 跨 seed 波动较大，toy H2 无法支撑统计显著性结论；
-真实 DFT/AIMD 数据集是最关键的下一步。
+真实 DFT/AIMD 数据集是最关键的下一步（rMD17 ethanol uncertainty branch 已完成，多策略对比进行中）。
 ```
 
 ---
@@ -644,7 +644,7 @@ independent_test 独立评估
 当前复现流程仍有以下限制：
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
-2. 当前尚未引入真实 DFT / AIMD 数据集；
+2. rMD17 ethanol 真实数据集 uncertainty branch 已完成，多策略对比和 independent test 待完成；
 3. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
 4. uncertainty vs random full RMSE learning curve 对比已生成；
 5. diversity 和 trust-level 策略已完成 multi-seed Round 001–003 完整实验（2026-05-25, 2×V100）；
