@@ -1,6 +1,6 @@
 # Real DFT/AIMD Dataset Execution Guide
 
-**Status: Pipeline ready, awaiting real data. All scripts tested with toy H2 smoke test.**
+**Status: Pipeline validated on rMD17 ethanol (2026-05-26). This guide remains as a template for future real datasets. For rMD17 ethanol results, see `docs/real_dataset_plan.md`.**
 
 ---
 

@@ -534,7 +534,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 12. 在 Round 001 remaining candidate-pool 对比中，uncertainty branch 的 force_dev_max_mean 低于所有三个 random seed。
 13. V100 训练耗时已从 36 个 train.log 中提取，2×V100 并行加速比约 1.97×。
 14. rMD17 ethanol 上 uncertainty branch 的 validation 和 independent test Force RMSE 均单调下降。
-15. rMD17 ethanol 上 uncertainty-based AL 显著优于 random baseline（Round 3: 0.354 vs 0.607 eV/Å）。
+15. rMD17 ethanol 单体系上，uncertainty 相比 random 表现出更稳定的 Force RMSE 改善趋势（Round 3: 0.354 vs 0.607 ± 0.385 eV/Å）。
 16. rMD17 ethanol 上 NVE 10K MD 稳定，100K+ 解离——模型精度需进一步提高。
 ```
 
@@ -549,7 +549,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 当前结果还不能支持以下过强结论：
 
 ```text
-1. uncertainty sampling 一定显著优于 random sampling；
+1. uncertainty sampling 在所有体系上均显著优于 random sampling（仅 rmd17 ethanol 单体系验证，random std 较大）；
 2. 当前方法在真实 DFT / AIMD 数据集上有效（rmd17 ethanol 已验证，多体系待验证）；
 3. 当前方法已经达到 CCF-B 论文完整实验标准；
 4. 当前方法已经完成 H100 / 多 GPU 加速验证；
@@ -564,7 +564,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 ```text
 toy H2 上已完成四策略 multi-seed multi-round 完整对比；
 rMD17 ethanol 上 uncertainty vs random 对比已完成，
-在独立测试集上 uncertainty 显著优于 random（Round 3: 0.327 vs 0.580 eV/Å）；
+在独立测试集上，uncertainty 相比 random 表现出更稳定的改善趋势（Round 3: 0.327 vs 0.580 ± 0.692 eV/Å，random 方差大）；
 diversity/trust_level 在真实数据上待验证；
 仍需要多个真实体系和 H100 scaling 进一步验证。
 ```
@@ -582,7 +582,7 @@ diversity/trust_level 在真实数据上待验证；
 5. 当前尚未进行 H100 / 多 GPU scaling 实验；
 6. V100 training wall-clock profiling 已全量记录（52 模型）；GPU utilization 曲线未记录；
 7. MD 稳定性在 10K NVE 通过验证，100K+ 解离——需提高模型精度后重新评估；
-8. 当前结果已能证明 uncertainty-based AL 在 toy H2 和单分子真实体系上优于 random baseline；multi-system 验证仍需补充。
+8. 在 rMD17 ethanol 单体系实验中，uncertainty 相比 random 表现出更稳定的改善趋势；random 跨 seed 方差较大，multi-system 验证仍需补充。
 
 ---
 

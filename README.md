@@ -665,11 +665,11 @@ scripts/data/... should not be ignored.
 6. V100 profiling 已记录训练耗时和代表性 GPU 利用率，但全流程 GPU utilization 曲线未记录；
 7. MD 稳定性仅在 10K NVE 验证通过，100K+ 解离——提高模型精度后需重新评估；
 8. 当前 committee models 跨 seed 方差在部分实验中较大；
-9. 当前结果已能证明”uncertainty-based AL 在真实分子体系上优于 random sampling”，但 multi-system 验证和高温 MD 稳定性仍需补充。
+9. 在 rMD17 ethanol 单体系上，uncertainty 相比 random 表现出更稳定的改善趋势，但 random 跨 seed 方差大（Round 3 std=0.385），不宜过度推广为普遍结论。
 
 一句话概括：
 
-> 当前仓库已经能证明”toy H2 和 rMD17 ethanol 上 uncertainty-based AL 闭环有效且优于 random baseline”；但 multi-system、multi-strategy 和高温 MD 稳定性仍需补充。
+> 当前仓库已在 toy H2 和 rMD17 ethanol 上验证了 uncertainty-based AL 闭环的可行性和比 random baseline 更稳定的改善趋势；multi-system、multi-strategy 和高温 MD 稳定性仍需补充。
 
 ---
 
