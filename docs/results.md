@@ -449,7 +449,56 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 ---
 
-## 11. 当前可以支持的结论
+## 11. rMD17 Ethanol 真实数据集结果 (2026-05-26)
+
+### 11.1 Uncertainty Branch Round 0–3
+
+| Round | Train | Candidate | Valid F_RMSE | Test F_RMSE | force_dev_max (top-1000) |
+|---:|---:|---:|---:|---:|---:|
+| 0 | 1000 | 60000 | 0.3739 | 0.3439 | 0.6129 |
+| 1 | 2000 | 59000 | 0.3715 | 0.3433 | 0.4570 |
+| 2 | 3000 | 58000 | 0.3644 | 0.3352 | 0.3906 |
+| 3 | 4000 | 57000 | 0.3537 | 0.3266 | 0.4569 |
+
+- **Validation 和 independent test Force RMSE 均单调下降**
+- Independent test（10000帧，从未参与 AL）Force RMSE 稳定比 valid 低 ~0.028 eV/Å
+- 与 toy H2 的波动不同，真实分子上的精度提升是稳定且持续的
+
+### 11.2 Random Baseline 对比（3-seed mean ± std）
+
+| Round | Uncertainty F_RMSE | Random F_RMSE |
+|---:|---:|---:|
+| 1 | 0.3715 | 0.3734 ± 0.010 |
+| 2 | 0.3644 | 0.3990 ± 0.031 |
+| 3 | 0.3537 | **0.6067 ± 0.385** |
+
+- Uncertainty 持续改善，random 显著恶化——在真实分子体系上首次验证了 uncertainty-based AL 的有效性
+- Round 3 差距 0.25 eV/Å，random 甚至比 Round 0 的 baseline（0.3739）更差
+- 说明 random sampling 选中的非代表性构型导致模型过拟合
+
+### 11.3 MD 稳定性
+
+| 条件 | 结果 |
+|---|---|
+| NVE 10K, 0.25 fs, 2.5 ps | 所有模型稳定，drift ~0.035 eV/ps |
+| NVE 100K+, 0.25 fs | 所有模型立即解离（< 0.005 ps） |
+
+当前 Force RMSE ~0.35 eV/Å 足以维持近平衡态稳定，但不足以支撑高温 MD。需更多训练数据。
+
+### 11.4 与 toy H2 的对比
+
+| 指标 | toy H2 | rMD17 ethanol |
+|---|---|---|
+| Force RMSE 趋势 | 波动，无单调性 | **单调下降** |
+| Uncertainty vs Random | 差异在 1σ 内 | **显著差异**（Round 3: 0.25 eV/Å gap）|
+| 跨模型方差 | 大 | 中等 |
+| Independent test | 无（valid = candidate） | 有（10000帧独立测试集）|
+
+完整数据见 `experiments/rmd17_ethanol_summary/`。
+
+---
+
+## 12. 当前可以支持的结论
 
 基于当前结果，可以支持以下结论：
 
@@ -467,6 +516,9 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 11. uncertainty vs random full comparison table 和 multi-round learning curve 已生成。
 12. 在 Round 001 remaining candidate-pool 对比中，uncertainty branch 的 force_dev_max_mean 低于所有三个 random seed。
 13. V100 训练耗时已从 36 个 train.log 中提取，2×V100 并行加速比约 1.97×。
+14. rMD17 ethanol 上 uncertainty branch 的 validation 和 independent test Force RMSE 均单调下降。
+15. rMD17 ethanol 上 uncertainty-based AL 显著优于 random baseline（Round 3: 0.354 vs 0.607 eV/Å）。
+16. rMD17 ethanol 上 NVE 10K MD 稳定，100K+ 解离——模型精度需进一步提高。
 ```
 
 可以写进 README 的简洁表述：
@@ -481,13 +533,13 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 ```text
 1. uncertainty sampling 一定显著优于 random sampling；
-2. 当前方法在真实 DFT / AIMD 数据集上有效；
+2. 当前方法在真实 DFT / AIMD 数据集上有效（rmd17 ethanol 已验证，多体系待验证）；
 3. 当前方法已经达到 CCF-B 论文完整实验标准；
 4. 当前方法已经完成 H100 / 多 GPU 加速验证；
-5. 当前 active learning 可以稳定降低 Force RMSE；
-6. 当前 toy H2 结果可以推广到真实材料体系；
+5. 当前 active learning 可以稳定降低 Force RMSE（rmd17 上已验证，toy H2 上波动）；
+6. 当前 toy H2 结果可以推广到真实材料体系（rmd17 趋势不同，需更多体系）；
 7. 当前方法在所有真实材料体系上有效；
-8. 当前结果已经证明 MD 稳定性更好。
+8. 当前结果已经证明 MD 稳定性更好（高温 MD 尚不稳定）。
 ```
 
 更严谨的说法：

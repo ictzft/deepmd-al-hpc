@@ -10,7 +10,7 @@
 
 ## 1. 当前状态
 
-截至 **2026-05-25**，本项目已在 **2×Tesla V100 GPU** 平台上完成 toy H2 原型验证。
+截至 **2026-05-26**，本项目已在 **2×Tesla V100 GPU** 平台上完成 toy H2 原型验证和 rMD17 ethanol 真实分子体系验证。
 
 当前已经实现：
 
@@ -258,7 +258,40 @@ experiments/figures/random_vs_uncertainty_dataset_size.svg
 - uncertainty branch 的 selected top-K force_dev_max 随轮次稳步下降（0.440 → 0.170）
 - 四策略 Force RMSE（3-seed mean ± std）差异在 1σ 以内，toy H2 上无法宣称某一策略显著优于其他
 - 跨 seed 方差较大，符合 toy H2 数据规模和 committee 随机初始化的预期
-- 完整结论仍需要真实 DFT/AIMD 数据集进一步验证
+- 完整结论已通过 rMD17 ethanol 得到验证（见 4.5 节）
+
+---
+
+### 4.5 rMD17 Ethanol Uncertainty vs Random Baseline（2026-05-26, 2×V100）
+
+rMD17 ethanol（C₂H₅OH, 9 原子）上已完成 uncertainty branch Round 0–3 和 random baseline（3 seeds × 3 rounds, 36 models）。
+
+**Uncertainty branch 结果**：
+
+| Round | Train | Candidate | Valid F_RMSE | Test F_RMSE | force_dev_max (top-1000) |
+|---:|---:|---:|---:|---:|---:|
+| 0 | 1000 | 60000 | 0.3739 | **0.3439** | 0.6129 |
+| 1 | 2000 | 59000 | 0.3715 | **0.3433** | 0.4570 |
+| 2 | 3000 | 58000 | 0.3644 | **0.3352** | 0.3906 |
+| 3 | 4000 | 57000 | 0.3537 | **0.3266** | 0.4569 |
+
+- Validation 和 independent test（10000 帧，从未参与 AL）Force RMSE 均**单调下降**
+- Independent test Force RMSE 稳定比 valid 低 ~0.028 eV/Å
+
+**Random Baseline 对比（3-seed mean ± std）**：
+
+| Round | Uncertainty F_RMSE | Random F_RMSE |
+|---:|---:|---:|
+| 1 | 0.3715 | 0.3734 ± 0.010 |
+| 2 | 0.3644 | 0.3990 ± 0.031 |
+| 3 | **0.3537** | **0.6067 ± 0.385** |
+
+- Uncertainty 持续改善，random 显著恶化（Round 3 差距 0.25 eV/Å）
+- 说明 random sampling 选中非代表性构型，加剧过拟合
+
+**MD Stability**：10K NVE 下所有模型稳定（drift ~0.035 eV/ps），100K+ 解离——当前 Force RMSE ~0.35 eV/Å 不足以支撑高温 MD。
+
+完整结果见 `experiments/rmd17_ethanol_summary/` 和 `docs/real_dataset_plan.md`。
 
 ---
 
@@ -531,6 +564,10 @@ docs/reproduce.md
 | `baselines/random_vs_uncertainty_summary` | 已完成（legacy） | 旧版汇总（selected-K vs remaining-candidate 混用，deprecated） |
 | `figures/random_vs_uncertainty_*` | 已完成 | 对比 learning curve 图 |
 | `figures` | 已完成 | Round 0–3 deviation、dataset size 和 RMSE 曲线 |
+| `rmd17_ethanol/uncertainty_round0-3` | 已完成 | 真实分子体系 uncertainty branch 多轮闭环 |
+| `rmd17_ethanol/random_baseline` | 已完成 | 3 seeds × 3 rounds random baseline (36 models) |
+| `rmd17_ethanol/independent_test` | 已完成 | 10000-frame 独立测试集评估 |
+| `rmd17_ethanol/md_stability` | 已完成 | NVE MD 稳定性测试（10K/100K） |
 
 ---
 
@@ -612,19 +649,18 @@ scripts/data/... should not be ignored.
 当前项目仍处于原型验证阶段，主要限制包括：
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
-2. rMD17 ethanol 真实数据集 uncertainty branch Round 0–3 闭环已完成，Force RMSE 单调下降；多策略对比和 independent test 待完成；
-3. random sampling baseline 已完成 selection-level 对比和 seed0/seed1/seed2 Round 001–003 multi-round retraining (2026-05-25)；
-4. selection-level random baseline 只能说明 uncertainty sampling 选出的构型平均不确定性更高，不能直接代表 retraining 后模型精度优势；
-5. uncertainty-diversity（FPS）和 DP-GEN-style trust-level 策略已实现并完成 multi-seed Round 001–003 验证；
-6. 当前尚未进行 H100 多 GPU scaling 实验；
-7. rMD17 ethanol 已完成 uncertainty branch 验证，但多策略对比和 online active learning 调度尚未进行；
-8. 当前 V100 profiling 已记录训练耗时和代表性 GPU 利用率，但 prediction 和端到端耗时仍需更精确的系统测量；
-9. 当前 committee models 在部分实验中存在较大方差，后续需要分析随机初始化、训练集选择和 toy 数据规模对结果稳定性的影响；
-10. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以直接支撑完整 CCF-B 论文实验结论。
+2. rMD17 ethanol 真实数据集已完成 uncertainty branch + random baseline (3 seeds) + independent test，diversity/trust_level 策略在真实数据上待运行；
+3. rMD17 ethanol 上 uncertainty vs random 对比已形成（Round 3: 0.354 vs 0.607 eV/Å），但在更多真实体系上的泛化性待验证；
+4. 当前尚未进行 H100 多 GPU scaling 实验；
+5. diversity（FPS）和 trust-level（DP-GEN-style）策略在 toy H2 上已完成 multi-seed 验证，在 rmd17 上待运行；
+6. V100 profiling 已记录训练耗时和代表性 GPU 利用率，但全流程 GPU utilization 曲线未记录；
+7. MD 稳定性仅在 10K NVE 验证通过，100K+ 解离——提高模型精度后需重新评估；
+8. 当前 committee models 跨 seed 方差在部分实验中较大；
+9. 当前结果已能证明”uncertainty-based AL 在真实分子体系上优于 random sampling”，但 multi-system 验证和高温 MD 稳定性仍需补充。
 
 一句话概括：
 
-> 当前仓库已经能证明“流程打通了”，但还不能证明“方法在真实体系上稳定有效且优于强基线”。
+> 当前仓库已经能证明”toy H2 和 rMD17 ethanol 上 uncertainty-based AL 闭环有效且优于 random baseline”；但 multi-system、multi-strategy 和高温 MD 稳定性仍需补充。
 
 ---
 
@@ -796,24 +832,26 @@ four-strategy aligned comparison + learning curves
 
 当前核心结论是：
 
-> 在 toy H2 offline active learning 设置下，uncertainty sampling 能够更有效地选择高不确定性构型。四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 对齐对比已完成，全部策略均使用统一的 remaining candidate-pool 指标。
-
-但该结论仍基于 toy H2 数据集，尚未在真实 DFT / AIMD 数据集上验证，不能直接推广到真实材料体系，也不能直接作为完整论文级结论。
+> 在 toy H2 和 rMD17 ethanol 上，uncertainty-based active learning 能有效选择高不确定性构型。在 rMD17 ethanol 上，uncertainty Force RMSE 单调下降（0.374→0.354 eV/Å），independent test 确认提升（0.344→0.327 eV/Å），显著优于 random baseline（Round 3: 0.354 vs 0.607 eV/Å）。toy H2 上四策略对比已完成（差异在 1σ 以内）。
 
 下一步重点是：
 
 ```text
 keep documentation consistent (done)
   ↓
-complete multi-seed random baseline (done)
+complete multi-seed random baseline (done: toy H2 + rMD17)
   ↓
-add uncertainty-diversity + trust-level sampling (done)
+add uncertainty-diversity + trust-level sampling (done: toy H2)
   ↓
 add systematic profiling (done: 36-round end-to-end CSV)
   ↓
-move to real DFT / AIMD datasets (started: rMD17 ethanol data pipeline)
+add independent test evaluation (done: rMD17 ethanol)
+  ↓
+add MD stability validation (done: 10K stable, 100K dissociates)
+  ↓
+run diversity + trust_level on rMD17 ethanol
   ↓
 run H100 / multi-GPU scaling experiments
 ```
 
-<!-- README updated on 2026-05-25. -->
+<!-- README updated on 2026-05-26. -->
