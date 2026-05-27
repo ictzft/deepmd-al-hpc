@@ -179,7 +179,7 @@ experiments/rmd17_ethanol_summary/
 **Can claim:**
 - Reproducible active learning pipeline on both toy H2 and rMD17 ethanol (2×V100)
 - Four-strategy multi-seed multi-round comparison completed on both toy H2 and rMD17 ethanol
-- All three active strategies (uncertainty/diversity/trust_level) significantly outperform random on rMD17 ethanol (Round 3: 0.354-0.362 vs 0.607 eV/Å)
+- All three active strategies (uncertainty/diversity/trust_level) have clearly lower mean Force RMSE than random on rMD17 ethanol (Round 3: 0.354-0.362 vs 0.607 eV/Å); however, random cross-seed variance is large (std=0.683), so strict statistical significance cannot be claimed from current data alone
 - Uncertainty branch shows monotonically decreasing Force RMSE on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å)
 - 2×V100 model-level parallel training is near-linear (1.97× speedup)
 - NVE MD at 10K stable with drift ~0.035 eV/ps
@@ -197,12 +197,14 @@ experiments/rmd17_ethanol_summary/
 ## 10. Recommended Next Commit / Experiment Order
 
 1. (done) Sync documentation
-2. (now) Create local data/artifact inventory
-3. Systematic end-to-end V100 profiling
+2. (done) Create local data/artifact inventory
+3. (done) Systematic end-to-end V100 profiling (124 models, unified CSV)
 4. (done) Uncertainty-diversity Round 002–003
 5. (done) Trust-level Round 002–003
 6. (done) Full 4-strategy comparison
-7. (done) rMD17 ethanol: uncertainty + random baseline + independent test + MD + profiling done
-8. rMD17 ethanol: diversity + trust_level baselines
-9. GPU utilization curves
-10. H100 scaling
+7. (done) rMD17 ethanol: uncertainty + random baseline + independent test + MD + profiling
+8. (done) rMD17 ethanol: diversity + trust_level baselines
+9. GPU utilization/memory curves for full training round (nvidia-smi dmon)
+10. I/O breakdown and prediction batch-size / candidate-size scaling
+11. Multi-system validation (beyond rMD17 ethanol)
+12. H100 scaling

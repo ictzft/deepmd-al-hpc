@@ -220,7 +220,7 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 | trust_level | 0.3616 | 0.0166 |
 | random | 0.6067 | 0.6826 |
 
-All three active strategies within 1σ, all outperform random. Consistent with toy H2.
+All three active strategies within 1σ, all have clearly lower mean Force RMSE than random (0.607 ± 0.683 eV/Å). However, random variance is large — strict statistical significance cannot be claimed. Consistent with toy H2.
 
 **Top-K Labeling Budget Ablation (Round 3, 3-seed mean ± std)**:
 | K | Force RMSE | Std | vs K=1000 |

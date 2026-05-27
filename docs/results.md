@@ -502,7 +502,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 | trust_level | 0.3616 | 0.0166 | 1.68× better |
 | random | 0.6067 | 0.6826 | — baseline |
 
-- 三种 active 策略差异在 1σ 内，均显著优于 random
+- 三种 active 策略差异在 1σ 内，mean 均明显低于 random（0.607 eV/Å），但 random 跨 seed 方差大（std=0.683），不宜仅凭当前数据做严格统计显著性结论
 - 与 toy H2 结论一致：未出现单一策略显著优于其他
 - Diversity 有 1/36 模型训练失败（seed0 model_000, E=30.2 eV），剔除后 F_RMSE=0.3555
 
@@ -631,6 +631,7 @@ prediction time (6.5–7.2s) ✓
 dataset update time (0.34s) ✓
 end-to-end round time (~29s) ✓
 GPU utilization sample (SM 23%, 5407 MiB) ✓
+```
 
 ---
 

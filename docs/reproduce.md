@@ -12,16 +12,26 @@ docs/reproduce_legacy.md
 
 ```text
 docs/
-├── reproduce.md                 # 复现总入口
-├── setup.md                     # 环境配置与 Docker 使用
-├── toy_h2_pipeline.md           # toy H2 数据生成、单模型、初始 committee、prediction
-├── uncertainty_rounds.md        # uncertainty branch Round 0–3 多轮闭环
-├── random_baseline.md           # random sampling baseline 与 random retraining
-├── results.md                   # 实验结果汇总与解释
-├── data_and_git_policy.md       # 数据目录、Git 跟踪、大文件忽略规则
-├── code_check.md                # Python / Shell / JSON / Git 检查命令
-├── profiling_v100.md            # V100 profiling 方案与实测
-└── profiling_h100.md            # H100 迁移计划（尚未执行）
+├── reproduce.md                       # 复现总入口
+├── setup.md                           # 环境配置与 Docker 使用
+├── toy_h2_pipeline.md                 # toy H2 数据生成、单模型、初始 committee、prediction
+├── uncertainty_rounds.md              # uncertainty branch Round 0–3 多轮闭环
+├── random_baseline.md                 # random sampling baseline 与 random retraining
+├── random_baseline_next_steps.md      # random baseline 完成后的下一步
+├── random_baseline_execution_checklist.md  # random baseline 执行清单
+├── selection_strategies.md            # 四类 selection strategy 说明
+├── diversity_and_trust_level_plan.md  # diversity / trust-level 实验计划与结果
+├── results.md                         # 实验结果汇总与解释
+├── paper_evidence.md                  # 论文证据清单
+├── current_project_status.md          # 当前项目全局状态总览
+├── real_dataset_plan.md               # 真实数据集迁移计划与 rMD17 结果
+├── real_dataset_execution_guide.md    # 真实数据集执行指南
+├── data_and_git_policy.md             # 数据目录、Git 跟踪、大文件忽略规则
+├── code_check.md                      # Python / Shell / JSON / Git 检查命令
+├── profiling_v100.md                  # V100 profiling 方案与实测
+├── profiling_h100.md                  # H100 迁移计划（尚未执行）
+├── strategy_comparison_toy_h2.md      # toy H2 策略对比说明
+└── reproduce_legacy.md                # 早期复现记录（历史版本）
 ```
 
 ---
