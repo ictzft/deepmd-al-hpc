@@ -115,3 +115,21 @@ experiments/**/test_result.*
 # Python cache
 __pycache__/
 *.pyc
+
+# rMD17 raw and processed datasets
+data/raw/
+data/processed/
+data/rmd17/
+
+# Large training artifacts
+experiments/**/frozen_model.pb
+experiments/**/*.npz
+experiments/**/*.npy
+experiments/**/model.ckpt*
+experiments/**/checkpoint*
+experiments/**/out.json
+experiments/**/test_result.*
+
+# Python cache
+__pycache__/
+*.pyc
