@@ -1,0 +1,86 @@
+{
+  "data_dir": "data/toy_h2/trust_level_round_001_candidate",
+  "models": [
+    "experiments/baselines/trust_level_seed1_round001_committee_models/model_000/frozen_model.pb",
+    "experiments/baselines/trust_level_seed1_round001_committee_models/model_001/frozen_model.pb",
+    "experiments/baselines/trust_level_seed1_round001_committee_models/model_002/frozen_model.pb",
+    "experiments/baselines/trust_level_seed1_round001_committee_models/model_003/frozen_model.pb"
+  ],
+  "n_models": 4,
+  "n_frames": 40,
+  "n_atoms": 2,
+  "top_k": 10,
+  "output_npz": "experiments/baselines/trust_level_seed1_round001_committee_prediction/committee_predictions.npz",
+  "selected_frames": [
+    {
+      "rank": 1,
+      "frame_index": 11,
+      "force_dev_max": 0.41261627443993276,
+      "force_dev_mean": 0.41261627443993276,
+      "energy_dev": 1.4855959214662289
+    },
+    {
+      "rank": 2,
+      "frame_index": 12,
+      "force_dev_max": 0.2641444610553478,
+      "force_dev_mean": 0.2641444610553478,
+      "energy_dev": 1.4852637880737583
+    },
+    {
+      "rank": 3,
+      "frame_index": 8,
+      "force_dev_max": 0.25746301985618053,
+      "force_dev_mean": 0.25746301985618053,
+      "energy_dev": 1.485206308643123
+    },
+    {
+      "rank": 4,
+      "frame_index": 9,
+      "force_dev_max": 0.22919525370346963,
+      "force_dev_mean": 0.22919525370346963,
+      "energy_dev": 1.479118077611901
+    },
+    {
+      "rank": 5,
+      "frame_index": 21,
+      "force_dev_max": 0.2266299173732547,
+      "force_dev_mean": 0.2266299173732547,
+      "energy_dev": 1.4814560118974955
+    },
+    {
+      "rank": 6,
+      "frame_index": 20,
+      "force_dev_max": 0.1840603030884005,
+      "force_dev_mean": 0.1840603030884005,
+      "energy_dev": 1.481655252218104
+    },
+    {
+      "rank": 7,
+      "frame_index": 22,
+      "force_dev_max": 0.17882708398547703,
+      "force_dev_mean": 0.17882708398547703,
+      "energy_dev": 1.479015809765901
+    },
+    {
+      "rank": 8,
+      "frame_index": 33,
+      "force_dev_max": 0.17279182242764707,
+      "force_dev_mean": 0.17279182242764707,
+      "energy_dev": 1.4784257684224402
+    },
+    {
+      "rank": 9,
+      "frame_index": 28,
+      "force_dev_max": 0.17229655582221157,
+      "force_dev_mean": 0.17229655582221157,
+      "energy_dev": 1.479657497689125
+    },
+    {
+      "rank": 10,
+      "frame_index": 23,
+      "force_dev_max": 0.1684776108106261,
+      "force_dev_mean": 0.1684776108106261,
+      "energy_dev": 1.4782467582254606
+    }
+  ]
+}
