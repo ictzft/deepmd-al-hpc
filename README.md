@@ -881,7 +881,7 @@ add independent test evaluation (done: rMD17 ethanol)
   ↓
 add MD stability validation (done: 10K stable, 100K dissociates)
   ↓
-run diversity + trust_level on rMD17 ethanol
+run diversity + trust_level on rMD17 ethanol (done: four-strategy comparison complete)
   ↓
 run H100 / multi-GPU scaling experiments
 ```

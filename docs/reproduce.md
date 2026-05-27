@@ -639,7 +639,6 @@ experiments/baselines/random_seed2_round001_committee_prediction/selected_topk.j
 当前仍需补充：
 
 ```text
-rMD17 ethanol diversity / trust_level baselines
 全流程 GPU utilization 曲线记录 (nvidia-smi dmon)
 H100 / 多 GPU scaling
 ```
@@ -647,7 +646,6 @@ H100 / 多 GPU scaling
 其中近期优先级最高的是：
 
 ```text
-rMD17 ethanol diversity + trust_level baselines（random baseline 已完成）
 全流程 GPU monitoring 曲线记录
 ```
 
@@ -661,7 +659,7 @@ rMD17 ethanol diversity + trust_level baselines（random baseline 已完成）
 2. rMD17 ethanol 真实数据集 uncertainty branch + random baseline + independent test 已完成（2026-05-26）；
 3. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
 4. uncertainty vs random full RMSE learning curve 对比已生成；
-5. diversity 和 trust-level 策略已完成 multi-seed Round 001–003 完整实验（2026-05-25, 2×V100）；
+5. diversity 和 trust-level 策略在 toy H2 和 rMD17 ethanol 上均已完成 multi-seed multi-round 验证；
 6. 当前尚未进行 H100 / 多 GPU scaling 实验；
 7. V100 training wall-clock profiling 已记录；GPU utilization/memory 系统监测和端到端精确测量未完成；
 8. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
