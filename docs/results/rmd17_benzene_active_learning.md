@@ -43,3 +43,16 @@ Each round follows:
 - Benzene has completed the same real rMD17 active learning loop as ethanol.
 - `DP_INFER_BATCH_SIZE=1800` was used during committee prediction to avoid V100 16GB OOM.
 - Large artifacts are intentionally excluded from GitHub.
+
+## Independent Test Results
+
+The following results were evaluated on the 10000-frame independent test split using `model_000` from each committee. These are single-model test results, not committee-averaged results.
+
+| Round | Train frames | Test Energy RMSE (eV) | Test Energy RMSE/Natoms (eV) | Test Force RMSE (eV/Å) |
+|---|---:|---:|---:|---:|
+| 000 | 1000 | 3.318915e-02 | 2.765762e-03 | 1.821129e-01 |
+| 001 | 2000 | 4.113166e-02 | 3.427639e-03 | 2.018259e-01 |
+| 002 | 3000 | 2.739586e-02 | 2.282988e-03 | 1.610441e-01 |
+| 003 | 4000 | 3.360915e-02 | 2.800763e-03 | 1.873087e-01 |
+
+Current observation: Round 002 gives the best independent-test force RMSE among the evaluated benzene uncertainty rounds. The trend is not strictly monotonic, so future comparison should include random baselines and multi-seed evaluation.
