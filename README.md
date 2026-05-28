@@ -743,7 +743,7 @@ scripts/data/... should not be ignored.
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系上的模型精度；
 2. rMD17 ethanol 四策略 multi-seed multi-round 已完成；independent test 已完成；MD stability (10K) 已完成；
 3. rMD17 benzene uncertainty branch Round 000–003 已完成，random / diversity / trust_level baseline 待补充；
-4. rMD17 ethanol 上 uncertainty vs random 对比已形成（Round 3: 0.354 vs 0.607 eV/Å），benzene 上的多策略对比待验证；
+4. rMD17 ethanol 上四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 对比已完成（Round 3: 0.354–0.362 vs random 0.607 eV/Å），benzene 上的多策略对比待验证；
 5. 当前尚未进行 H100 多 GPU scaling 实验；
 6. diversity（FPS）和 trust-level（DP-GEN-style）策略在 toy H2 和 rMD17 ethanol 上均已完成 multi-seed multi-round 验证；多体系泛化性待验证；
 7. V100 profiling 已记录训练耗时和代表性 GPU 利用率，但全流程 GPU utilization 曲线未记录；

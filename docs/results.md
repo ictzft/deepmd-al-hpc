@@ -654,9 +654,9 @@ four-strategy comparison
 
 ```text
 toy H2 上已完成四策略 multi-seed multi-round 完整对比；
-rMD17 ethanol 上 uncertainty vs random 对比已完成，
-在独立测试集上，uncertainty 相比 random 表现出更稳定的改善趋势（Round 3: 0.327 vs 0.580 ± 0.692 eV/Å，random 方差大）；
-diversity/trust_level 在真实数据上已完成（四策略差异在 1σ 内）；
+rMD17 ethanol 上四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 对比已完成，
+uncertainty 相比 random 在独立测试集上表现出更稳定的改善趋势（Round 3: 0.327 vs 0.580 ± 0.692 eV/Å，random 方差大）；
+三种 active 策略差异在 1σ 内（0.354–0.362 eV/Å）；
 rMD17 benzene 上 uncertainty branch 已完成，多策略 baseline 待补充；
 仍需要更多真实体系和 H100 scaling 进一步验证。
 ```
