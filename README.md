@@ -1,5 +1,29 @@
 # deepmd-al-hpc
 
+## 0. 最新实验状态（2026-05-28）
+
+当前项目已经完成 toy H2 原型验证、rMD17 ethanol 单体系验证，以及 rMD17 benzene 第二真实体系验证。需要注意，本仓库当前阶段仍属于 offline active learning 原型系统：使用已有 rMD17 标注数据模拟 DFT labeling，不等同于已经接入实时 DFT/AIMD 标注闭环。
+
+当前已完成：
+
+- toy H2：uncertainty / random / diversity / trust_level 四策略 multi-seed multi-round 对比；
+- rMD17 ethanol：uncertainty Round000-003，random baseline，多策略对比，independent test，10K NVE stability sanity check；
+- rMD17 benzene：uncertainty Round000-003，random seed0/1/2 Round001-003，independent test，对照表与 mean ± std 汇总；
+- V100：已完成基础训练与推理流程验证，已有 profiling baseline。
+
+当前仍未完成：
+
+- H100 / 多 GPU scaling 实验尚未开始；
+- 真实在线 DFT/AIMD labeling 闭环尚未接入；
+- 10K NVE 只能说明短程稳定性，100K+ 仍会出现解离，不能宣称长期 MD 稳定；
+- uncertainty、diversity、trust_level 之间差异有限，当前不能声称某一 active strategy 统计显著优于其他 active strategy；
+- V100 profiling 还需要补充 GPU utilization、throughput、end-to-end speedup 和 scaling 分析。
+
+当前可支持的论文表述是：本项目实现并验证了一个面向 DeePMD committee models 的 offline active learning 原型系统，在 ethanol 和 benzene 两个 rMD17 分子体系上完成了 uncertainty selection 与 random baseline 的对照验证，并在 V100 平台上形成了初步性能 profiling；H100 scaling、在线 DFT 标注和长期 MD 稳定性仍作为后续工作。
+
+---
+
+
 `deepmd-al-hpc` 是一个面向 **第一性原理机器学习势函数主动学习闭环** 的原型系统，重点关注 **DeePMD / DeepMD-kit 多模型 committee 训练**、**基于不确定性的构型筛选**、**random sampling baseline 对比**，以及后续面向 **多 GPU / H100 平台** 的高性能加速。
 
 本项目属于 **AI for Science × 高性能计算** 交叉方向，目标是构建一个用于机器学习势函数主动学习的可复现实验框架。
