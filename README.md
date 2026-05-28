@@ -1,5 +1,22 @@
 # deepmd-al-hpc
 
+## 最新状态修正（2026-05-28）
+
+当前仓库已经不再只是 toy H2 + rMD17 ethanol。最新进展如下：
+
+- toy H2：四策略 multi-seed multi-round 已完成；
+- rMD17 ethanol：uncertainty / random / diversity / trust_level 四策略 multi-seed multi-round 已完成，independent test 与 10K NVE stability 已完成；
+- rMD17 benzene：uncertainty Round000–003 已完成，random baseline seed0/seed1/seed2 Round001–003 已完成，independent test 与 mean ± std 汇总已完成；
+- V100：training / prediction / selection / dataset update 主流程已跑通，已有 profiling baseline；
+- H100 / 多 GPU scaling：尚未开始；
+- 真实在线 DFT/AIMD labeling：尚未接入，当前仍属于 offline active learning 原型；
+- 长期 MD 稳定性：10K NVE 可作为短程 sanity check，100K+ 解离说明当前模型仍不能宣称长期 MD 稳定。
+
+当前最稳妥的论文表述是：本项目已经在 toy H2、rMD17 ethanol 和 rMD17 benzene 上验证了 DeePMD committee-based offline active learning 原型流程，并在 ethanol 与 benzene 上完成 uncertainty selection 与 random baseline 的独立测试对照；H100 scaling、在线 DFT labeling、第三个真实分子体系和长期 MD 稳定性仍属于后续工作。
+
+---
+
+
 ## 0. 最新实验状态（2026-05-28）
 
 当前项目已经完成 toy H2 原型验证、rMD17 ethanol 单体系验证，以及 rMD17 benzene 第二真实体系验证。需要注意，本仓库当前阶段仍属于 offline active learning 原型系统：使用已有 rMD17 标注数据模拟 DFT labeling，不等同于已经接入实时 DFT/AIMD 标注闭环。
