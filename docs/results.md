@@ -21,8 +21,9 @@ pipeline profiling (all stages)
 
 【rMD17 benzene】
 uncertainty branch Round 000–003
-random / diversity / trust_level baseline (pending)
-independent test evaluation (pending)
+random baseline (seed0/1/2 Round 001–003)
+independent test evaluation
+diversity / trust_level baseline (pending)
 MD stability (pending)
 ```
 
@@ -578,26 +579,34 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 - `DP_INFER_BATCH_SIZE=1800` 避免 V100 16GB OOM
 - 每轮选择 top-1000 高不确定性构型
 
-### 12.3 待补充实验
+### 12.3 已完成实验
 
 ```text
-random baseline (3 seeds × 3 rounds)
+uncertainty branch Round 000–003 ✓
+random baseline seed0/1/2 Round 001–003 ✓
+independent test evaluation ✓
+```
+
+### 12.4 待补充实验
+
+```text
 diversity baseline (3 seeds × 3 rounds)
 trust_level baseline (3 seeds × 3 rounds)
-independent test evaluation (10000-frame test set)
 MD stability (NVE 10K/100K)
 four-strategy comparison
 ```
 
-### 12.4 与 rMD17 ethanol 的对比
+### 12.5 与 rMD17 ethanol 的对比
 
 | 指标 | rMD17 ethanol | rMD17 benzene |
 |---|---|---|
 | 原子数 | 9 | 12 |
 | 候选池 | 60,000 | 60,000 |
 | Uncertainty branch | Round 0–3 (done) | Round 000–003 (done) |
-| 多策略 baseline | done (4-strategy) | pending |
-| Independent test | done (10000 frames) | pending |
+| Random baseline | done (3 seeds × 3 rounds) | done (seed0/1/2 Round 001–003) |
+| Diversity baseline | done | pending |
+| Trust_level baseline | done | pending |
+| Independent test | done (10000 frames) | done |
 | MD stability | done (10K stable) | pending |
 
 详细说明见 `docs/results/rmd17_benzene_active_learning.md`。
@@ -626,7 +635,7 @@ four-strategy comparison
 15. rMD17 ethanol 单体系上，uncertainty 相比 random 表现出更稳定的 Force RMSE 改善趋势（Round 3: 0.354 vs 0.607 ± 0.385 eV/Å）。
 16. rMD17 ethanol 上 NVE 10K MD 稳定，100K+ 解离——模型精度需进一步提高。
 17. rMD17 benzene 上 uncertainty branch Round 000–003 已完成（4 rounds, 4 models each, top-1000 per round）。
-18. rMD17 benzene 多策略 baseline（random / diversity / trust_level）、independent test 和 MD stability 待补充。
+18. rMD17 benzene uncertainty branch、random baseline 和 independent test 已完成，diversity / trust_level baseline 和 MD stability 待补充。
 ```
 
 可以写进 README 的简洁表述：
@@ -641,7 +650,7 @@ four-strategy comparison
 
 ```text
 1. uncertainty sampling 在所有体系上均显著优于 random sampling（仅 rmd17 ethanol 单体系验证，random std 较大）；
-2. 当前方法在真实 DFT / AIMD 数据集上有效（rmd17 ethanol 已验证，benzene baseline 待补充，更多体系待验证）；
+2. 当前方法在真实 DFT / AIMD 数据集上有效（rmd17 ethanol 已验证，benzene uncertainty + random + independent test 已完成，diversity/trust_level 待补充，更多体系待验证）；
 3. 当前方法已经达到 CCF-B 论文完整实验标准；
 4. 当前方法已经完成 H100 / 多 GPU 加速验证；
 5. 当前 active learning 可以稳定降低 Force RMSE（rmd17 上已验证，toy H2 上波动）；
@@ -657,7 +666,7 @@ toy H2 上已完成四策略 multi-seed multi-round 完整对比；
 rMD17 ethanol 上四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 对比已完成，
 uncertainty 相比 random 在独立测试集上表现出更稳定的改善趋势（Round 3: 0.327 vs 0.580 ± 0.692 eV/Å，random 方差大）；
 三种 active 策略差异在 1σ 内（0.354–0.362 eV/Å）；
-rMD17 benzene 上 uncertainty branch 已完成，多策略 baseline 待补充；
+rMD17 benzene 上 uncertainty branch、random baseline 和 independent test 已完成，diversity / trust_level baseline 待补充；
 仍需要更多真实体系和 H100 scaling 进一步验证。
 ```
 
@@ -670,7 +679,7 @@ rMD17 benzene 上 uncertainty branch 已完成，多策略 baseline 待补充；
 1. toy H2 数据集仅用于流程验证；rMD17 ethanol 已提供真实分子体系证据，rMD17 benzene uncertainty branch 已完成但 baseline 待补充；
 2. toy H2 中 valid set 同时承担 candidate pool 和 validation/test 角色（rMD17 已通过 independent test 修正）；
 3. rMD17 ethanol 四策略 multi-seed multi-round 已完成；independent test 已完成；diversity/trust_level 在真实数据上已运行；
-4. rMD17 benzene 仅完成 uncertainty branch，random / diversity / trust_level baseline、independent test 和 MD stability 待补充；
+4. rMD17 benzene uncertainty branch、random baseline 和 independent test 已完成，diversity / trust_level baseline 和 MD stability 待补充；
 5. toy H2 和 rMD17 ethanol 上 diversity 和 trust-level 均已完成 multi-seed multi-round 验证；
 6. 当前尚未进行 H100 / 多 GPU scaling 实验；
 7. V100 training wall-clock profiling 已全量记录（52 模型）；GPU utilization 曲线未记录；
@@ -749,14 +758,14 @@ realistic first-principles dataset validation
 rMD17 benzene data conversion ✓
 train / candidate / test split ✓
 uncertainty branch Round 000–003 ✓
-random baseline (3 seeds × 3 rounds) ✗
+random baseline (seed0/1/2 Round 001–003) ✓
+independent test evaluation ✓
 diversity / trust_level baselines ✗
-independent test evaluation ✗
 MD stability ✗
 four-strategy comparison ✗
 ```
 
-当前 benzene 已从数据准备推进到 uncertainty branch 多轮闭环，下一步是补充多策略 baseline 和独立测试评估。
+当前 benzene 已完成 uncertainty branch、random baseline 和 independent test，下一步是补充 diversity / trust_level baseline 和 MD stability。
 
 ---
 
@@ -945,7 +954,7 @@ experiments/rmd17_ethanol_summary/md_stability/md_summary.json
 toy H2 上四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成；
 rMD17 ethanol 上 uncertainty branch Round 0–3 已完成，random baseline (3 seeds × 3 rounds) 已完成，
 rMD17 ethanol 四策略 multi-seed multi-round 已完成，independent test evaluation 已完成，MD stability 已完成；
-rMD17 benzene 上 uncertainty branch Round 000–003 已完成，多策略 baseline 待补充；
+rMD17 benzene 上 uncertainty branch、random baseline 和 independent test 已完成，diversity / trust_level baseline 待补充；
 H100 scaling 未开始。
 ```
 
@@ -964,7 +973,7 @@ final paper-level validation on real datasets (benzene baselines pending, more s
 下一步重点是：
 
 ```text
-rMD17 benzene: random / diversity / trust_level baselines + independent test + MD
+rMD17 benzene: diversity / trust_level baselines + MD stability
   ↓
 full GPU utilization curves (nvidia-smi dmon)
   ↓

@@ -126,7 +126,7 @@ The `metadata.json` and associated config files ARE suitable for Git.
 
 ---
 
-## 10. Current Status (2026-05-26)
+## 10. Current Status (2026-05-28)
 
 rMD17 ethanol dataset pipeline — uncertainty branch Round 0–3 active learning loop is nearly complete:
 
@@ -273,12 +273,12 @@ rMD17 benzene (C₆H₅OH, 12 atoms) is the second real molecular system validat
 - Data conversion and splitting
 - Round 000–003 committee training (4 models × 4 rounds = 16 models)
 - Round 000–003 committee prediction + uncertainty top-1000 selection
+- Random baseline (seed0/1/2 Round 001–003)
+- Independent test evaluation
 
 **Pending:**
-- Random baseline (3 seeds × 3 rounds)
 - Diversity baseline (3 seeds × 3 rounds)
 - Trust_level baseline (3 seeds × 3 rounds)
-- Independent test evaluation (10000 frames)
 - MD stability (NVE 10K/100K)
 - Four-strategy comparison
 - Pipeline profiling

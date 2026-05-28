@@ -89,7 +89,7 @@ docs/profiling_h100.md
 
 **rMD17 ethanol**：四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成；independent test evaluation 已完成；10K NVE MD stability 已完成。
 
-**rMD17 benzene**：uncertainty branch Round 000–003 已完成（4 rounds × 4 models）；random / diversity / trust_level baseline 待补充；independent test 和 MD stability 待完成。
+**rMD17 benzene**：uncertainty branch Round 000–003 和 random baseline（seed0/1/2 Round 001–003）已完成；independent test 已完成；diversity / trust_level baseline 和 MD stability 待完成。
 
 **H100 scaling**：未开始。
 
@@ -659,7 +659,7 @@ H100 / 多 GPU scaling
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. rMD17 ethanol 真实数据集 uncertainty branch + random baseline + independent test 已完成（2026-05-26）；
-3. rMD17 benzene uncertainty branch Round 000–003 已完成，多策略 baseline 待补充；
+3. rMD17 benzene uncertainty branch 和 random baseline 已完成，independent test 已完成，diversity / trust_level baseline 待补充；
 4. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
 5. uncertainty vs random full RMSE learning curve 对比已生成；
 6. diversity 和 trust-level 策略在 toy H2 和 rMD17 ethanol 上均已完成 multi-seed multi-round 验证；
@@ -743,4 +743,4 @@ docs/profiling_h100.md:
 
 这样可以避免 `reproduce.md` 继续膨胀，也更符合论文型开源项目的文档组织方式。
 
-<!-- reproduce.md updated on 2026-05-26. -->
+<!-- reproduce.md updated on 2026-05-28. -->
