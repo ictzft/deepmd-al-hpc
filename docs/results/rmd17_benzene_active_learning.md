@@ -68,3 +68,15 @@ The following random baseline results were evaluated on the 10000-frame independ
 | random seed0 | 003 | 4000 | 3.684600e-02 | 1.975246e-01 |
 
 Current observation: the random seed0 baseline is non-monotonic and shows a large degradation at Round 002. More random seeds are needed before drawing a statistical conclusion.
+
+## Random Baseline Results: seed1
+
+The following results were evaluated on the 10000-frame independent test split using `model_000` from each 4-model committee.
+
+| Baseline | Round | Train frames | Test Energy RMSE (eV) | Test Energy RMSE/Natoms (eV) | Test Force RMSE (eV/Å) |
+|---|---:|---:|---:|---:|---:|
+| random seed1 | 001 | 2000 | 3.612558e-02 | 3.010465e-03 | 2.108467e-01 |
+| random seed1 | 002 | 3000 | 3.393902e-02 | 2.828252e-03 | 2.037351e-01 |
+| random seed1 | 003 | 4000 | 3.601689e-02 | 3.001408e-03 | 2.092180e-01 |
+
+Current observation: random seed1 is relatively stable across Rounds 001-003, while random seed0 showed a larger degradation at Round 002. At least one more random seed is needed for a more reliable mean/std comparison.
