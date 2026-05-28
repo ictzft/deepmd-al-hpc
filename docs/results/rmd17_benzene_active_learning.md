@@ -56,3 +56,15 @@ The following results were evaluated on the 10000-frame independent test split u
 | 003 | 4000 | 3.360915e-02 | 2.800763e-03 | 1.873087e-01 |
 
 Current observation: Round 002 gives the best independent-test force RMSE among the evaluated benzene uncertainty rounds. The trend is not strictly monotonic, so future comparison should include random baselines and multi-seed evaluation.
+
+## Random Baseline Results
+
+The following random baseline results were evaluated on the 10000-frame independent test split using `model_000` from each 4-model committee. These are single-model test results, not committee-averaged results.
+
+| Baseline | Round | Train frames | Test Energy RMSE (eV) | Test Force RMSE (eV/Å) |
+|---|---:|---:|---:|---:|
+| random seed0 | 001 | 2000 | 3.067832e-02 | 1.939204e-01 |
+| random seed0 | 002 | 3000 | 4.373666e-02 | 2.978373e-01 |
+| random seed0 | 003 | 4000 | 3.684600e-02 | 1.975246e-01 |
+
+Current observation: the random seed0 baseline is non-monotonic and shows a large degradation at Round 002. More random seeds are needed before drawing a statistical conclusion.
