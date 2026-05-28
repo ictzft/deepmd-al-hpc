@@ -80,3 +80,25 @@ The following results were evaluated on the 10000-frame independent test split u
 | random seed1 | 003 | 4000 | 3.601689e-02 | 3.001408e-03 | 2.092180e-01 |
 
 Current observation: random seed1 is relatively stable across Rounds 001-003, while random seed0 showed a larger degradation at Round 002. At least one more random seed is needed for a more reliable mean/std comparison.
+
+## Random Baseline Results: seed2
+
+The following results were evaluated on the 10000-frame independent test split using `model_000` from each 4-model committee.
+
+| Baseline | Round | Train frames | Test Energy RMSE (eV) | Test Energy RMSE/Natoms (eV) | Test Force RMSE (eV/Å) |
+|---|---:|---:|---:|---:|---:|
+| random seed2 | 001 | 2000 | 3.748186e-02 | 3.123488e-03 | 2.210941e-01 |
+| random seed2 | 002 | 3000 | 4.418035e-02 | 3.681696e-03 | 2.416705e-01 |
+| random seed2 | 003 | 4000 | 4.036361e-02 | 3.363634e-03 | 2.677120e-01 |
+
+## Random Baseline Summary
+
+Mean and standard deviation are computed across random seed0, seed1, and seed2. All results use `model_000` from each committee.
+
+| Round | Train frames | Energy RMSE mean ± std (eV) | Force RMSE mean ± std (eV/Å) |
+|---|---:|---:|---:|
+| 001 | 2000 | 3.476192e-02 ± 3.600933e-03 | 2.086204e-01 ± 1.372297e-02 |
+| 002 | 3000 | 4.061868e-02 ± 5.789005e-03 | 2.477476e-01 ± 4.734453e-02 |
+| 003 | 4000 | 3.774217e-02 ± 2.307776e-03 | 2.248182e-01 ± 3.760442e-02 |
+
+Current observation: the random baseline shows clear seed-to-seed and round-to-round fluctuation. Round 002 has the largest force-RMSE variance, mainly due to degradation in random seed0. Compared with the uncertainty-selection results, random selection does not show a stable monotonic improvement on benzene.
