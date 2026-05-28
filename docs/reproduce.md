@@ -89,6 +89,8 @@ docs/profiling_h100.md
 
 **rMD17 ethanol**：四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成；independent test evaluation 已完成；10K NVE MD stability 已完成。
 
+**rMD17 benzene**：uncertainty branch Round 000–003 已完成（4 rounds × 4 models）；random / diversity / trust_level baseline 待补充；independent test 和 MD stability 待完成。
+
 **H100 scaling**：未开始。
 
 toy H2 主线流程包括：
@@ -475,7 +477,7 @@ Round 3: 0.174265
 该结论仍基于 toy H2 数据集；
 所有四策略 multi-seed multi-round comparison 已生成；
 validation RMSE 跨 seed 波动较大，toy H2 无法支撑统计显著性结论；
-真实 DFT/AIMD 数据集是最关键的下一步（rMD17 ethanol uncertainty branch 已完成，多策略对比进行中）。
+真实 DFT/AIMD 数据集已推进到 rMD17 ethanol（四策略完成）和 rMD17 benzene（uncertainty branch 完成，baseline 待补充）。
 ```
 
 ---
@@ -657,12 +659,13 @@ H100 / 多 GPU scaling
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. rMD17 ethanol 真实数据集 uncertainty branch + random baseline + independent test 已完成（2026-05-26）；
-3. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
-4. uncertainty vs random full RMSE learning curve 对比已生成；
-5. diversity 和 trust-level 策略在 toy H2 和 rMD17 ethanol 上均已完成 multi-seed multi-round 验证；
-6. 当前尚未进行 H100 / 多 GPU scaling 实验；
-7. V100 training wall-clock profiling 已记录；GPU utilization/memory 系统监测和端到端精确测量未完成；
-8. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
+3. rMD17 benzene uncertainty branch Round 000–003 已完成，多策略 baseline 待补充；
+4. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
+5. uncertainty vs random full RMSE learning curve 对比已生成；
+6. diversity 和 trust-level 策略在 toy H2 和 rMD17 ethanol 上均已完成 multi-seed multi-round 验证；
+7. 当前尚未进行 H100 / 多 GPU scaling 实验；
+8. V100 training wall-clock profiling 已记录；GPU utilization/memory 系统监测和端到端精确测量未完成；
+9. 当前结果更适合证明主动学习闭环和 baseline 对比流程可行，尚不足以作为完整论文级结论。
 
 ---
 

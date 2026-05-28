@@ -1,6 +1,6 @@
 # Real DFT/AIMD Dataset Execution Guide
 
-**Status: Pipeline validated on rMD17 ethanol (2026-05-26). This guide remains as a template for future real datasets. For rMD17 ethanol results, see `docs/real_dataset_plan.md`.**
+**Status: Pipeline validated on rMD17 ethanol (2026-05-26) and rMD17 benzene uncertainty branch (2026-05-27). This guide remains as a template for future real datasets. For rMD17 results, see `docs/real_dataset_plan.md`.**
 
 ---
 

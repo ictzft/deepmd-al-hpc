@@ -1,6 +1,6 @@
 # Paper Evidence Checklist
 
-This document tracks the current evidence and pending experiments for the `deepmd-al-hpc` project. Last updated: 2026-05-26.
+This document tracks the current evidence and pending experiments for the `deepmd-al-hpc` project. Last updated: 2026-05-28.
 
 ---
 
@@ -24,6 +24,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 16. rMD17 ethanol four-strategy comparison: all three active strategies (uncertainty/diversity/trust_level) show similar Force RMSE (0.354-0.362 eV/Å, within 1σ), all significantly better than random (0.607 eV/Å). Consistent with toy H2 finding.
 17. MD stability test (NVE 10K): all models stable with drift ~0.035 eV/ps; 100K+ dissociation indicates current Force RMSE ~0.35 eV/Å is insufficient for high-T MD.
 18. All experiments are reproducible via documented scripts and configs.
+19. rMD17 benzene uncertainty branch Round 000–003 completed (4 rounds × 4 models, top-1000 per round, 12-atom molecule, 60000-frame candidate pool).
 
 ---
 
@@ -32,7 +33,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 1. **Uncertainty sampling reduces remaining candidate-pool uncertainty more effectively than random sampling.**
    - *Evidence (toy H2):* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332).
    - *Evidence (rmd17):* Four-strategy Round 3 comparison shows all three active strategies (0.354-0.362) outperform random (0.607 eV/Å) on both validation and independent test sets.
-   - *Gap:* Differences among active strategies are within 1σ on both datasets; single-system evidence for real data.
+   - *Gap:* Differences among active strategies are within 1σ on both datasets; benzene baselines pending for multi-system confirmation.
 
 2. **Uncertainty-diversity sampling improves structural coverage without severely degrading model quality.**
    - *Evidence:* Multi-seed Round 001–003 on toy H2 shows diversity F_RMSE comparable to random. On rmd17 ethanol, diversity F_RMSE (0.3555) is competitive with uncertainty (0.3537). Selection-level comparison confirms wider structural coverage (3.1x on toy H2).
@@ -46,8 +47,8 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 ## 3. Claims not yet supported (尚不支持的结论)
 
-1. The method significantly outperforms random sampling across multiple datasets or multiple rounds (single-system rMD17 ethanol evidence available, multi-system needed).
-2. The method is validated on multiple real DFT/AIMD systems (only rMD17 ethanol tested).
+1. The method significantly outperforms random sampling across multiple datasets or multiple rounds (ethanol evidence available; benzene uncertainty done, baselines pending).
+2. The method is validated on multiple real DFT/AIMD systems (rMD17 ethanol fully validated; rMD17 benzene uncertainty branch done, baselines pending).
 3. The framework has demonstrated H100 or multi-node scaling.
 4. The framework has been validated through high-temperature MD stability tests (10K NVE stable; 100K+ dissociation).
 5. The framework is production-ready or meets CCF-B submission standards.
@@ -59,7 +60,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 1. Toy H2 dataset (2 atoms, 250 frames) — cannot represent realistic material systems.
 2. Toy H2: valid set also serves as candidate pool (no independent test). rMD17 ethanol: independent test available (10000 frames).
-3. rMD17 ethanol four-strategy comparison completed on a single molecular system; multi-system validation pending.
+3. rMD17 ethanol four-strategy comparison completed; rMD17 benzene uncertainty branch done, baselines pending; multi-system validation partially underway.
 4. Uncertainty-diversity (FPS) and trust-level (DP-GEN-style) implemented and validated on both toy H2 and rMD17 ethanol.
 5. No H100 or multi-node scaling experiments.
 6. MD stability only verified at 10K NVE; 100K+ dissociation — high-T MD stability not yet achieved.
@@ -73,6 +74,6 @@ This document tracks the current evidence and pending experiments for the `deepm
 1. **Align comparison metrics** — DONE (aligned_comparison.csv uses consistent remaining candidate-pool metric).
 2. **Add GPU monitoring curves** — Run nvidia-smi dmon during one complete round (representative sample done, full curves pending).
 3. **Add uncertainty-diversity selection** — DONE (FPS + pairwise-distance descriptor, 3.1x structural spread).
-4. **Move to real DFT/AIMD dataset** — rMD17 ethanol four-strategy multi-seed multi-round completed; independent test done; MD stability done. Next: multi-system validation.
+4. **Move to real DFT/AIMD dataset** — rMD17 ethanol four-strategy multi-seed multi-round completed; independent test done; MD stability done. rMD17 benzene uncertainty branch done. Next: benzene baselines + independent test + MD stability, then more systems.
 5. **Run H100 / multi-GPU scaling** — Benchmark training throughput and end-to-end round time.
 6. **MD stability tests** — 10K NVE done (stable, drift ~0.035 eV/ps); high-T (>100K) MD stability pending.

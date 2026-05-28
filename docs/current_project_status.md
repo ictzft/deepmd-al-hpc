@@ -1,12 +1,12 @@
 # Current Project Status
 
-Date: 2026-05-26 | Host: shared-v100 (2×Tesla V100-16GB) | Branch: main
+Date: 2026-05-28 | Host: shared-v100 (2×Tesla V100-16GB) | Branch: main
 
 ---
 
 ## 1. One-sentence Summary
 
-toy H2 四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成。rMD17 ethanol 四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成，independent test evaluation 已完成，10K NVE MD stability 已完成；多体系验证待完成。H100 scaling 未开始。
+toy H2 四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成。rMD17 ethanol 四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成，independent test evaluation 已完成，10K NVE MD stability 已完成。rMD17 benzene uncertainty branch Round 000–003 已完成（random / diversity / trust_level baseline 待补充）。H100 scaling 未开始。
 
 ---
 
@@ -38,6 +38,12 @@ toy H2 四策略 multi-seed multi-round 已完成；V100 profiling baseline 已�
 | 22 | rMD17 ethanol MD stability | NVE 10K stable (drift ~0.035 eV/ps), 100K+ dissociates | done |
 | 23 | rMD17 ethanol diversity baseline | 3 seeds × 3 rounds (36 models), F_RMSE=0.3555 | done |
 | 24 | rMD17 ethanol trust_level baseline | 3 seeds × 3 rounds (36 models), F_RMSE=0.3616 | done |
+| 25 | rMD17 benzene uncertainty branch | Round 000–003, 4 rounds × 4 models, top-1000 per round | done |
+| 26 | rMD17 benzene random baseline | — | pending |
+| 27 | rMD17 benzene diversity baseline | — | pending |
+| 28 | rMD17 benzene trust_level baseline | — | pending |
+| 29 | rMD17 benzene independent test | — | pending |
+| 30 | rMD17 benzene MD stability | — | pending |
 
 ---
 
@@ -74,6 +80,21 @@ See `experiments/baselines/aligned_comparison.md` for full aligned comparison.
 
 See `experiments/rmd17_ethanol_summary/four_strategy_comparison.csv`.
 
+### 3.2c rMD17 Benzene Uncertainty Branch (Round 000–003)
+
+| Round | Train | Candidate | Selection | Status |
+|---:|---:|---:|---|---|
+| 000 | 1000 | 60000 | initial | done |
+| 001 | 2000 | 59000 | uncertainty top-1000 | done |
+| 002 | 3000 | 58000 | uncertainty top-1000 | done |
+| 003 | 4000 | 57000 | uncertainty top-1000 | done |
+
+- Dataset: rMD17 benzene (C₆H₅OH, 12 atoms, ~99,995 frames total)
+- Data split: train 1000 / candidate 60000 / valid 5000 / test 10000
+- 4 committee models per round, `DP_INFER_BATCH_SIZE=1800`
+- random / diversity / trust_level baselines pending
+- Detailed results: `docs/results/rmd17_benzene_active_learning.md`
+
 ### 3.3 Key result files
 
 **toy H2:**
@@ -89,6 +110,13 @@ See `experiments/rmd17_ethanol_summary/four_strategy_comparison.csv`.
 - `experiments/rmd17_ethanol_summary/random_baseline_round_summary.csv`
 - `experiments/rmd17_ethanol_summary/profiling_unified.csv`
 - `experiments/rmd17_ethanol_summary/md_stability/md_summary.json`
+
+**rMD17 benzene:**
+- `experiments/rmd17_benzene_round000_committee_prediction/selected_topk.json`
+- `experiments/rmd17_benzene_round001_committee_prediction/selected_topk.json`
+- `experiments/rmd17_benzene_round002_committee_prediction/selected_topk.json`
+- `experiments/rmd17_benzene_round003_committee_prediction/selected_topk.json`
+- `docs/results/rmd17_benzene_active_learning.md`
 
 ---
 
@@ -162,6 +190,9 @@ experiments/rmd17_ethanol_summary/
 3. (done) Uncertainty-diversity multi-round (Round 002–003)
 4. (done) Trust-level multi-round (Round 002–003)
 5. (done) Full 4-strategy comparison (uncertainty / random / diversity / trust-level)
+6. (done) rMD17 benzene uncertainty branch Round 000–003
+7. rMD17 benzene: random / diversity / trust_level baselines
+8. rMD17 benzene: independent test + MD stability
 
 ---
 
@@ -177,17 +208,18 @@ experiments/rmd17_ethanol_summary/
 ## 9. Claim Boundary
 
 **Can claim:**
-- Reproducible active learning pipeline on both toy H2 and rMD17 ethanol (2×V100)
+- Reproducible active learning pipeline on toy H2, rMD17 ethanol, and rMD17 benzene (2×V100)
 - Four-strategy multi-seed multi-round comparison completed on both toy H2 and rMD17 ethanol
 - All three active strategies (uncertainty/diversity/trust_level) have clearly lower mean Force RMSE than random on rMD17 ethanol (Round 3: 0.354-0.362 vs 0.607 eV/Å); however, random cross-seed variance is large (std=0.683), so strict statistical significance cannot be claimed from current data alone
-- Uncertainty branch shows monotonically decreasing Force RMSE on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å)
+- Uncertainty branch shows monotonically decreasing Force RMSE on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å) for rMD17 ethanol
+- Uncertainty branch completed on rMD17 benzene (Round 000–003, 4 rounds)
 - 2×V100 model-level parallel training is near-linear (1.97× speedup)
-- NVE MD at 10K stable with drift ~0.035 eV/ps
+- NVE MD at 10K stable with drift ~0.035 eV/ps (ethanol)
 - Pipeline profiling complete (124 models: 16 unc + 36 rnd + 36 div + 36 trust, unified CSV)
 
 **Cannot claim (yet):**
-- Results generalize to multiple real DFT/AIMD systems (only rMD17 ethanol tested)
-- One active strategy consistently outperforms others (differences within 1σ on both datasets)
+- Results generalize broadly (only 2 rMD17 systems tested; benzene baselines pending)
+- One active strategy consistently outperforms others (differences within 1σ on both toy H2 and ethanol)
 - High-temperature MD stability (100K+ dissociation)
 - H100 multi-GPU scaling results
 - Full CCF-B paper-level evidence
@@ -204,7 +236,8 @@ experiments/rmd17_ethanol_summary/
 6. (done) Full 4-strategy comparison
 7. (done) rMD17 ethanol: uncertainty + random baseline + independent test + MD + profiling
 8. (done) rMD17 ethanol: diversity + trust_level baselines
-9. GPU utilization/memory curves for full training round (nvidia-smi dmon)
-10. I/O breakdown and prediction batch-size / candidate-size scaling
-11. Multi-system validation (beyond rMD17 ethanol)
-12. H100 scaling
+9. (done) rMD17 benzene: uncertainty branch Round 000–003
+10. rMD17 benzene: random / diversity / trust_level baselines + independent test + MD stability
+11. GPU utilization/memory curves for full training round (nvidia-smi dmon)
+12. I/O breakdown and prediction batch-size / candidate-size scaling
+13. H100 scaling

@@ -244,5 +244,44 @@ All three active strategies within 1σ, all have clearly lower mean Force RMSE t
 - 2-model competitive with 4-model at half the cost
 - Diminishing returns: 4→8 models gives only 8.7% RMSE improvement for 2× cost
 
+---
+
+## 11. rMD17 Benzene Results (2026-05-27)
+
+rMD17 benzene (C₆H₅OH, 12 atoms) is the second real molecular system validated.
+
+**Data**:
+| Split | Frames | Path |
+|---|---|---|
+| Initial train | 1000 | `data/rmd17/benzene/train` |
+| Validation | 5000 | `data/rmd17/benzene/valid` |
+| Test | 10000 | `data/rmd17/benzene/test` |
+| Initial candidate | 60000 | `data/rmd17/benzene/candidate` |
+
+**Active learning rounds (uncertainty branch)**:
+| Round | Train frames | Candidate frames | Selection | Status |
+|---:|---:|---:|---|---|
+| 000 | 1000 | 60000 | initial | done |
+| 001 | 2000 | 59000 | uncertainty top-1000 | done |
+| 002 | 3000 | 58000 | uncertainty top-1000 | done |
+| 003 | 4000 | 57000 | uncertainty top-1000 | done |
+
+- 4 committee models per round, `DP_INFER_BATCH_SIZE=1800` to avoid V100 OOM
+- Same pipeline and scripts as rMD17 ethanol
+
+**Done:**
+- Data conversion and splitting
+- Round 000–003 committee training (4 models × 4 rounds = 16 models)
+- Round 000–003 committee prediction + uncertainty top-1000 selection
+
 **Pending:**
-- Multi-system validation (beyond rMD17 ethanol, e.g., benzene)
+- Random baseline (3 seeds × 3 rounds)
+- Diversity baseline (3 seeds × 3 rounds)
+- Trust_level baseline (3 seeds × 3 rounds)
+- Independent test evaluation (10000 frames)
+- MD stability (NVE 10K/100K)
+- Four-strategy comparison
+- Pipeline profiling
+
+**Pending (general):**
+- Additional molecular/material systems beyond rMD17
