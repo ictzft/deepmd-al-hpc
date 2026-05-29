@@ -86,9 +86,13 @@ pipeline profiling (all stages, unified CSV)
   ↓
 uncertainty branch Round 000–003 (1000→4000 训练帧, 60000→57000 候选帧)
   ↓
-random / diversity / trust_level baseline (pending)
+random baseline seed0/1/2 Round 001–003 (done)
   ↓
-independent test evaluation (pending)
+independent test evaluation (done)
+  ↓
+diversity / trust_level baseline (pending)
+  ↓
+four-strategy comparison (pending)
   ↓
 MD stability (pending)
 ```
@@ -96,8 +100,9 @@ MD stability (pending)
 当前尚未完成：
 
 ```text
-rMD17 benzene 多策略 baseline (random / diversity / trust_level)
-rMD17 benzene independent test + MD stability
+rMD17 benzene diversity / trust_level baseline
+rMD17 benzene four-strategy comparison
+rMD17 benzene MD stability
 H100 / 多 GPU scaling
 系统 GPU utilization / memory 曲线记录
 ```
@@ -557,9 +562,9 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 
 | 参数 | 值 |
 |---|---|
-| 分子 | C₆H₅OH（苯酚） |
+| 分子 | C₆H₆（苯） |
 | 原子数 | 12 |
-| 元素 | C, H, O |
+| 元素 | C, H |
 | 总帧数 | ~99,995 |
 | Initial train | 1,000 |
 | Candidate | 60,000 |
@@ -592,8 +597,8 @@ independent test evaluation ✓
 ```text
 diversity baseline (3 seeds × 3 rounds)
 trust_level baseline (3 seeds × 3 rounds)
-MD stability (NVE 10K/100K)
 four-strategy comparison
+MD stability (NVE 10K/100K)
 ```
 
 ### 12.5 与 rMD17 ethanol 的对比
@@ -608,6 +613,7 @@ four-strategy comparison
 | Trust_level baseline | done | pending |
 | Independent test | done (10000 frames) | done |
 | MD stability | done (10K stable) | pending |
+| Four-strategy comparison | done | pending |
 
 详细说明见 `docs/results/rmd17_benzene_active_learning.md`。
 

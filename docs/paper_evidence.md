@@ -21,7 +21,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 13. Structural diversity analysis: diversity (FPS) achieves 3.1x greater structural spread vs uncertainty top-K in toy H2.
 14. rMD17 ethanol uncertainty branch Round 0–3 active learning loop completed; Force RMSE decreases monotonically on both validation (0.374→0.354) and independent test (0.344→0.327 eV/Å).
 15. rMD17 ethanol random baseline (3 seeds × 3 rounds): uncertainty Force RMSE monotonically improves while random shows large variance (Round 3: 0.354 vs 0.607 ± 0.385 eV/Å). In this single-system experiment, uncertainty shows a more stable improvement trend than random.
-16. rMD17 ethanol four-strategy comparison: all three active strategies (uncertainty/diversity/trust_level) show similar Force RMSE (0.354-0.362 eV/Å, within 1σ), all significantly better than random (0.607 eV/Å). Consistent with toy H2 finding.
+16. rMD17 ethanol four-strategy comparison: all three active strategies (uncertainty/diversity/trust_level) show similar Force RMSE (0.354-0.362 eV/Å, within 1σ), all showing lower mean Force RMSE than random (0.607 eV/Å); however, random cross-seed variance is large (std=0.683), so strict statistical significance cannot be claimed. Consistent with toy H2 finding.
 17. MD stability test (NVE 10K): all models stable with drift ~0.035 eV/ps; 100K+ dissociation indicates current Force RMSE ~0.35 eV/Å is insufficient for high-T MD.
 18. All experiments are reproducible via documented scripts and configs.
 19. rMD17 benzene uncertainty branch Round 000–003 completed (4 rounds × 4 models, top-1000 per round, 12-atom molecule, 60000-frame candidate pool).
@@ -32,7 +32,7 @@ This document tracks the current evidence and pending experiments for the `deepm
 
 1. **Uncertainty sampling reduces remaining candidate-pool uncertainty more effectively than random sampling.**
    - *Evidence (toy H2):* In Round 001 remaining candidate-pool comparison, uncertainty_round001 (0.126) < all three random seeds (0.355, 0.488, 0.332).
-   - *Evidence (rmd17):* Four-strategy Round 3 comparison shows all three active strategies (0.354-0.362) outperform random (0.607 eV/Å) on both validation and independent test sets.
+   - *Evidence (rmd17):* Four-strategy Round 3 comparison shows all three active strategies (0.354-0.362) have lower mean Force RMSE than random (0.607 eV/Å) on both validation and independent test sets; however, random cross-seed variance is large (std=0.683).
    - *Gap:* Differences among active strategies are within 1σ on both datasets; benzene baselines pending for multi-system confirmation.
 
 2. **Uncertainty-diversity sampling improves structural coverage without severely degrading model quality.**

@@ -477,7 +477,7 @@ Round 3: 0.174265
 该结论仍基于 toy H2 数据集；
 所有四策略 multi-seed multi-round comparison 已生成；
 validation RMSE 跨 seed 波动较大，toy H2 无法支撑统计显著性结论；
-真实 DFT/AIMD 数据集已推进到 rMD17 ethanol（四策略完成）和 rMD17 benzene（uncertainty branch 完成，baseline 待补充）。
+真实 DFT/AIMD 数据集已推进到 rMD17 ethanol（四策略完成）和 rMD17 benzene（uncertainty branch、random baseline、independent test 已完成，diversity / trust_level baseline 和 MD stability 待补充）。
 ```
 
 ---

@@ -248,7 +248,7 @@ All three active strategies within 1σ, all have clearly lower mean Force RMSE t
 
 ## 11. rMD17 Benzene Results (2026-05-27)
 
-rMD17 benzene (C₆H₅OH, 12 atoms) is the second real molecular system validated.
+rMD17 benzene (C₆H₆, 12 atoms) is the second real molecular system validated.
 
 **Data**:
 | Split | Frames | Path |

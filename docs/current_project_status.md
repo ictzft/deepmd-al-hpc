@@ -89,7 +89,7 @@ See `experiments/rmd17_ethanol_summary/four_strategy_comparison.csv`.
 | 002 | 3000 | 58000 | uncertainty top-1000 | done |
 | 003 | 4000 | 57000 | uncertainty top-1000 | done |
 
-- Dataset: rMD17 benzene (C₆H₅OH, 12 atoms, ~99,995 frames total)
+- Dataset: rMD17 benzene (C₆H₆, 12 atoms, ~99,995 frames total)
 - Data split: train 1000 / candidate 60000 / valid 5000 / test 10000
 - 4 committee models per round, `DP_INFER_BATCH_SIZE=1800`
 - random baseline (seed0/1/2 Round 001–003) done
