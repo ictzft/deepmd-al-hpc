@@ -15,13 +15,19 @@ A real DFT/AIMD dataset is the minimum requirement for a paper submission.
 
 ---
 
-## 2. Minimum dataset requirements
+## 2. Dataset requirements
 
-- At least one realistic material system (e.g., bulk metal, oxide, water)
-- Hundreds to thousands of frames
-- Multi-element (not single-species)
-- Periodic boundary conditions (PBC)
+Two stages of validation are distinguished:
+
+**Molecular benchmark stage** (current: rMD17 ethanol, benzene):
+- Small organic molecules, no PBC
+- Energy + force labels (no virial)
+- Sufficient for validating the AL workflow and strategy comparison
+
+**Periodic material stage** (future):
+- Bulk metals, oxides, or liquids with periodic boundary conditions
 - Energy, force, and virial labels
+- Required for material-science paper submissions
 
 ---
 
@@ -128,7 +134,7 @@ The `metadata.json` and associated config files ARE suitable for Git.
 
 ## 10. Current Status (2026-05-28)
 
-rMD17 ethanol dataset pipeline — uncertainty branch Round 0–3 active learning loop is nearly complete:
+rMD17 ethanol pipeline is complete for the current offline-AL stage: uncertainty/random/diversity/trust_level, independent test, short-horizon NVE sanity check, and V100 profiling have been completed.
 
 **Data** (C₂H₅OH, 9 atoms, 27 Cartesian force components):
 | Split | Frames | Path |
@@ -197,15 +203,15 @@ Each round selects 1000 uncertainty top-K frames from the candidate pool.
 - Test Force RMSE decreases monotonically (0.344→0.327 eV/Å), confirming genuine improvement
 - Test RMSE consistently ~0.028 eV/Å lower than validation
 
-**Random Baseline (3 seeds × 3 rounds)**:
+**Random Baseline (validation set, cross-seed mean ± std; std is across 3 seed means, not 12 models)**:
 | Round | Uncertainty F_RMSE | Random F_RMSE (mean±std) |
 |---:|---:|---:|
 | 1 | 0.3715 | 0.3734 ± 0.010 |
 | 2 | 0.3644 | 0.3990 ± 0.031 |
 | 3 | 0.3537 | 0.6067 ± 0.385 |
 
-- Uncertainty Force RMSE monotonically decreases, random worsens significantly
-- Random Round 3 shows catastrophic degradation (0.607 vs 0.354 eV/Å)
+- Uncertainty Force RMSE monotonically decreases, random worsens in Round 3
+- Random Round 3 mean (0.607) is 1.71× uncertainty (0.354), but random cross-seed variance is large
 
 **MD Stability (NVE, 10K)**:
 - All models stable at 10K with drift ~0.035 eV/ps

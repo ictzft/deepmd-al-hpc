@@ -18,11 +18,19 @@ env/
 
 # =========================
 # Data files
+# /data/ ignores the root local data directory.
+# scripts/data/ contains data-processing scripts and is NOT ignored.
 # =========================
 /data/
 /datasets/
 raw_data/
 processed_data/
+
+# rMD17 raw and processed datasets (explicit, for clarity)
+data/raw/
+data/processed/
+data/rmd17/
+data/real_datasets/
 
 # =========================
 # DeePMD / model files
@@ -85,24 +93,11 @@ experiments/**/committee_predictions.npz
 experiments/**/committee_models/
 experiments/**/model_*/
 
-# =========================
-# =========================
 # Profiling logs (large, auto-generated)
-# =========================
 experiments/profiling/*.log
 experiments/profiling/gpu_*.csv
 experiments/profiling/v100/gpu_logs/
 
-# =========================
-# Real datasets (large data arrays)
-# =========================
-data/real_datasets/
-
-# rMD17 raw and processed datasets
-data/raw/
-data/processed/
-data/rmd17/
-
 # Large training artifacts
 experiments/**/frozen_model.pb
 experiments/**/*.npz
@@ -111,28 +106,6 @@ experiments/**/model.ckpt*
 experiments/**/checkpoint*
 experiments/**/out.json
 experiments/**/test_result.*
-
-# Python cache
-__pycache__/
-*.pyc
-
-# rMD17 raw and processed datasets
-data/raw/
-data/processed/
-data/rmd17/
-
-# Large training artifacts
-experiments/**/frozen_model.pb
-experiments/**/*.npz
-experiments/**/*.npy
-experiments/**/model.ckpt*
-experiments/**/checkpoint*
-experiments/**/out.json
-experiments/**/test_result.*
-
-# Python cache
-__pycache__/
-*.pyc
 
 # DeePMD test output details
 experiments/*_test_model*.out

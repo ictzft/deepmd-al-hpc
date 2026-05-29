@@ -509,7 +509,9 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 - Independent test（10000帧，从未参与 AL）Force RMSE 稳定比 valid 低 ~0.028 eV/Å
 - 与 toy H2 的波动不同，真实分子上的精度提升是稳定且持续的
 
-### 11.2 Random Baseline 对比（3-seed mean ± std）
+### 11.2 Random Baseline 对比（validation set, cross-seed mean ± std）
+
+> **Std 口径说明**：下表 std 为跨 3 个 seed 均值的标准差（n=3）。四策略对比表（11.2b）的 std 为跨 12 个模型的标准差（n=12, ddof=1），数值更大。
 
 | Round | Uncertainty F_RMSE | Random F_RMSE |
 |---:|---:|---:|
@@ -517,7 +519,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 | 2 | 0.3644 | 0.3990 ± 0.031 |
 | 3 | 0.3537 | **0.6067 ± 0.385** |
 
-- Uncertainty 持续改善，random 显著恶化——在真实分子体系上首次验证了 uncertainty-based AL 的有效性
+- Uncertainty 持续改善，random 在 Round 3 出现明显恶化
 - Round 3 差距 0.25 eV/Å，random 甚至比 Round 0 的 baseline（0.3739）更差
 - 说明 random sampling 选中的非代表性构型导致模型过拟合
 
@@ -548,7 +550,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 | 指标 | toy H2 | rMD17 ethanol |
 |---|---|---|
 | Force RMSE 趋势 | 波动，无单调性 | **单调下降** |
-| Uncertainty vs Random | 差异在 1σ 内 | **显著差异**（Round 3: 0.25 eV/Å gap）|
+| Uncertainty vs Random | 差异在 1σ 内 | uncertainty mean 明显更低，但 random 方差大（Round 3: 0.25 eV/Å gap, std=0.683）|
 | 跨模型方差 | 大 | 中等 |
 | Independent test | 无（valid = candidate） | 有（10000帧独立测试集）|
 

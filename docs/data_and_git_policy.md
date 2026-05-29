@@ -169,6 +169,8 @@ scripts/data/make_remaining_candidate.py
 
 无法被 Git 正常跟踪。
 
+注意：`.gitignore` 中除了 `/data/` 之外，还显式列出了 `data/raw/`、`data/processed/`、`data/rmd17/` 等子目录。这是为了提高可读性——`/data/` 已经覆盖了这些路径，显式列出只是为了让人一眼看出有哪些数据子目录存在，不会产生实际冲突。
+
 ---
 
 ## 5. 检查 `.gitignore`

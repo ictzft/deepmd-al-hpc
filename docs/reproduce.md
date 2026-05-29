@@ -93,6 +93,16 @@ docs/profiling_h100.md
 
 **H100 scaling**：未开始。
 
+### 复现目标总表
+
+| Target | Scope | Main doc | Status |
+|---|---|---|---|
+| toy H2 quick reproduce | pipeline + 4 strategies | `docs/toy_h2_pipeline.md`, `docs/strategy_comparison_toy_h2.md` | done |
+| rMD17 ethanol reproduce | uncertainty/random/diversity/trust_level + test + MD | `docs/results/rmd17_ethanol_active_learning.md` | done |
+| rMD17 benzene reproduce | uncertainty + random + independent test | `docs/results/rmd17_benzene_active_learning.md` | partial (diversity/trust_level/MD pending) |
+| V100 profiling reproduce | wall time + prediction + pipeline CSV | `docs/profiling_v100.md` | partial (GPU utilization curves pending) |
+| H100 scaling | planned only | `docs/profiling_h100.md` | not started |
+
 toy H2 主线流程包括：
 
 ```text
