@@ -8,7 +8,7 @@
 - **GPU utilization**: representative sample 可用（SM 23%, 5407 MiB）；全流程曲线未记录
 - **Prediction / I/O**: rMD17 上已实测，toy H2 上为估算值
 
-The current V100 profiling should be treated as a **wall-clock baseline** rather than a complete performance characterization. GPU utilization curves and per-stage I/O latency breakdown are not yet available.
+当前 V100 profiling 应被视为 **wall-clock baseline**，而非完整的性能表征。GPU utilization 曲线和分阶段 I/O latency 分解尚未可用。
 
 ## 1. 为什么 V100 阶段需要做 profiling
 
@@ -493,7 +493,7 @@ V100 profiling 建立的指标体系和 CSV 格式可以直接复用到 H100：
 
 ### 6.4 GPU Utilization and Memory (representative sample)
 
-Recorded via `nvidia-smi dmon -s pucvmet -d 1` inside Docker during single-model training:
+在 Docker 内单模型训练期间通过 `nvidia-smi dmon -s pucvmet -d 1` 记录：
 
 | Metric | Value |
 |---|---|
@@ -502,7 +502,7 @@ Recorded via `nvidia-smi dmon -s pucvmet -d 1` inside Docker during single-model
 | Memory used | ~5407 MiB / 16384 MiB (33%) |
 | Power draw (avg) | 32.6 W |
 
-The low GPU utilization is expected for the toy H2 model (2 atoms, tiny network). GPU memory is mostly TensorFlow runtime overhead. Realistic DFT systems will show higher utilization.
+toy H2 模型（2 atoms, tiny network）的低 GPU 利用率是预期的。GPU memory 主要是 TensorFlow runtime 开销。真实 DFT 系统将表现出更高的利用率。
 
 完整 profiling 数据见 `experiments/profiling/profiling_v100_rounds.csv` 和 `experiments/profiling/profiling_v100_summary.md`。
 

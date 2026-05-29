@@ -1,33 +1,33 @@
-# H100 Profiling Plan
+# H100 Profiling 计划
 
-This document is reserved for future H100 / multi-GPU scaling experiments.
-**No H100 result is reported in the current repository.**
+本文档预留给未来的 H100 / 多 GPU scaling 实验。
+**当前仓库中未报告任何 H100 结果。**
 
-Current status (2026-05-25):
-- V100 wall-clock profiling has been completed (see `docs/profiling_v100.md`).
-- H100 experiments have NOT been conducted.
+当前状态（2026-05-25）：
+- V100 wall-clock profiling 已完成（见 `docs/profiling_v100.md`）。
+- H100 实验尚未进行。
 
-## Planned work
+## 计划工作
 
-1. Port the validated V100 pipeline to H100.
-2. Compare V100 vs H100 per-model training wall-clock time.
-3. Evaluate 1/2/4/8 GPU scaling if resources are available.
-4. Measure committee training throughput (models/hour).
-5. Measure candidate prediction throughput (frames/second).
-6. Report GPU utilization and memory usage via nvidia-smi dmon.
-7. Compare end-to-end active learning round time (V100 vs H100).
+1. 将已验证的 V100 流水线迁移到 H100。
+2. 对比 V100 vs H100 单模型训练 wall-clock time。
+3. 如有资源可用，评估 1/2/4/8 GPU scaling。
+4. 测量 committee training throughput（models/hour）。
+5. 测量 candidate prediction throughput（frames/second）。
+6. 通过 nvidia-smi dmon 报告 GPU utilization 和 memory usage。
+7. 对比端到端 active learning round time（V100 vs H100）。
 
-## Prerequisites
+## 前提条件
 
-- H100 node access with DeepMD-kit Docker environment.
-- Identical training configs (use existing `configs/deepmd/` JSON files) for fair comparison.
-- Identical toy H2 dataset for controlled benchmarking.
+- 具有 DeepMD-kit Docker 环境的 H100 节点访问权限。
+- 使用相同训练配置（现有 `configs/deepmd/` JSON 文件）以保证公平对比。
+- 使用相同 toy H2 数据集进行受控基准测试。
 
-## Relationship to V100 profiling
+## 与 V100 profiling 的关系
 
-See `docs/profiling_v100.md` for the current V100 baseline data, including:
-- Per-model training wall time: mean=10.9s (1000 steps, 8.7ms/batch)
-- 2×V100 parallel speedup: 1.97×
-- Representative GPU utilization and memory data
+当前 V100 baseline 数据见 `docs/profiling_v100.md`，包括：
+- 单模型训练 wall time：mean=10.9s（1000 steps, 8.7ms/batch）
+- 2×V100 并行加速比：1.97×
+- 代表性 GPU utilization 和 memory 数据
 
-The H100 profiling should use the same methodology and report the same metrics for direct comparison.
+H100 profiling 应使用相同方法并报告相同指标，以便直接对比。

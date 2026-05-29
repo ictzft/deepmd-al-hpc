@@ -1,104 +1,51 @@
-# rMD17 Benzene Active Learning Experiments
+# rMD17 Benzene 主动学习实验
 
-## Dataset
+## 数据集
 
-- Dataset: rMD17 benzene
-- Raw data: `data/raw/rmd17_benzene.npz`
-- DeePMD format data: `data/rmd17/benzene/`
-- Type map: `C H O`
+- 数据集：rMD17 benzene
+- 原始数据：`data/raw/rmd17_benzene.npz`
+- DeePMD 格式数据：`data/rmd17/benzene/`
+- Type map：`C H`
 
-Data split:
+数据划分：
 
-| Split | Frames |
+| 划分 | 帧数 |
 |---|---:|
-| Initial train | 1000 |
-| Candidate | 60000 |
-| Validation | 5000 |
-| Test | 10000 |
+| 初始训练集 | 1000 |
+| 候选池 | 60000 |
+| 验证集 | 5000 |
+| 测试集 | 10000 |
 
-> Raw `.npz`, processed `.npy`, candidate pools, predictions, and frozen models are not tracked by Git. They are stored on the training server.
+> 原始 `.npz`、处理后的 `.npy`、候选池、预测结果和 frozen models 不被 Git 跟踪。存储在训练服务器上。
 
-## Active Learning Pipeline
+---
 
-Each round follows:
+## Uncertainty Branch（Round 000–003）
 
-1. Train 4 DeePMD committee models.
-2. Predict the candidate pool with all committee models.
-3. Compute committee model deviation.
-4. Select top-1000 frames by uncertainty.
-5. Merge selected frames into the next-round training set.
-6. Remove selected frames from the candidate pool.
+| Round | 训练帧 | 候选帧 | 选择策略 | 状态 |
+|---:|---:|---:|---|---|
+| 000 | 1000 | 60000 | 初始 | 已完成 |
+| 001 | 2000 | 59000 | uncertainty top-1000 | 已完成 |
+| 002 | 3000 | 58000 | uncertainty top-1000 | 已完成 |
+| 003 | 4000 | 57000 | uncertainty top-1000 | 已完成 |
 
-## Completed Rounds
+- 每轮 4 个 committee models，`DP_INFER_BATCH_SIZE=1800` 避免 V100 OOM
+- 与 rMD17 ethanol 使用相同的 active learning 流水线
 
-| Round | Train frames | Candidate frames | Selection strategy | Committee models | Status |
-|---|---:|---:|---|---:|---|
-| 000 | 1000 | 60000 | initial | 4 | done |
-| 001 | 2000 | 59000 | uncertainty top-1000 | 4 | done |
-| 002 | 3000 | 58000 | uncertainty top-1000 | 4 | done |
-| 003 | 4000 | 57000 | uncertainty top-1000 | 4 | done |
+---
 
-## Notes
+## 已完成实验
 
-- Benzene has completed the same real rMD17 active learning loop as ethanol.
-- `DP_INFER_BATCH_SIZE=1800` was used during committee prediction to avoid V100 16GB OOM.
-- Large artifacts are intentionally excluded from GitHub.
+- 数据格式转换和划分
+- Round 000–003 committee training（4 models × 4 rounds = 16 models）
+- Round 000–003 committee prediction + uncertainty top-1000 selection
+- Random baseline（seed0/1/2 Round 001–003）
+- Independent test evaluation
 
-## Independent Test Results
+## 待补充实验
 
-The following results were evaluated on the 10000-frame independent test split using `model_000` from each committee. These are single-model test results, not committee-averaged results.
-
-| Round | Train frames | Test Energy RMSE (eV) | Test Energy RMSE/Natoms (eV) | Test Force RMSE (eV/Å) |
-|---|---:|---:|---:|---:|
-| 000 | 1000 | 3.318915e-02 | 2.765762e-03 | 1.821129e-01 |
-| 001 | 2000 | 4.113166e-02 | 3.427639e-03 | 2.018259e-01 |
-| 002 | 3000 | 2.739586e-02 | 2.282988e-03 | 1.610441e-01 |
-| 003 | 4000 | 3.360915e-02 | 2.800763e-03 | 1.873087e-01 |
-
-Current observation: Round 002 gives the best independent-test force RMSE among the evaluated benzene uncertainty rounds. The trend is not strictly monotonic, so future comparison should include random baselines and multi-seed evaluation.
-
-## Random Baseline Results
-
-The following random baseline results were evaluated on the 10000-frame independent test split using `model_000` from each 4-model committee. These are single-model test results, not committee-averaged results.
-
-| Baseline | Round | Train frames | Test Energy RMSE (eV) | Test Force RMSE (eV/Å) |
-|---|---:|---:|---:|---:|
-| random seed0 | 001 | 2000 | 3.067832e-02 | 1.939204e-01 |
-| random seed0 | 002 | 3000 | 4.373666e-02 | 2.978373e-01 |
-| random seed0 | 003 | 4000 | 3.684600e-02 | 1.975246e-01 |
-
-Current observation: the random seed0 baseline is non-monotonic and shows a large degradation at Round 002. More random seeds are needed before drawing a statistical conclusion.
-
-## Random Baseline Results: seed1
-
-The following results were evaluated on the 10000-frame independent test split using `model_000` from each 4-model committee.
-
-| Baseline | Round | Train frames | Test Energy RMSE (eV) | Test Energy RMSE/Natoms (eV) | Test Force RMSE (eV/Å) |
-|---|---:|---:|---:|---:|---:|
-| random seed1 | 001 | 2000 | 3.612558e-02 | 3.010465e-03 | 2.108467e-01 |
-| random seed1 | 002 | 3000 | 3.393902e-02 | 2.828252e-03 | 2.037351e-01 |
-| random seed1 | 003 | 4000 | 3.601689e-02 | 3.001408e-03 | 2.092180e-01 |
-
-Current observation: random seed1 is relatively stable across Rounds 001-003, while random seed0 showed a larger degradation at Round 002. At least one more random seed is needed for a more reliable mean/std comparison.
-
-## Random Baseline Results: seed2
-
-The following results were evaluated on the 10000-frame independent test split using `model_000` from each 4-model committee.
-
-| Baseline | Round | Train frames | Test Energy RMSE (eV) | Test Energy RMSE/Natoms (eV) | Test Force RMSE (eV/Å) |
-|---|---:|---:|---:|---:|---:|
-| random seed2 | 001 | 2000 | 3.748186e-02 | 3.123488e-03 | 2.210941e-01 |
-| random seed2 | 002 | 3000 | 4.418035e-02 | 3.681696e-03 | 2.416705e-01 |
-| random seed2 | 003 | 4000 | 4.036361e-02 | 3.363634e-03 | 2.677120e-01 |
-
-## Random Baseline Summary
-
-Mean and standard deviation are computed across random seed0, seed1, and seed2. All results use `model_000` from each committee.
-
-| Round | Train frames | Energy RMSE mean ± std (eV) | Force RMSE mean ± std (eV/Å) |
-|---|---:|---:|---:|
-| 001 | 2000 | 3.476192e-02 ± 3.600933e-03 | 2.086204e-01 ± 1.372297e-02 |
-| 002 | 3000 | 4.061868e-02 ± 5.789005e-03 | 2.477476e-01 ± 4.734453e-02 |
-| 003 | 4000 | 3.774217e-02 ± 2.307776e-03 | 2.248182e-01 ± 3.760442e-02 |
-
-Current observation: the random baseline shows clear seed-to-seed and round-to-round fluctuation. Round 002 has the largest force-RMSE variance, mainly due to degradation in random seed0. Compared with the uncertainty-selection results, random selection does not show a stable monotonic improvement on benzene.
+- Diversity baseline（3 seeds × 3 rounds）
+- Trust_level baseline（3 seeds × 3 rounds）
+- Four-strategy comparison
+- MD stability（NVE 10K/100K）
+- Pipeline profiling

@@ -1,16 +1,16 @@
-# Real DFT/AIMD Dataset Execution Guide
+# 真实 DFT/AIMD 数据集执行指南
 
-**Status: Pipeline validated on rMD17 ethanol (2026-05-26) and rMD17 benzene uncertainty branch (2026-05-27). This guide remains as a template for future real datasets. For rMD17 results, see `docs/real_dataset_plan.md`.**
+**状态：已在 rMD17 ethanol（2026-05-26）和 rMD17 benzene uncertainty branch（2026-05-27）上验证。本指南保留作为未来真实数据集的模板。rMD17 结果见 `docs/real_dataset_plan.md`。**
 
 ---
 
-## Step 0: Prerequisites
+## Step 0：前提条件
 
-- A DeePMD-format dataset directory containing `type.raw`, `type_map.raw`, and `set.*/coord.npy`, `set.*/force.npy`, `set.*/energy.npy`, `set.*/box.npy`
-- 2xV100 with DeepMD-kit Docker environment
-- This repository at `/data/zft/deepmd-al-hpc`
+- DeePMD 格式的数据目录，包含 `type.raw`、`type_map.raw` 和 `set.*/coord.npy`、`set.*/force.npy`、`set.*/energy.npy`、`set.*/box.npy`
+- 具有 DeepMD-kit Docker 环境的 2×V100
+- 本仓库位于 `/data/zft/deepmd-al-hpc`
 
-## Step 1: Four-way split
+## Step 1：四路划分
 
 ```bash
 python scripts/data/prepare_real_dataset_template.py \
@@ -21,17 +21,17 @@ python scripts/data/prepare_real_dataset_template.py \
   --validation 100 --test 100 \
   --seed 0
 
-# Review the metadata
+# 检查 metadata
 cat data/real_datasets/my_system/metadata.json
 ```
 
-Manually split the source data according to the generated indices into:
+根据生成的索引手动划分源数据到：
 - `data/real_datasets/my_system/initial_train/`
 - `data/real_datasets/my_system/candidate_pool/`
 - `data/real_datasets/my_system/validation/`
 - `data/real_datasets/my_system/independent_test/`
 
-## Step 2: Generate committee configs for Round 0
+## Step 2：为 Round 0 生成 committee 配置
 
 ```bash
 python scripts/config/make_round_committee_configs.py \
@@ -42,7 +42,7 @@ python scripts/config/make_round_committee_configs.py \
   --round-id 0 --n-models 4 --base-seed 1001
 ```
 
-## Step 3: Train initial committee (Round 0)
+## Step 3：训练初始 committee（Round 0）
 
 ```bash
 bash scripts/train/train_round_committee_models.sh \
@@ -51,7 +51,7 @@ bash scripts/train/train_round_committee_models.sh \
   /data/zft/deepmd-al-hpc/data/real_datasets/my_system/validation
 ```
 
-## Step 4: Initial committee prediction on candidate_pool
+## Step 4：对 candidate_pool 进行初始 committee prediction
 
 ```bash
 python scripts/inference/predict_committee_models.py \
@@ -66,9 +66,9 @@ python scripts/inference/predict_committee_models.py \
   --top-k 10
 ```
 
-## Step 5: Run active learning rounds with all 4 strategies
+## Step 5：使用所有 4 种策略运行 active learning 轮次
 
-For each strategy (random/uncertainty/diversity/trust_level) and each seed (0/1/2):
+对每种策略（random/uncertainty/diversity/trust_level）和每个 seed（0/1/2）：
 
 ```bash
 python scripts/selection/select_by_strategy.py \
@@ -77,13 +77,13 @@ python scripts/selection/select_by_strategy.py \
   --top-k 10 --top-m 30 \
   --output experiments/real_system/diversity_seed0/round_001/selected_topk.json
 
-# Then: merge -> configs -> train -> predict (same pattern as toy H2 pipeline)
-# Repeat for Round 002, 003
+# 然后：merge → configs → train → predict（与 toy H2 流水线相同模式）
+# 对 Round 002, 003 重复
 ```
 
-See `scripts/experiments/run_toy_h2_strategy_comparison.sh` as template — adapt `--strategy`, data paths, and output dirs.
+以 `scripts/experiments/run_toy_h2_strategy_comparison.sh` 为模板——修改 `--strategy`、数据路径和输出目录。
 
-## Step 6: Independent test evaluation
+## Step 6：Independent test 评估
 
 ```bash
 python scripts/evaluation/evaluate_independent_test_template.py \
@@ -92,13 +92,13 @@ python scripts/evaluation/evaluate_independent_test_template.py \
   --output experiments/real_system/diversity_seed0/round_003/independent_test_metrics.json
 ```
 
-## Step 7: Summarize
+## Step 7：汇总
 
 ```bash
-python scripts/analysis/build_aligned_comparison.py  # adapt to real data paths
+python scripts/analysis/build_aligned_comparison.py  # 修改为真实数据路径
 ```
 
-## Files NOT to commit
+## 不应提交的文件
 
 ```
 data/real_datasets/**/*.npy

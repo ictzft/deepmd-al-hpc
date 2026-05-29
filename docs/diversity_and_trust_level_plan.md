@@ -1,39 +1,39 @@
-# Diversity and Trust-Level Baseline Plan
+# Diversity 和 Trust-Level Baseline 计划
 
 ---
 
-## 1. Status
+## 1. 状态
 
-Diversity and trust-level strategies are **fully implemented and validated** (multi-seed Round 001–003, 2026-05-25, 2×V100). This document is retained as a reference for the original plan and implementation details.
+Diversity 和 trust-level 策略已**完全实现并验证**（multi-seed Round 001–003, 2026-05-25, 2×V100）。本文档保留作为原始计划和实现细节的参考。
 
-- **Uncertainty-diversity**: reduces structural redundancy in top-K uncertainty selection
-- **Trust-level (DP-GEN-style)**: splits candidate pool by model deviation into accurate / candidate / failed regions
+- **Uncertainty-diversity**：减少 top-K uncertainty selection 中的结构冗余
+- **Trust-level（DP-GEN-style）**：按 model deviation 将候选池划分为 accurate / candidate / failed 区域
 
 ---
 
-## 2. Current Available Components
+## 2. 当前可用组件
 
-| Component | Location | Status |
+| 组件 | 位置 | 状态 |
 |---|---|---|
-| Uncertainty-diversity selector | `src/al/selector.py:select_uncertainty_diversity` | implemented |
-| Trust-level selector | `src/al/selector.py:select_trust_level` | implemented |
-| Strategy CLI | `scripts/selection/select_by_strategy.py` | implemented |
-| Selector with diversity/trust support | `scripts/active_learning/select_from_predictions.py` | updated |
-| Diversity multi-seed Round 001–003 | `experiments/baselines/diversity_*` | done (2026-05-25) |
-| Trust-level multi-seed Round 001–003 | `experiments/baselines/trust_level_*` | done (2026-05-25) |
-| Selection-level comparison | `experiments/baselines/strategy_comparison_round000.csv` | done |
-| Aligned four-strategy comparison | `experiments/baselines/aligned_comparison.csv` | done (2026-05-25) |
-| Diversity descriptor analysis | `experiments/baselines/diversity_analysis.md` | done (3.1× spread) |
+| Uncertainty-diversity selector | `src/al/selector.py:select_uncertainty_diversity` | 已实现 |
+| Trust-level selector | `src/al/selector.py:select_trust_level` | 已实现 |
+| Strategy CLI | `scripts/selection/select_by_strategy.py` | 已实现 |
+| 支持 diversity/trust 的 Selector | `scripts/active_learning/select_from_predictions.py` | 已更新 |
+| Diversity multi-seed Round 001–003 | `experiments/baselines/diversity_*` | 已完成（2026-05-25） |
+| Trust-level multi-seed Round 001–003 | `experiments/baselines/trust_level_*` | 已完成（2026-05-25） |
+| Selection-level 对比 | `experiments/baselines/strategy_comparison_round000.csv` | 已完成 |
+| 统一口径四策略对比 | `experiments/baselines/aligned_comparison.csv` | 已完成（2026-05-25） |
+| Diversity descriptor 分析 | `experiments/baselines/diversity_analysis.md` | 已完成（3.1× 覆盖度） |
 
 ---
 
 ## 3. Uncertainty-Diversity Selection
 
-**Algorithm**: Top-M by force_dev_max → pairwise-distance descriptor → Farthest Point Sampling to select K diverse frames.
+**算法**：按 force_dev_max 选 top-M → pairwise-distance descriptor → Farthest Point Sampling 选出 K 个多样性帧。
 
-**Default params**: top_k=10, top_m=30, descriptor=pairwise-distance.
+**默认参数**：top_k=10, top_m=30, descriptor=pairwise-distance。
 
-**Usage**:
+**用法**：
 ```bash
 python scripts/selection/select_by_strategy.py \
   --predictions <committee_predictions.npz> \
@@ -42,7 +42,7 @@ python scripts/selection/select_by_strategy.py \
   --output <output.json>
 ```
 
-**Multi-seed Round 001–003 results (3-seed mean ± std)**:
+**Multi-seed Round 001–003 结果（3-seed mean ± std）**：
 
 | Round | F_RMSE | F_RMSE std |
 |---:|---:|---:|
@@ -50,20 +50,20 @@ python scripts/selection/select_by_strategy.py \
 | 2 | 1.738e-01 | 9.290e-03 |
 | 3 | 1.759e-01 | 4.082e-02 |
 
-See `experiments/baselines/aligned_comparison.md` for full comparison with other strategies.
+完整对比见 `experiments/baselines/aligned_comparison.md`。
 
 ---
 
 ## 4. Trust-Level / DP-GEN-style Selection
 
-**Algorithm**: Force_dev_max percentile splitting:
-- accurate (<P50): skip
-- candidate (P50-P90): select from here (80%)
-- failed (>P90): keep small fraction (20%)
+**算法**：Force_dev_max 分位数划分：
+- accurate（<P50）：跳过
+- candidate（P50–P90）：从此区域选择（80%）
+- failed（>P90）：少量保留（20%）
 
-**Default params**: low_pct=50, high_pct=90, candidate_ratio=0.8.
+**默认参数**：low_pct=50, high_pct=90, candidate_ratio=0.8。
 
-**Usage**:
+**用法**：
 ```bash
 python scripts/selection/select_by_strategy.py \
   --predictions <committee_predictions.npz> \
@@ -72,7 +72,7 @@ python scripts/selection/select_by_strategy.py \
   --output <output.json>
 ```
 
-**Multi-seed Round 001–003 results (3-seed mean ± std)**:
+**Multi-seed Round 001–003 结果（3-seed mean ± std）**：
 
 | Round | F_RMSE | F_RMSE std |
 |---:|---:|---:|
@@ -80,40 +80,40 @@ python scripts/selection/select_by_strategy.py \
 | 2 | 1.491e-01 | 2.256e-02 |
 | 3 | 1.782e-01 | 6.470e-03 |
 
-Accurate/Candidate/Failed split (initial 50-frame pool): 25/20/5.
+Accurate/Candidate/Failed 划分（初始 50 帧候选池）：25/20/5。
 
-See `experiments/baselines/aligned_comparison.md` for full comparison with other strategies.
-
----
-
-## 5. Round 002–003 Execution (Completed)
-
-Round 002–003 for both diversity and trust-level strategies were completed on 2026-05-25 (2×V100). The execution followed the same pattern as `scripts/run_random_baseline_round.sh`:
-1. Prepare data using `merge_selected_frames.py` + `make_remaining_candidate.py`
-2. Generate configs using `make_round_committee_configs.py`
-3. Train using `train_round_committee_models.sh`
-4. Predict using `predict_committee_models.py`
-5. Select next round frames using `select_by_strategy.py`
-
-See `docs/random_baseline_execution_checklist.md` for the command template.
+完整对比见 `experiments/baselines/aligned_comparison.md`。
 
 ---
 
-## 6. Generated Output Files
+## 5. Round 002–003 执行（已完成）
+
+Diversity 和 trust-level 策略的 Round 002–003 已于 2026-05-25 完成（2×V100）。执行流程与 `scripts/run_random_baseline_round.sh` 相同：
+1. 使用 `merge_selected_frames.py` + `make_remaining_candidate.py` 准备数据
+2. 使用 `make_round_committee_configs.py` 生成配置
+3. 使用 `train_round_committee_models.sh` 训练
+4. 使用 `predict_committee_models.py` 预测
+5. 使用 `select_by_strategy.py` 选择下一轮帧
+
+命令模板见 `docs/random_baseline_execution_checklist.md`。
+
+---
+
+## 6. 生成的输出文件
 
 ```
-experiments/baselines/diversity_round002_*/ (trained models + prediction) — done
-experiments/baselines/diversity_round003_*/ — done
-experiments/baselines/trust_level_round002_*/ — done
-experiments/baselines/trust_level_round003_*/ — done
-experiments/baselines/aligned_comparison.csv (4 strategies × 3 rounds) — done
+experiments/baselines/diversity_round002_*/（训练模型 + 预测）— 已完成
+experiments/baselines/diversity_round003_*/ — 已完成
+experiments/baselines/trust_level_round002_*/ — 已完成
+experiments/baselines/trust_level_round003_*/ — 已完成
+experiments/baselines/aligned_comparison.csv（4 strategies × 3 rounds）— 已完成
 ```
 
 ---
 
-## 7. Comparison Table Design
+## 7. 对比表设计
 
-| Strategy | Round | E_RMSE | F_RMSE | Cand force_dev_max | Selected force_dev_max |
+| 策略 | Round | E_RMSE | F_RMSE | Cand force_dev_max | Selected force_dev_max |
 |---|---:|---:|---:|---:|---:|
 | uncertainty | 1 | ... | ... | ... | ... |
 | random (mean) | 1 | ... | ... | ... | ... |
@@ -122,9 +122,9 @@ experiments/baselines/aligned_comparison.csv (4 strategies × 3 rounds) — done
 
 ---
 
-## 8. Limitations
+## 8. 限制
 
-1. Toy H2 only (2 atoms) — structural diversity descriptor is H-H bond length only. Real systems need richer descriptors (SOAP, ACSF).
-2. Trust-level uses only force_dev_max; full DP-GEN uses both force and energy deviation.
-3. Cross-model variance limits per-run comparison reliability.
-4. All conclusions still need validation on real DFT/AIMD datasets.
+1. 仅在 toy H2（2 atoms）上测试——结构多样性 descriptor 仅为 H-H bond length。真实体系需要更丰富的 descriptor（SOAP, ACSF）。
+2. Trust-level 仅使用 force_dev_max；完整 DP-GEN 使用 force 和 energy deviation。
+3. Cross-model variance 限制了单次运行对比的可靠性。
+4. 所有结论仍需在真实 DFT/AIMD 数据集上验证。

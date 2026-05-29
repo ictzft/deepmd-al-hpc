@@ -1,57 +1,57 @@
-# Real DFT/AIMD Dataset Migration Plan
+# 真实 DFT/AIMD 数据集迁移计划
 
 ---
 
-## 1. Why toy H2 is insufficient
+## 1. 为什么 toy H2 不够
 
-Toy H2 (2 atoms, 250 frames) validates that the pipeline works but cannot support claims about real material systems:
+Toy H2（2 atoms, 250 frames）验证了流水线可运行，但不能支撑关于真实材料体系的结论：
 
-- 2-atom H2 has no structural diversity beyond H-H bond length
-- Committee model variance is inflated by tiny dataset size
-- Valid set doubles as candidate pool — no independent evaluation
-- Results cannot generalize to multi-element or periodic systems
+- 2 原子 H2 除 H-H bond length 外无结构多样性
+- Committee model variance 因数据集过小而被放大
+- Valid set 同时充当 candidate pool——无 independent evaluation
+- 结果不能推广到多元素或周期性体系
 
-A real DFT/AIMD dataset is the minimum requirement for a paper submission.
-
----
-
-## 2. Dataset requirements
-
-Two stages of validation are distinguished:
-
-**Molecular benchmark stage** (current: rMD17 ethanol, benzene):
-- Small organic molecules, no PBC
-- Energy + force labels (no virial)
-- Sufficient for validating the AL workflow and strategy comparison
-
-**Periodic material stage** (future):
-- Bulk metals, oxides, or liquids with periodic boundary conditions
-- Energy, force, and virial labels
-- Required for material-science paper submissions
+真实 DFT/AIMD 数据集是论文投稿的最低要求。
 
 ---
 
-## 3. Recommended data splits
+## 2. 数据集要求
 
-| Split | Purpose | Typical Size |
+区分两个验证阶段：
+
+**分子基准阶段**（当前：rMD17 ethanol, benzene）：
+- 小有机分子，无 PBC
+- Energy + force labels（无 virial）
+- 足以验证 AL 工作流和策略对比
+
+**周期性材料阶段**（未来）：
+- 具有周期性边界条件的块体金属、氧化物或液体
+- Energy, force, 和 virial labels
+- 材料科学论文投稿所需
+
+---
+
+## 3. 推荐数据划分
+
+| 划分 | 用途 | 典型大小 |
 |---|---|---|
-| `initial_train` | Train Round 0 committee models | 100–200 frames |
-| `candidate_pool` | Unlabeled pool for active learning selection | 500–2000 frames |
-| `validation` | Model selection and hyperparameter tuning | 100–200 frames |
-| `independent_test` | Final evaluation ONLY, never used in AL | 100–200 frames |
+| `initial_train` | 训练 Round 0 committee models | 100–200 frames |
+| `candidate_pool` | 未标注池，用于 active learning selection | 500–2000 frames |
+| `validation` | 模型选择和超参数调优 | 100–200 frames |
+| `independent_test` | 仅用于最终评估，永不参与 AL | 100–200 frames |
 
-### Critical rules
+### 关键规则
 
-1. `independent_test` must NEVER be used for selection
-2. `candidate_pool` simulates expensive DFT labeling — each selected frame is "labeled"
-3. `validation` is separate from `independent_test`
-4. Toy H2 currently violates rule 1 (valid = candidate_pool). This must be fixed in the real dataset pipeline.
+1. `independent_test` 绝不能用于 selection
+2. `candidate_pool` 模拟昂贵的 DFT labeling——每个被选中的帧被"标注"
+3. `validation` 与 `independent_test` 分离
+4. Toy H2 当前违反规则 1（valid = candidate_pool）。真实数据集流水线中必须修正。
 
 ---
 
-## 4. How to convert existing DeePMD data
+## 4. 如何转换已有 DeePMD 数据
 
-If data is already in DeePMD format (npy arrays with `set.*/` structure):
+如果数据已是 DeePMD 格式（npy arrays with `set.*/` structure）：
 
 ```bash
 python scripts/data/prepare_real_dataset_template.py \
@@ -62,50 +62,50 @@ python scripts/data/prepare_real_dataset_template.py \
   --seed 0
 ```
 
-This creates the directory structure and metadata, then prints the manual steps needed to split the actual data.
+这会创建目录结构和 metadata，然后打印手动划分实际数据所需的步骤。
 
 ---
 
-## 5. How to reuse the four-strategy pipeline
+## 5. 如何复用四策略流水线
 
-The existing scripts work with any DeePMD-format data:
+现有脚本适用于任何 DeePMD 格式数据：
 
-1. Replace `data/toy_h2/` paths with `data/real_datasets/<name>/` paths
-2. Use `initial_train` as the starting training set
-3. Use `candidate_pool` as the initial candidate pool
-4. Use `validation` for `dp test` evaluation
-5. Use `independent_test` only in final evaluation (never feed into AL round)
+1. 将 `data/toy_h2/` 路径替换为 `data/real_datasets/<name>/` 路径
+2. 使用 `initial_train` 作为初始训练集
+3. 使用 `candidate_pool` 作为初始候选池
+4. 使用 `validation` 进行 `dp test` 评估
+5. 仅在最终评估中使用 `independent_test`（永不输入 AL 轮次）
 
-The `scripts/experiments/run_toy_h2_strategy_comparison.sh` template can be adapted by changing data paths.
-
----
-
-## 6. Independent test evaluation
-
-After all AL rounds complete:
-1. Train final models on full training set
-2. Compute Energy RMSE, Force RMSE on `independent_test`
-3. Compute model deviation statistics
-4. Compare against baseline (no AL, random selection)
-
-The `independent_test` must be used exactly once — at the end.
+`scripts/experiments/run_toy_h2_strategy_comparison.sh` 模板可通过修改数据路径来适配。
 
 ---
 
-## 7. MD stability validation (future)
+## 6. Independent test 评估
 
-MD stability is an important physics-based validation that goes beyond RMSE:
+所有 AL 轮次完成后：
+1. 在完整训练集上训练最终模型
+2. 在 `independent_test` 上计算 Energy RMSE, Force RMSE
+3. 计算 model deviation 统计量
+4. 与 baseline（无 AL, random selection）对比
 
-1. Run LAMMPS MD with the final frozen model
-2. Check energy conservation (NVE ensemble)
-3. Check RDF / structural properties match DFT reference
-4. Check no unphysical bond breaking
-
-This is deferred to after the real dataset pipeline is validated.
+`independent_test` 必须仅使用一次——在最后。
 
 ---
 
-## 8. Files NOT to commit to Git
+## 7. MD stability 验证（未来）
+
+MD stability 是超越 RMSE 的重要物理验证：
+
+1. 使用最终 frozen model 运行 LAMMPS MD
+2. 检查能量守恒（NVE ensemble）
+3. 检查 RDF / 结构属性与 DFT 参考一致
+4. 检查无非物理键断裂
+
+这推迟到真实数据集流水线验证之后。
+
+---
+
+## 8. 不应提交到 Git 的文件
 
 ```
 data/real_datasets/**/*.npy
@@ -116,119 +116,119 @@ data/real_datasets/**/energy.npy
 data/real_datasets/**/box.npy
 ```
 
-The `metadata.json` and associated config files ARE suitable for Git.
+`metadata.json` 和相关配置文件适合提交到 Git。
 
 ---
 
-## 9. Next steps
+## 9. 下一步
 
-1. Acquire a small real DFT/AIMD dataset (e.g., from a public repository or collaborator)
-2. Convert to DeePMD npy format if needed
-3. Run `prepare_real_dataset_template.py` to create splits
-4. Adapt the strategy comparison runner to real data paths
-5. Run 4-strategy comparison on real data
-6. Perform independent test evaluation
-7. (Future) Run MD stability validation
+1. 获取小型真实 DFT/AIMD 数据集（如来自公共数据库或合作者）
+2. 如需要，转换为 DeePMD npy 格式
+3. 运行 `prepare_real_dataset_template.py` 创建划分
+4. 将策略对比运行器适配到真实数据路径
+5. 在真实数据上运行四策略对比
+6. 进行 independent test 评估
+7. （未来）运行 MD stability 验证
 
 ---
 
-## 10. Current Status (2026-05-28)
+## 10. 当前状态（2026-05-28）
 
-rMD17 ethanol pipeline is complete for the current offline-AL stage: uncertainty/random/diversity/trust_level, independent test, short-horizon NVE sanity check, and V100 profiling have been completed.
+rMD17 ethanol 流水线在当前 offline-AL 阶段已完成：uncertainty/random/diversity/trust_level、independent test、短时 NVE sanity check 和 V100 profiling 均已完成。
 
-**Data** (C₂H₅OH, 9 atoms, 27 Cartesian force components):
-| Split | Frames | Path |
+**数据**（C₂H₅OH, 9 atoms, 27 Cartesian force components）：
+| 划分 | 帧数 | 路径 |
 |---|---|---|
-| Initial train | 1000 | `data/rmd17/ethanol/train` |
-| Validation | 5000 | `data/rmd17/ethanol/valid` |
-| Test | 10000 | `data/rmd17/ethanol/test` |
-| Initial candidate | 60000 | `data/rmd17/ethanol/candidate` |
+| 初始训练集 | 1000 | `data/rmd17/ethanol/train` |
+| 验证集 | 5000 | `data/rmd17/ethanol/valid` |
+| 测试集 | 10000 | `data/rmd17/ethanol/test` |
+| 初始候选池 | 60000 | `data/rmd17/ethanol/candidate` |
 
-**Active learning rounds (uncertainty branch)**:
-| Round | Train frames | Candidate frames | Training | Prediction |
+**Active learning 轮次（uncertainty branch）**：
+| Round | 训练帧 | 候选帧 | Training | Prediction |
 |---|---:|---:|---|---|
-| 0 | 1000 | 60000 | done | done |
-| 1 | 2000 | 59000 | done | done |
-| 2 | 3000 | 58000 | done | done |
-| 3 | 4000 | 57000 | done | done |
+| 0 | 1000 | 60000 | 已完成 | 已完成 |
+| 1 | 2000 | 59000 | 已完成 | 已完成 |
+| 2 | 3000 | 58000 | 已完成 | 已完成 |
+| 3 | 4000 | 57000 | 已完成 | 已完成 |
 
-Each round selects 1000 uncertainty top-K frames from the candidate pool.
+每轮从候选池中选择 1000 个 uncertainty top-K 帧。
 
-**Done:**
-- Data conversion script: `scripts/data/convert_rmd17_to_deepmd.py`
-- Data splitting script: `scripts/data/split_rmd17_to_deepmd.py`
-- Round 0–3 committee configs (4 models × 4 rounds = 16 configs)
-- Round 0–3 committee model training (16 frozen models)
-- Round 0–3 committee predictions with uncertainty top-K selection
-- Round 0–3 summary CSV + MD + learning curve figures
-- Unified profiling CSV (52 models, all pipeline stages)
+**已完成：**
+- 数据格式转换脚本：`scripts/data/convert_rmd17_to_deepmd.py`
+- 数据划分脚本：`scripts/data/split_rmd17_to_deepmd.py`
+- Round 0–3 committee 配置（4 models × 4 rounds = 16 configs）
+- Round 0–3 committee 模型训练（16 frozen models）
+- Round 0–3 committee prediction + uncertainty top-K selection
+- Round 0–3 summary CSV + MD + learning curve 图
+- 统一 profiling CSV（52 models, all pipeline stages）
 
-**End-to-End Pipeline Profiling (2x V100)**:
-| Round | Train (s) | Pred (s) | Other (s) | Total (s) |
+**端到端流水线 Profiling（2×V100）**：
+| Round | 训练 (s) | 预测 (s) | 其他 (s) | 总计 (s) |
 |---:|---:|---:|---:|---:|
 | 0 | 87 | 185 | 21 | 293 |
 | 1 | 104 | 182 | 21 | 307 |
 | 2 | 107 | 179 | 21 | 307 |
 | 3 | 106 | 176 | 21 | 303 |
 
-- Training: 4 models / 2 GPUs parallel, mean 50.4s/model (uncertainty), 56.7s/model (random)
-- Prediction: 57k–60k frames × 4 models, ~3 min per round
-- Per-round total: ~5 min (uncertainty), ~10 min (random, 3 seeds)
-- Full uncertainty branch (Round 0–3): ~20 min
-- Full random baseline (3 seeds × 3 rounds): ~29 min
-- Data: `experiments/rmd17_ethanol_summary/profiling_unified.csv`, `profiling_all_models.csv`
+- 训练：4 models / 2 GPUs parallel，mean 50.4s/model（uncertainty），56.7s/model（random）
+- 预测：57k–60k frames × 4 models，~3 min/round
+- 每轮总计：~5 min（uncertainty），~10 min（random, 3 seeds）
+- 完整 uncertainty branch（Round 0–3）：~20 min
+- 完整 random baseline（3 seeds × 3 rounds）：~29 min
+- 数据：`experiments/rmd17_ethanol_summary/profiling_unified.csv`，`profiling_all_models.csv`
 
-**Key Results (uncertainty branch)**:
+**关键结果（uncertainty branch）**：
 
-| Round | Train | Candidate | Force RMSE mean | force_dev_max (selected top-1000) |
+| Round | 训练帧 | 候选帧 | Force RMSE mean | force_dev_max（selected top-1000） |
 |---:|---:|---:|---:|---:|
 | 0 | 1000 | 60000 | 3.739e-01 | 6.129e-01 |
 | 1 | 2000 | 59000 | 3.715e-01 | 4.570e-01 |
 | 2 | 3000 | 58000 | 3.644e-01 | 3.906e-01 |
 | 3 | 4000 | 57000 | 3.537e-01 | 4.569e-01 |
 
-- Force RMSE monotonically decreasing (0.374 → 0.354 eV/Å), unlike toy H2
-- top-1000 force_dev_max_mean decreased Round 0→2 (0.613 → 0.391), then bounced to 0.457 in Round 3
-- Energy RMSE stable at ~0.12–0.13 eV across all rounds
-- Summary files: `experiments/rmd17_ethanol_summary/`
+- Force RMSE 单调下降（0.374 → 0.354 eV/Å），与 toy H2 不同
+- top-1000 force_dev_max_mean 在 Round 0→2 下降（0.613 → 0.391），Round 3 回弹至 0.457
+- Energy RMSE 在所有轮次稳定在 ~0.12–0.13 eV
+- 摘要文件：`experiments/rmd17_ethanol_summary/`
 
-**Independent Test Results (10000 frames, never used in AL)**:
-| Round | Force RMSE (test) | Force RMSE (valid) |
+**Independent Test 结果（10000 帧，从未参与 AL）**：
+| Round | Force RMSE（test） | Force RMSE（valid） |
 |---:|---:|---:|
 | 0 | 0.343914 | 0.373912 |
 | 1 | 0.343304 | 0.371493 |
 | 2 | 0.335249 | 0.364440 |
 | 3 | 0.326594 | 0.353702 |
 
-- Test Force RMSE decreases monotonically (0.344→0.327 eV/Å), confirming genuine improvement
-- Test RMSE consistently ~0.028 eV/Å lower than validation
+- Test Force RMSE 单调下降（0.344→0.327 eV/Å），确认真实改善
+- Test RMSE 一致比 validation 低 ~0.028 eV/Å
 
-**Random Baseline (validation set, cross-seed mean ± std; std is across 3 seed means, not 12 models)**:
-| Round | Uncertainty F_RMSE | Random F_RMSE (mean±std) |
+**Random Baseline（validation set, cross-seed mean ± std；std 为跨 3 个 seed 均值的标准差，非 12 个模型）**：
+| Round | Uncertainty F_RMSE | Random F_RMSE（mean±std） |
 |---:|---:|---:|
 | 1 | 0.3715 | 0.3734 ± 0.010 |
 | 2 | 0.3644 | 0.3990 ± 0.031 |
 | 3 | 0.3537 | 0.6067 ± 0.385 |
 
-- Uncertainty Force RMSE monotonically decreases, random worsens in Round 3
-- Random Round 3 mean (0.607) is 1.71× uncertainty (0.354), but random cross-seed variance is large
+- Uncertainty Force RMSE 单调下降，random 在 Round 3 恶化
+- Random Round 3 mean（0.607）是 uncertainty（0.354）的 1.71 倍，但 random 跨 seed 方差大
 
-**MD Stability (NVE, 10K)**:
-- All models stable at 10K with drift ~0.035 eV/ps
-- At 100K+, all models dissociate immediately (Force RMSE ~0.35 eV/Å insufficient for MD)
-- Uncertainty Round 3 has marginally lowest drift (-0.0338 eV/ps)
+**MD Stability（NVE, 10K）**：
+- 所有模型在 10K 下稳定，drift ~0.035 eV/ps
+- 100K+ 下所有模型立即解离（Force RMSE ~0.35 eV/Å 不足以支撑 MD）
+- Uncertainty Round 3 具有最低 drift（-0.0338 eV/ps）
 
-**Four-Strategy Comparison (Round 3, 3-seed mean ± std)**:
-| Strategy | Force RMSE | Std |
+**四策略对比（Round 3, 3-seed mean ± std）**：
+| 策略 | Force RMSE | Std |
 |---|---:|---:|
 | uncertainty | 0.3537 | 0.0247 |
 | diversity | 0.3555 | 0.0143 |
 | trust_level | 0.3616 | 0.0166 |
 | random | 0.6067 | 0.6826 |
 
-All three active strategies within 1σ, all have clearly lower mean Force RMSE than random (0.607 ± 0.683 eV/Å). However, random variance is large — strict statistical significance cannot be claimed. Consistent with toy H2.
+三种 active strategy 在 1σ 内，mean 均低于 random（0.607 ± 0.683 eV/Å）。但 random 方差大——不能声称严格统计显著性。与 toy H2 一致。
 
-**Top-K Labeling Budget Ablation (Round 3, 3-seed mean ± std)**:
+**Top-K Labeling Budget Ablation（Round 3, 3-seed mean ± std）**：
 | K | Force RMSE | Std | vs K=1000 |
 |---:|---:|---:|---:|
 | 250 | 0.3408 | 0.0141 | 3.6% better |
@@ -236,58 +236,58 @@ All three active strategies within 1σ, all have clearly lower mean Force RMSE t
 | 1000 | 0.3537 | 0.0247 | baseline |
 | 2000 | 0.3315 | 0.0176 | 6.3% better |
 
-- K=250 (most selective) and K=2000 (most data) both outperform K=1000
-- Larger K benefits from more training data; smaller K benefits from higher selection precision
+- K=250（最严格选择）和 K=2000（最多数据）均优于 K=1000
+- 更大的 K 受益于更多训练数据；更小的 K 受益于更高选择精度
 
-**Committee Size Ablation (Round 1, 3-seed mean ± std)**:
-| Committee | Force RMSE | Std | Train Time/round |
+**Committee Size Ablation（Round 1, 3-seed mean ± std）**：
+| Committee | Force RMSE | Std | 训练时间/round |
 |---:|---:|---:|---:|
-| 2 models | 0.3436 | 0.0155 | ~55s (1 batch) |
-| 4 models | 0.3715 | 0.0146 | ~110s (2 batches) |
-| 8 models | 0.3392 | 0.0206 | ~220s (4 batches) |
+| 2 models | 0.3436 | 0.0155 | ~55s（1 batch） |
+| 4 models | 0.3715 | 0.0146 | ~110s（2 batches） |
+| 8 models | 0.3392 | 0.0206 | ~220s（4 batches） |
 
-- 8-model best Force RMSE but 2× training cost vs 4-model
-- 2-model competitive with 4-model at half the cost
-- Diminishing returns: 4→8 models gives only 8.7% RMSE improvement for 2× cost
+- 8-model 最佳 Force RMSE 但训练成本是 4-model 的 2 倍
+- 2-model 与 4-model 竞争力相当，成本减半
+- 收益递减：4→8 models 仅 8.7% RMSE 改善，成本翻倍
 
 ---
 
-## 11. rMD17 Benzene Results (2026-05-27)
+## 11. rMD17 Benzene 结果（2026-05-27）
 
-rMD17 benzene (C₆H₆, 12 atoms) is the second real molecular system validated.
+rMD17 benzene（C₆H₆, 12 atoms）是第二个被验证的真实分子体系。
 
-**Data**:
-| Split | Frames | Path |
+**数据**：
+| 划分 | 帧数 | 路径 |
 |---|---|---|
-| Initial train | 1000 | `data/rmd17/benzene/train` |
-| Validation | 5000 | `data/rmd17/benzene/valid` |
-| Test | 10000 | `data/rmd17/benzene/test` |
-| Initial candidate | 60000 | `data/rmd17/benzene/candidate` |
+| 初始训练集 | 1000 | `data/rmd17/benzene/train` |
+| 验证集 | 5000 | `data/rmd17/benzene/valid` |
+| 测试集 | 10000 | `data/rmd17/benzene/test` |
+| 初始候选池 | 60000 | `data/rmd17/benzene/candidate` |
 
-**Active learning rounds (uncertainty branch)**:
-| Round | Train frames | Candidate frames | Selection | Status |
+**Active learning 轮次（uncertainty branch）**：
+| Round | 训练帧 | 候选帧 | 选择策略 | 状态 |
 |---:|---:|---:|---|---|
-| 000 | 1000 | 60000 | initial | done |
-| 001 | 2000 | 59000 | uncertainty top-1000 | done |
-| 002 | 3000 | 58000 | uncertainty top-1000 | done |
-| 003 | 4000 | 57000 | uncertainty top-1000 | done |
+| 000 | 1000 | 60000 | 初始 | 已完成 |
+| 001 | 2000 | 59000 | uncertainty top-1000 | 已完成 |
+| 002 | 3000 | 58000 | uncertainty top-1000 | 已完成 |
+| 003 | 4000 | 57000 | uncertainty top-1000 | 已完成 |
 
-- 4 committee models per round, `DP_INFER_BATCH_SIZE=1800` to avoid V100 OOM
-- Same pipeline and scripts as rMD17 ethanol
+- 每轮 4 个 committee models，`DP_INFER_BATCH_SIZE=1800` 避免 V100 OOM
+- 与 rMD17 ethanol 使用相同的流水线和脚本
 
-**Done:**
-- Data conversion and splitting
-- Round 000–003 committee training (4 models × 4 rounds = 16 models)
+**已完成：**
+- 数据格式转换和划分
+- Round 000–003 committee training（4 models × 4 rounds = 16 models）
 - Round 000–003 committee prediction + uncertainty top-1000 selection
-- Random baseline (seed0/1/2 Round 001–003)
+- Random baseline（seed0/1/2 Round 001–003）
 - Independent test evaluation
 
-**Pending:**
-- Diversity baseline (3 seeds × 3 rounds)
-- Trust_level baseline (3 seeds × 3 rounds)
-- MD stability (NVE 10K/100K)
+**待补充：**
+- Diversity baseline（3 seeds × 3 rounds）
+- Trust_level baseline（3 seeds × 3 rounds）
+- MD stability（NVE 10K/100K）
 - Four-strategy comparison
 - Pipeline profiling
 
-**Pending (general):**
-- Additional molecular/material systems beyond rMD17
+**待补充（通用）：**
+- rMD17 之外的更多分子/材料体系

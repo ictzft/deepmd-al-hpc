@@ -1,32 +1,32 @@
-# Toy H2 Four-Strategy Comparison
+# Toy H2 四策略对比
 
 ---
 
-## 1. Why four-strategy comparison
+## 1. 为什么需要四策略对比
 
-Random baseline alone only tells us "uncertainty is better than random." A stronger paper needs to compare uncertainty against other plausible selection strategies:
+仅靠 random baseline 只能说明"uncertainty 优于 random"。更强的论文需要将 uncertainty 与其他合理 selection strategy 进行对比：
 
-1. **Random** — simplest baseline, verifies that selection strategy matters at all
-2. **Uncertainty top-K** — standard committee-based active learning
-3. **Uncertainty-diversity** — reduces structural redundancy in high-uncertainty regions
-4. **Trust-level (DP-GEN-style)** — splits candidate pool by model deviation thresholds
+1. **Random** — 最简单的 baseline，验证 selection strategy 是否真的有效
+2. **Uncertainty top-K** — 标准 committee-based active learning
+3. **Uncertainty-diversity** — 减少高不确定性区域的结构冗余
+4. **Trust-level（DP-GEN-style）** — 按 model deviation 阈值划分候选池
 
 ---
 
-## 2. Strategy descriptions
+## 2. 策略描述
 
-| Strategy | Algorithm | Parameters |
+| 策略 | 算法 | 参数 |
 |---|---|---|
-| random | Uniform random sampling | `seed` |
-| uncertainty | Sort by `force_dev_max` descending, take top-K | `top_k` |
-| uncertainty-diversity | Top-M by uncertainty → pairwise-distance descriptor → Farthest Point Sampling | `top_k`, `top_m`, `descriptor` |
-| trust-level | Percentile-based accurate/candidate/failed region split | `top_k`, `low_pct`, `high_pct`, `candidate_ratio` |
+| random | 均匀随机采样 | `seed` |
+| uncertainty | 按 `force_dev_max` 降序排序，取 top-K | `top_k` |
+| uncertainty-diversity | 按不确定性选 top-M → pairwise-distance descriptor → Farthest Point Sampling | `top_k`, `top_m`, `descriptor` |
+| trust-level | 基于分位数的 accurate/candidate/failed 区域划分 | `top_k`, `low_pct`, `high_pct`, `candidate_ratio` |
 
-See `docs/selection_strategies.md` for detailed descriptions.
+详见 `docs/selection_strategies.md`。
 
 ---
 
-## 3. How to dry-run
+## 3. 如何 dry-run
 
 ```bash
 for strategy in random uncertainty uncertainty-diversity trust-level; do
@@ -38,18 +38,18 @@ for strategy in random uncertainty uncertainty-diversity trust-level; do
 done
 ```
 
-The dry-run prints all commands without executing them. Use this to verify paths and parameters before running on V100.
+dry-run 打印所有命令但不执行。用于在 V100 上运行前验证路径和参数。
 
 ---
 
-## 4. How to run on V100
+## 4. 如何在 V100 上运行
 
-1. Enter the DeepMD-kit Docker container
-2. Verify data paths exist (`data/toy_h2/train`, `data/toy_h2/valid`)
-3. Remove `--dry-run` and execute:
+1. 进入 DeepMD-kit Docker 容器
+2. 验证数据路径存在（`data/toy_h2/train`, `data/toy_h2/valid`）
+3. 去掉 `--dry-run` 执行：
 
 ```bash
-# Inside Docker container:
+# Docker 容器内：
 bash scripts/experiments/run_toy_h2_strategy_comparison.sh \
   --strategy uncertainty-diversity \
   --start-round 1 --end-round 3 \
@@ -61,32 +61,32 @@ bash scripts/experiments/run_toy_h2_strategy_comparison.sh \
   --top-k 10
 ```
 
-Note: The random and uncertainty strategies already have results in `experiments/baselines/` and `experiments/exp_*/`. The comparison framework can reference those existing results.
+注意：random 和 uncertainty 策略的结果已在 `experiments/baselines/` 和 `experiments/exp_*/` 中。对比框架可以引用这些已有结果。
 
 ---
 
-## 5. How to summarize results
+## 5. 如何汇总结果
 
 ```bash
 python scripts/analysis/summarize_strategy_comparison.py
 ```
 
-Outputs:
+输出：
 - `experiments/strategy_comparison_toy_h2/strategy_summary.csv`
 - `experiments/strategy_comparison_toy_h2/strategy_summary.md`
 
 ---
 
-## 6. Toy H2 limitations
+## 6. Toy H2 的局限性
 
-- 2-atom system: structural diversity descriptor is just H-H bond length
-- Small dataset (250 frames): high cross-model variance
-- Valid set doubles as candidate pool: no independent test set
-- Results indicate workflow feasibility, not general material-system performance
-- Comparison should be treated as a prototype framework, not a final paper table
+- 2 原子体系：结构多样性 descriptor 仅为 H-H bond length
+- 小数据集（250 frames）：cross-model variance 大
+- Valid set 同时作为 candidate pool：无 independent test set
+- 结果表明工作流可行性，不代表真实材料体系性能
+- 对比应视为原型框架，而非最终论文表格
 
 ---
 
-## 7. Real DFT/AIMD migration
+## 7. 迁移到真实 DFT/AIMD 数据集
 
-See `docs/real_dataset_plan.md` for the plan to migrate this comparison framework to a real DFT/AIMD dataset with proper train/candidate/validation/test splits.
+将此对比框架迁移到真实 DFT/AIMD 数据集的计划见 `docs/real_dataset_plan.md`，包括正确的 train/candidate/validation/test 划分。
