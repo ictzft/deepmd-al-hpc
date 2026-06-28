@@ -12,10 +12,22 @@
 | rMD17 ethanol | 四策略 + independent test + 10K NVE stability 完成 |
 | rMD17 benzene | 四策略 + independent test + 2.5ps NVE stability 完成 |
 | H100 scaling | 未开始 |
+| RTX 5090 适配 | Docker 镜像 + toy H2 端到端验证完成（2026-06-28） |
 
 当前仍属于 **offline active learning 原型**：使用已有 rMD17 标注数据模拟 DFT labeling，不等同于已接入实时 DFT/AIMD 标注闭环。
 
 详细状态见 [`docs/current_project_status.md`](docs/current_project_status.md)。
+
+---
+
+## 硬件环境
+
+| 环境 | GPU | 状态 |
+|---|---|---|
+| shared-v100 | 2×Tesla V100-16GB | 全部实验已完成 |
+| RTX 5090 | 8×RTX 5090-32GB (Blackwell) | 环境就绪，实验待跑 |
+
+RTX 5090 环境配置详见 [`docs/setup.md`](docs/setup.md) 第 5.1 节。
 
 ---
 
@@ -106,4 +118,4 @@ GitHub 中保留：source code、configuration files、lightweight experiment su
 
 详见 [`docs/data_and_git_policy.md`](docs/data_and_git_policy.md)。
 
-<!-- README updated on 2026-06-28. -->
+<!-- README updated on 2026-06-28 (5090 env added). -->

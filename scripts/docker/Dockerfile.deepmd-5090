@@ -1,0 +1,35 @@
+# Dockerfile for DeepMD-kit on RTX 5090 (Blackwell, sm_120)
+# Based on nvcr.io/nvidia/pytorch:25.06 which has verified CUDA 12.9 + RTX 5090 support
+FROM nvcr.io/nvidia/pytorch:25.06-py3
+
+# NOTE: NO apt-get mpich needed! HPC-X (already in the base image) provides
+# libmpi.so.40 which torch links against. We only need pip mpich for its Python
+# package metadata (deepmd-kit reads metadata.files("mpich") at runtime).
+
+# Install build deps for deepmd-kit from-source compilation
+RUN apt-get update -qq && apt-get install -y -qq cmake && \
+    rm -rf /var/lib/apt/lists/*
+
+# Build deepmd-kit from source against the container's PyTorch 2.8
+# (PyPI wheel is compiled for PyTorch 2.10, ABI-incompatible)
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    mpi4py mpich && \
+    DP_ENABLE_PYTORCH=1 pip install --no-cache-dir --no-binary deepmd-kit \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple deepmd-kit && \
+    python3 -c "import deepmd; print('deepmd version:', deepmd.__version__)" && \
+    python3 -c "from deepmd.infer import DeepPot; print('DeepPot OK')"
+
+# Force numpy<2: deepmd-kit build pulls in numpy 2.x which is ABI-incompatible
+# with the container's PyTorch (compiled with numpy 1.x)
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    "numpy<2" && \
+    python3 -c "import numpy; print('numpy:', numpy.__version__)" && \
+    python3 -c "import torch; print('torch+numpy OK')"
+
+# Default working directory matches the repo convention
+WORKDIR /data/zft/deepmd-al-hpc
+
+# Ensure DeepMD-kit uses PyTorch backend by default
+ENV DEEPMD_BACKEND=pytorch
+
+CMD ["bash"]

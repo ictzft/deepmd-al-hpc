@@ -1,13 +1,35 @@
-# H100 Profiling 计划
+# H100 / RTX 5090 Profiling 计划
 
-本文档预留给未来的 H100 / 多 GPU scaling 实验。
+本文档预留给未来的 H100 / RTX 5090 多 GPU scaling 实验。
 **当前仓库中未报告任何 H100 结果。**
 
-当前状态（2026-05-25）：
+当前状态（2026-06-28）：
 - V100 wall-clock profiling 已完成（见 `docs/profiling_v100.md`）。
 - H100 实验尚未进行。
+- RTX 5090 环境已就绪，实验待执行。
+
+## RTX 5090 硬件环境
+
+```text
+GPU：8×NVIDIA GeForce RTX 5090 (32GB, Blackwell sm_120)
+驱动：570.124.06，CUDA 12.8
+镜像：deepmd-5090:latest（基于 nvcr.io/nvidia/pytorch:25.06-py3，CUDA 12.9 Minor Version Compat）
+DeepMD-kit：v3.1.3 PyTorch 后端（从源码编译）
+单卡 toy H2 baseline：0.039 s/batch（1000 steps, ~40s total）
+```
 
 ## 计划工作
+
+### RTX 5090（优先）
+
+1. 单卡 V100 vs 5090 speedup 对比（toy H2 相同配置）。
+2. 多 GPU scaling：1/2/4/8 GPU committee training throughput。
+3. Bfloat16 / mixed-precision training（5090 原生支持 bf16，V100 不支持）。
+4. Candidate prediction throughput vs batch size scaling。
+5. 端到端 active learning round time 对比。
+6. GPU utilization / memory 曲线（nvidia-smi dmon）。
+
+### H100（待资源就绪）
 
 1. 将已验证的 V100 流水线迁移到 H100。
 2. 对比 V100 vs H100 单模型训练 wall-clock time。

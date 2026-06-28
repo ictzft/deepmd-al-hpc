@@ -190,7 +190,42 @@ GPU：2×Tesla V100-SXM2-16GB
 
 ```text
 该环境主要用于当前 toy H2 原型验证。
-后续迁移到 H100 时，需要重新记录镜像、驱动、CUDA、DeepMD-kit 版本和 GPU 信息。
+后续迁移到 H100/5090 时，需要重新记录镜像、驱动、CUDA、DeepMD-kit 版本和 GPU 信息。
+```
+
+---
+
+### 5.1 RTX 5090 环境（2026-06-28 适配）
+
+当前 RTX 5090 已验证环境：
+
+```text
+自定义镜像：deepmd-5090:latest（基于 nvcr.io/nvidia/pytorch:25.06-py3）
+DeepMD-kit：v3.1.3（PyTorch 后端，从源码编译以匹配容器 PyTorch 2.8.0）
+Python：/usr/local/bin/python3（Python 3.12）
+PyTorch：2.8.0a0+cu129 (NVIDIA 定制版)
+numpy：<2（锁定以兼容容器 PyTorch）
+mpi4py：已安装
+GPU：8×NVIDIA GeForce RTX 5090 (32GB, Blackwell sm_120)
+驱动：570.124.06，CUDA 12.8（容器内 CUDA 12.9，Minor Version Compat 模式）
+```
+
+关键适配说明：
+
+```text
+1. TensorFlow 后端不可用：TF 编译时仅支持到 sm_89/compute_90，不含 Blackwell sm_120，
+   因此使用 PyTorch 后端（dp -b pytorch train ...）。
+
+2. 镜像构建脚本：scripts/docker/Dockerfile.deepmd-5090
+   进入容器：bash scripts/docker/enter_deepmd_5090.sh
+
+3. 必须使用 root 运行容器：--user 模式下 MPS 会导致 CUDA 初始化挂起。
+
+4. deepmd-kit 从源码编译：PyPI wheel 使用 PyTorch 2.10.0 编译（ABI 不兼容），
+   需设置 DP_ENABLE_PYTORCH=1 pip install --no-binary deepmd-kit。
+
+5. apt mpich 不可安装：会引入 Ubuntu UCX 与 HPC-X UCX 冲突，
+   仅需 pip install mpich（Python 包元数据）。
 ```
 
 ---

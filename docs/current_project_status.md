@@ -1,6 +1,6 @@
 # Current Project Status
 
-Date: 2026-06-28 | Host: shared-v100 (2×Tesla V100-16GB) | Branch: main
+Date: 2026-06-28 | Host: shared-v100 (2×Tesla V100-16GB) → 已迁移至 RTX-5090 (8×RTX 5090-32GB) | Branch: main
 
 ---
 
@@ -200,12 +200,22 @@ V100 上的所有 Tier 1 和 Tier 2 实验均已完成（2026-06-28）：
 
 ---
 
-## 8. Tasks Deferred to H100
+## 8. Tasks Deferred to H100 / RTX 5090
 
-1. Multi-GPU scaling (4/8 GPU)
-2. Bfloat16 / mixed-precision training
+1. Multi-GPU scaling (4/8 GPU) — **5090 上可执行（8 卡）**
+2. Bfloat16 / mixed-precision training — **5090 原生支持 bf16**
 3. Large-batch committee training throughput
-4. H100 vs V100 speedup comparison
+4. H100 / 5090 vs V100 speedup comparison
+
+### 8.1 RTX 5090 环境状态（2026-06-28）
+
+- Docker 镜像 `deepmd-5090:latest` 已构建并验证
+  - 基于 `nvcr.io/nvidia/pytorch:25.06-py3`（CUDA 12.9 + PyTorch 2.8.0）
+  - deepmd-kit 3.1.3 PyTorch 后端从源码编译
+  - Dockerfile: `scripts/docker/Dockerfile.deepmd-5090`
+  - 启动脚本: `scripts/docker/enter_deepmd_5090.sh`
+- toy H2 单模型训练端到端验证通过 (0.039 s/batch, 1000 steps)
+- 注意事项：必须 root 运行容器，TF 后端不可用（Blackwell sm_120 不支持），详见 `docs/setup.md` 5.1 节
 
 ---
 

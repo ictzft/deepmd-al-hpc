@@ -102,6 +102,7 @@ docs/profiling_h100.md
 | rMD17 benzene reproduce | four-strategy + test + MD | `docs/results/rmd17_benzene_active_learning.md` | done |
 | V100 profiling reproduce | wall time + prediction + pipeline CSV | `docs/profiling_v100.md` | partial (GPU utilization curves pending) |
 | H100 scaling | planned only | `docs/profiling_h100.md` | not started |
+| RTX 5090 profiling | 5090 vs V100 + multi-GPU scaling | `docs/profiling_h100.md` | env ready |
 
 toy H2 主线流程包括：
 
