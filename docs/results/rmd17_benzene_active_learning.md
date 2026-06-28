@@ -42,10 +42,35 @@
 - Random baseline（seed0/1/2 Round 001–003）
 - Independent test evaluation
 
-## 待补充实验
+## 已完成实验（更新于 2026-06-28）
 
-- Diversity baseline（3 seeds × 3 rounds）
-- Trust_level baseline（3 seeds × 3 rounds）
+- Diversity baseline（3 seeds × 3 rounds，36 模型）
+- Trust_level baseline（3 seeds × 3 rounds，36 模型）
 - Four-strategy comparison
-- MD stability（NVE 10K/100K）
-- Pipeline profiling
+- MD stability（NVE 2.5ps，10K）
+
+### Four-Strategy Force RMSE（Round 3，validation set，3-seed mean ± std）
+
+| Strategy | Force RMSE (eV/Å) | Std |
+|---|---:|---:|
+| uncertainty | 1.825e-01 | N/A |
+| diversity | 1.891e-01 | ±2.476e-02 |
+| trust_level | 1.966e-01 | ±2.682e-02 |
+| random | 2.165e-01 | ±2.548e-02 |
+
+### MD Stability（NVE 2.5ps, 0.5fs, ~10K）
+
+全部 4 个策略的 Round 3 代表模型均稳定，drift < 0.002 eV/atom/ps：
+
+| Model | Drift (eV/atom/ps) | Temp (K) |
+|---|---:|---:|
+| uncertainty_round3 | 1.808e-03 | 78.0 |
+| random_seed0_round3 | 1.775e-03 | 77.7 |
+| diversity_seed0_round3 | 1.946e-03 | 77.2 |
+| trust_level_seed0_round3 | 1.920e-03 | 77.5 |
+
+### 四策略分析文件
+
+- `experiments/rmd17_benzene_summary/all_strategies_detail.csv`
+- `experiments/rmd17_benzene_summary/four_strategy_comparison.csv`
+- `experiments/rmd17_benzene_summary/md_stability/md_summary.json`

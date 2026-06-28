@@ -25,7 +25,5 @@
 
 ## 待完成
 
-1. rMD17 benzene：diversity / trust_level baselines + MD stability
-2. 全流程 GPU utilization/memory 曲线（nvidia-smi dmon）
-3. H100 / 多 GPU scaling 实验
-4. rMD17 之外的更多分子或材料体系
+1. H100 / 多 GPU scaling 实验
+2. rMD17 之外的更多分子或材料体系

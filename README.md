@@ -4,13 +4,13 @@
 
 ---
 
-## 当前状态（2026-05-28）
+## 当前状态（2026-06-28）
 
 | 系统 | 状态 |
 |---|---|
 | toy H2 | 四策略 multi-seed multi-round 完成；V100 profiling 完成 |
 | rMD17 ethanol | 四策略 + independent test + 10K NVE stability 完成 |
-| rMD17 benzene | uncertainty branch + random baseline + independent test 完成；diversity / trust_level / four-strategy comparison / MD stability 待补充 |
+| rMD17 benzene | 四策略 + independent test + 2.5ps NVE stability 完成 |
 | H100 scaling | 未开始 |
 
 当前仍属于 **offline active learning 原型**：使用已有 rMD17 标注数据模拟 DFT labeling，不等同于已接入实时 DFT/AIMD 标注闭环。
@@ -69,7 +69,7 @@ docs/setup.md → docs/toy_h2_pipeline.md → docs/uncertainty_rounds.md → doc
 - 2×V100 model-level parallel training achieves ~1.97× speedup
 
 **Cannot claim (yet):**
-- Results generalize broadly (only 2 rMD17 systems tested; benzene diversity/trust_level pending)
+- Results generalize broadly (only 2 rMD17 systems tested; more systems needed)
 - One active strategy consistently outperforms others (differences within 1σ on both toy H2 and ethanol)
 - High-temperature MD stability (100K+ dissociation on ethanol)
 - H100 multi-GPU scaling results
@@ -106,4 +106,4 @@ GitHub 中保留：source code、configuration files、lightweight experiment su
 
 详见 [`docs/data_and_git_policy.md`](docs/data_and_git_policy.md)。
 
-<!-- README updated on 2026-05-28. -->
+<!-- README updated on 2026-06-28. -->

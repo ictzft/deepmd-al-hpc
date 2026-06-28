@@ -89,7 +89,7 @@ docs/profiling_h100.md
 
 **rMD17 ethanol**：四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成；independent test evaluation 已完成；10K NVE MD stability 已完成。
 
-**rMD17 benzene**：uncertainty branch Round 000–003 和 random baseline（seed0/1/2 Round 001–003）已完成；independent test 已完成；diversity / trust_level baseline 和 MD stability 待完成。
+**rMD17 benzene**：四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 全部完成；independent test 已完成；2.5ps NVE MD stability 已完成。
 
 **H100 scaling**：未开始。
 
@@ -99,7 +99,7 @@ docs/profiling_h100.md
 |---|---|---|---|
 | toy H2 quick reproduce | pipeline + 4 strategies | `docs/toy_h2_pipeline.md`, `docs/strategy_comparison_toy_h2.md` | done |
 | rMD17 ethanol reproduce | uncertainty/random/diversity/trust_level + test + MD | `docs/results/rmd17_ethanol_active_learning.md` | done |
-| rMD17 benzene reproduce | uncertainty + random + independent test | `docs/results/rmd17_benzene_active_learning.md` | partial (diversity/trust_level/MD pending) |
+| rMD17 benzene reproduce | four-strategy + test + MD | `docs/results/rmd17_benzene_active_learning.md` | done |
 | V100 profiling reproduce | wall time + prediction + pipeline CSV | `docs/profiling_v100.md` | partial (GPU utilization curves pending) |
 | H100 scaling | planned only | `docs/profiling_h100.md` | not started |
 
@@ -487,7 +487,7 @@ Round 3: 0.174265
 该结论仍基于 toy H2 数据集；
 所有四策略 multi-seed multi-round comparison 已生成；
 validation RMSE 跨 seed 波动较大，toy H2 无法支撑统计显著性结论；
-真实 DFT/AIMD 数据集已推进到 rMD17 ethanol（四策略完成）和 rMD17 benzene（uncertainty branch、random baseline、independent test 已完成，diversity / trust_level baseline 和 MD stability 待补充）。
+真实 DFT/AIMD 数据集已推进到 rMD17 ethanol 和 rMD17 benzene（两个体系四策略 multi-seed multi-round 全部完成，independent test 和 MD stability 均已完成）。
 ```
 
 ---
@@ -669,7 +669,7 @@ H100 / 多 GPU scaling
 
 1. toy H2 数据集仅用于流程验证，不能代表真实材料或分子体系；
 2. rMD17 ethanol 真实数据集 uncertainty branch + random baseline + independent test 已完成（2026-05-26）；
-3. rMD17 benzene uncertainty branch 和 random baseline 已完成，independent test 已完成，diversity / trust_level baseline 待补充；
+3. rMD17 benzene 四策略 multi-seed multi-round 全部完成，independent test 和 MD stability 已完成；
 4. random sampling baseline 已完成 seed0/seed1/seed2 Round 001–003 multi-round retraining；
 5. uncertainty vs random full RMSE learning curve 对比已生成；
 6. diversity 和 trust-level 策略在 toy H2 和 rMD17 ethanol 上均已完成 multi-seed multi-round 验证；
@@ -697,7 +697,7 @@ docs/profiling_h100.md:
 后续迁移到真实 DFT / AIMD 数据集时，建议新增：
 
 ```text
-docs/real_dataset.md
+docs/real_dataset_plan.md
 ```
 
 用于记录：

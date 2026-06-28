@@ -2,11 +2,12 @@
 
 本文档记录在 2×Tesla V100 GPU 平台上对 `deepmd-al-hpc` 主动学习闭环的性能 profiling 方案和实测数据。
 
-**当前状态（2026-05-26）：**
+**当前状态（2026-06-28）：**
 - **toy H2**: 132 models training wall time 已提取（mean=11.0s）；2×V100 并行加速比 1.97×
 - **rMD17 ethanol**: 124 models（16 unc + 36 rnd + 36 div + 36 trust）training wall time 已提取（mean=50-57s）；prediction（57k-60k frames, ~176s/round）已实测；统一 pipeline CSV 已生成
-- **GPU utilization**: representative sample 可用（SM 23%, 5407 MiB）；全流程曲线未记录
-- **Prediction / I/O**: rMD17 上已实测，toy H2 上为估算值
+- **rMD17 benzene**: 124 models（16 unc + 36 rnd + 36 div + 36 trust）training wall time 已提取（mean=48-50s，与 ethanol 接近）；prediction（60k frames, ~106s/round, BS=1800）已实测；GPU utilization 连续曲线已记录
+- **GPU utilization**: benzene prediction full round 连续曲线已记录（GPU0 SM avg 51%, max 74%；GPU1 SM avg 21%）；toy H2 representative sample 可用（SM 23%, 5407 MiB）
+- **Prediction / I/O**: rMD17 ethanol + benzene 均已实测；batch-size scaling 在 benzene 上完成（BS 512→3600）
 
 当前 V100 profiling 应被视为 **wall-clock baseline**，而非完整的性能表征。GPU utilization 曲线和分阶段 I/O latency 分解尚未可用。
 
@@ -510,6 +511,52 @@ toy H2 模型（2 atoms, tiny network）的低 GPU 利用率是预期的。GPU m
 
 ---
 
+## 6.5 rMD17 Benzene Prediction GPU Utilization（连续曲线，2026-06-28）
+
+在 benzene 60k-frame 候选池 × 4 committee models 的完整 prediction 阶段，通过 `nvidia-smi dmon -s pucvmet -d 2` 连续记录（98 samples）：
+
+| Metric | GPU0 | GPU1 |
+|---|---|---|
+| SM utilization (avg) | **51%** | 21% |
+| SM utilization (max) | **74%** | 49% |
+| Mem utilization (avg) | 34% | ~2% |
+| Mem used | ~5.6 GB / 16 GB | ~0.3 GB / 16 GB |
+
+**分析**：
+- GPU0 承担主要推理负载（4 个模型依次在可用 GPU 上运行）
+- GPU1 在部分推理阶段空闲，利用率偏低
+- SM 利用率 51-74% 显著高于 toy H2 训练时的 23-28%
+- 总 throughput：2264 fps（4 models × 60000 frames / 106s @ BS=1800）
+
+### 6.6 Benzene Prediction Batch-Size Scaling（2026-06-28）
+
+| Batch Size | Wall Time (s) | Throughput (fps) | vs BS=1800 |
+|---:|---:|---:|---:|
+| 512 | 124 | 1935 | 0.85× |
+| 1024 | 111 | 2162 | 0.96× |
+| **1800** | **106** | **2264** | **1.00×** |
+| 3600 | 104 | 2308 | 1.02× |
+
+- BS=1800 是 V100 16GB 的 sweet spot：接近最优 throughput，更大 BS（3600）仅提升 2%
+- BS=512→1800 提升 17%，此后瓶颈从 batch size 转移到模型推理本身
+- 单模型 prediction throughput ~566 fps
+
+### 6.7 rMD17 Benzene Per-Round Pipeline Timeline（2×V100，实测）
+
+| Stage | Time (s) | % | GPU |
+|---|---:|---:|---|
+| Training (4 models, 2 GPU) | ~100 | 47% | Yes |
+| Freeze + Test (4 models) | ~15 | 7% | Yes |
+| Prediction (60k frames) | 106 | 50% | Yes (unbalanced) |
+| Selection / Merge / I/O | ~6 | 3% | No |
+| **Total** | **~227** | **100%** | |
+
+- 主要瓶颈：training (47%) + prediction (50%)
+- Training：4 models × ~48s/model ≈ 192s serial，2-GPU 并行 = ~100s（~1.92× 加速比）
+- 与 ethanol 对比：ethanol per-round ~303s（training 35%，prediction 58%），benzene 更快（少 1 个原子，但有 O 元素 type）
+- 数据来源：`experiments/profiling/gpu_dmon_benzene_prediction.log`、`experiments/profiling/batch_size_scaling.csv`
+---
+
 ## 7. 如何开始 V100 Profiling
 
 ### 第一步：创建 profiling 目录
@@ -566,3 +613,4 @@ V100 profiling 完成后，记录：
 ```
 
 这些数据将成为后续 `docs/profiling_h100.md` 中 H100 加速比计算的 baseline。
+

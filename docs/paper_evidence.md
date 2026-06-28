@@ -1,6 +1,6 @@
 # 论文证据清单
 
-本文档跟踪 `deepmd-al-hpc` 项目的当前证据和待完成实验。最后更新：2026-05-28。
+本文档跟踪 `deepmd-al-hpc` 项目的当前证据和待完成实验。最后更新：2026-06-28。
 
 ---
 
@@ -25,6 +25,8 @@
 17. MD stability test（NVE 10K）：所有模型稳定，drift ~0.035 eV/ps；100K+ 解离表明当前 Force RMSE ~0.35 eV/Å 不足以支撑高温 MD。
 18. 本仓库提供了文档化的脚本、配置和轻量摘要，用于复现主要实验工作流，前提是具备所需的本地数据集和 DeepMD-kit 环境。
 19. rMD17 benzene uncertainty branch Round 000–003 完成（4 rounds × 4 models, top-1000 per round, 12 原子分子, 60000 帧候选池）。
+20. rMD17 benzene 四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 全部完成（124 models：16 unc + 36 rnd + 36 div + 36 trust），independent test 和 MD stability（NVE 2.5ps）完成。四策略 Force RMSE 接近（0.182-0.217 eV/Å）。
+21. V100 benzene prediction GPU utilization 连续曲线已记录（GPU0 SM avg 51%, max 74%）；batch-size scaling 完成（BS 512→3600, sweet spot BS=1800, 2264 fps）。
 
 ---
 
@@ -33,7 +35,7 @@
 1. **Uncertainty sampling 比 random sampling 更有效地降低剩余候选池不确定性。**
    - *证据（toy H2）：* Round 001 剩余候选池对比中，uncertainty_round001（0.126）< 三个 random seed（0.355, 0.488, 0.332）。
    - *证据（rMD17）：* 四策略 Round 3 对比显示三种 active strategy（0.354–0.362）在 validation 和 independent test 上均低于 random（0.607 eV/Å）；但 random 跨 seed 方差大（std=0.683）。
-   - *差距：* active strategy 之间的差异在两个数据集上均在 1σ 内；benzene baselines 待补充以进行多体系确认。
+   - *差距：* active strategy 之间的差异在两个数据集上均在 1σ 内；benzene 四策略已完成，but conclusions limited to 2 systems。
 
 2. **Uncertainty-diversity sampling 在不严重降低模型质量的前提下改善结构覆盖度。**
    - *证据：* toy H2 上 multi-seed Round 001–003 显示 diversity F_RMSE 与 random 相当。rMD17 ethanol 上 diversity F_RMSE（0.3555）与 uncertainty（0.3537）竞争力相当。Selection-level 对比确认了更广的结构覆盖（toy H2 上 3.1x）。
@@ -47,8 +49,8 @@
 
 ## 3. 尚不支持的结论
 
-1. 该方法在多个数据集或多轮实验中显著优于 random sampling（ethanol 证据可用；benzene uncertainty + random + independent test 已完成，diversity/trust_level 待补充）。
-2. 该方法已在多个真实 DFT/AIMD 系统上验证（rMD17 ethanol 完全验证；rMD17 benzene uncertainty + random + independent test 已完成，diversity/trust_level 待补充）。
+1. 该方法在多个数据集或多轮实验中显著优于 random sampling（ethanol 上 uncertainty 明显优于 random，但 random 方差大；benzene 上四策略接近，uncertainty 略优但差异在 1σ 内）。
+2. 该方法已在多个真实 DFT/AIMD 系统上验证（rMD17 ethanol + benzene 两个体系四策略全部完成；更多体系待验证）。
 3. 该框架已展示 H100 或多节点 scaling。
 4. 该框架已通过高温 MD stability 测试验证（10K NVE 稳定；100K+ 解离）。
 5. 该框架已达到生产就绪或满足 CCF-B 投稿标准。
@@ -60,12 +62,12 @@
 
 1. Toy H2 数据集（2 atoms, 250 frames）——不能代表真实材料体系。
 2. Toy H2：valid set 同时作为 candidate pool（无 independent test）。rMD17 ethanol：independent test 可用（10000 frames）。
-3. rMD17 ethanol 四策略对比已完成；rMD17 benzene uncertainty + random + independent test 已完成，diversity/trust_level 待补充；多体系验证部分进行中。
+3. rMD17 ethanol + benzene 两个体系四策略对比均已完成；多体系验证部分进行中。
 4. Uncertainty-diversity（FPS）和 trust-level（DP-GEN-style）已在 toy H2 和 rMD17 ethanol 上实现并验证。
 5. 无 H100 或多节点 scaling 实验。
 6. MD stability 仅在 10K NVE 验证；100K+ 解离——高温 MD stability 尚未实现。
-7. 全流程 GPU utilization 曲线未记录（有代表性样本）。
-8. Profiling 覆盖 124 models（所有策略）；GPU utilization 曲线和分阶段 I/O latency 待补充。
+7. GPU utilization 连续曲线已在 benzene prediction 上记录（GPU0 SM avg 51%），batch-size scaling 已完成。
+8. Profiling 覆盖 212 models（toy H2 132 + ethanol 124 + benzene 124 去重）；GPU utilization 曲线和 batch-size scaling 已完成。
 
 ---
 
@@ -74,6 +76,6 @@
 1. **统一对比指标** — 已完成（aligned_comparison.csv 使用一致的 remaining candidate-pool 指标）。
 2. **添加 GPU 监控曲线** — 在完整一轮中运行 nvidia-smi dmon（代表性样本已完成，完整曲线待补充）。
 3. **添加 uncertainty-diversity selection** — 已完成（FPS + pairwise-distance descriptor, 3.1x 结构覆盖度）。
-4. **迁移到真实 DFT/AIMD 数据集** — rMD17 ethanol 四策略 multi-seed multi-round 已完成；independent test 已完成；MD stability 已完成。rMD17 benzene uncertainty + random + independent test 已完成。下一步：benzene diversity/trust_level baselines + MD stability，然后是更多体系。
+4. **迁移到真实 DFT/AIMD 数据集** — rMD17 ethanol 四策略 multi-seed multi-round 已完成；rMD17 benzene 四策略也都已完成。下一步：更多分子体系。
 5. **运行 H100 / 多 GPU scaling** — 测试训练 throughput 和端到端 round time。
 6. **MD stability 测试** — 10K NVE 已完成（稳定, drift ~0.035 eV/ps）；高温（>100K）MD stability 待补充。

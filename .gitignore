@@ -96,6 +96,10 @@ experiments/**/model_*/
 # Profiling logs (large, auto-generated)
 experiments/profiling/*.log
 experiments/profiling/gpu_*.csv
+experiments/profiling/batch_size_scaling.csv
+experiments/profiling/benzene_bs*.npz
+experiments/profiling/benzene_prediction_test.npz
+experiments/profiling/gpu_dmon_benzene_prediction*
 experiments/profiling/v100/gpu_logs/
 
 # Large training artifacts

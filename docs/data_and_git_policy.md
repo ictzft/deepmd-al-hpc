@@ -703,7 +703,7 @@ docs/results.md
 docs/setup.md
 docs/toy_h2_pipeline.md
 docs/uncertainty_rounds.md
-docs/week2_single_model_baseline.md
+docs/toy_h2_pipeline.md
 ```
 
 说明：
