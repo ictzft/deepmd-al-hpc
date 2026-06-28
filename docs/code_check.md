@@ -871,3 +871,95 @@ git ls-files | grep -E "\.pb$|\.npz$|\.npy$|checkpoint|model.ckpt|train.log|test
 ```
 
 如果大文件检查无输出，且 `git diff --cached --stat` 只包含预期文件，再进行 commit 和 push。
+
+---
+
+## 17. rMD17 Benzene 验证
+
+如果修改了 benzene 相关的脚本、配置或结果文件，建议执行以下额外检查。
+
+### 17.1 benzene Python 脚本语法检查
+
+```bash
+python3 -m py_compile \
+  scripts/experiments/run_rmd17_benzene_strategy_baseline.py \
+  scripts/analysis/summarize_rmd17_benzene.py \
+  scripts/analysis/plot_rmd17_benzene_comparison.py
+```
+
+### 17.2 benzene 配置完整性检查
+
+```bash
+# 检查 diversity config 目录
+for seed in 0 1 2; do
+  for rd in 1 2 3; do
+    dir="configs/deepmd/rmd17_benzene_diversity_seed${seed}_round00${rd}_committee"
+    n=$(ls "$dir"/*.json 2>/dev/null | wc -l)
+    [ "$n" -ne 4 ] && echo "MISSING: $dir has $n files (expected 4)"
+  done
+done
+
+# 检查 trust_level config 目录
+for seed in 0 1 2; do
+  for rd in 1 2 3; do
+    dir="configs/deepmd/rmd17_benzene_trust_level_seed${seed}_round00${rd}_committee"
+    n=$(ls "$dir"/*.json 2>/dev/null | wc -l)
+    [ "$n" -ne 4 ] && echo "MISSING: $dir has $n files (expected 4)"
+  done
+done
+
+echo "Config check done（无输出 = 全部通过）"
+```
+
+### 17.3 benzene 实验摘要完整性检查
+
+```bash
+# 检查四策略汇总 CSV
+for f in experiments/rmd17_benzene_summary/all_strategies_detail.csv \
+         experiments/rmd17_benzene_summary/four_strategy_comparison.csv; do
+  [ -f "$f" ] && echo "✅ $f" || echo "❌ MISSING: $f"
+done
+
+# 检查 MD stability
+for f in experiments/rmd17_benzene_summary/md_stability/md_summary.json; do
+  [ -f "$f" ] && echo "✅ $f" || echo "❌ MISSING: $f"
+done
+
+# 检查 selected JSON
+for strategy in diversity trust_level; do
+  for seed in 0 1 2; do
+    for rd in 1 2 3; do
+      f="experiments/baselines/rmd17_benzene_${strategy}_seed${seed}_round00${rd}_committee_prediction/selected_${strategy}.json"
+      [ -f "$f" ] || echo "❌ MISSING: $f"
+    done
+  done
+done
+echo "Summary check done（无 MISSING 输出 = 全部通过）"
+```
+
+### 17.4 benzene 四策略结果一致性检查
+
+```bash
+python3 -c "
+import csv
+with open('experiments/rmd17_benzene_summary/all_strategies_detail.csv') as f:
+    rows = list(csv.DictReader(f))
+# 检查 Round 3 有 4 个策略的结果
+rd3 = [r for r in rows if r['round'] == '3']
+strategies = set(r['strategy'] for r in rd3)
+assert strategies == {'uncertainty', 'random', 'diversity', 'trust_level'}, f'Missing strategies: {strategies}'
+print(f'Round 3 strategies: {strategies}')
+for r in rd3:
+    assert r['force_rmse_mean'], f'Missing force_rmse_mean for {r[\"strategy\"]}'
+print('All strategies have valid force_rmse_mean')
+print('✅ Consistency check passed')
+"
+```
+
+### 17.5 benzene 大文件泄露检查
+
+```bash
+# benzene 相关目录不应有 pb/npz/npy 被 git 跟踪
+git ls-files experiments/baselines/rmd17_benzene_* | grep -E "\.pb$|\.npz$|\.npy$" && echo "❌ LEAK" || echo "✅ No large files tracked"
+git ls-files experiments/rmd17_benzene_* | grep -E "\.pb$|\.npz$|\.npy$" && echo "❌ LEAK" || echo "✅ No large files tracked"
+```
