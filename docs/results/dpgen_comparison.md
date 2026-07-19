@@ -1,4 +1,4 @@
-# DP-GEN 对比（CCGrid 2027 Table 2）
+# DP-GEN 对比（IPDPS 2027 Table 2）
 
 更新：2026-07-19 | 平台：8×RTX 5090（deepmd-5090 容器，PyTorch 后端）
 

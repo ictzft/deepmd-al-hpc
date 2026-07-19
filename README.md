@@ -1,6 +1,6 @@
 # deepmd-al-hpc
 
-`deepmd-al-hpc` 是一个面向 **机器学习势函数（MLP）committee-based active learning 的 GPU 性能表征与优化** 的研究框架，目标投稿 **CCGrid 2027**（CCF-B）。
+`deepmd-al-hpc` 是一个面向 **机器学习势函数（MLP）committee-based active learning 的 GPU 性能表征与优化** 的研究框架，目标投稿 **IPDPS 2027**（CCF-B）。
 
 **核心问题**：committee AL 训练（DP-GEN 范式）在 GPU 上严重低效 —— 单模型训练 SM 利用率仅 **4–9%**。本项目用 Nsight 定位根因（**launch-bound**），并提出 MPS 多模型共享 + batch 调优：单卡利用率提升 **8.6×**、资源效率 **~4×**。
 
@@ -10,7 +10,7 @@
 
 ## 当前状态（2026-07-19）
 
-### CCGrid 2027 系统论文（主线，8×RTX 5090）
+### IPDPS 2027 系统论文（主线，8×RTX 5090）
 
 | 模块 | 状态 |
 |---|---|
@@ -73,7 +73,7 @@ bash scripts/scaling/run_mps.sh 4 1 100 256
 bash scripts/scaling/run_strong_scaling.sh 8 ethanol 200
 ```
 
-CCGrid 路线图见 [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md)，复现总入口见 [`docs/reproduce.md`](docs/reproduce.md)。
+HPDC 路线图见 [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md)，复现总入口见 [`docs/reproduce.md`](docs/reproduce.md)。
 
 ---
 
@@ -83,7 +83,7 @@ CCGrid 路线图见 [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md)
 
 | 文档 | 作用 |
 |---|---|
-| [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md) | CCGrid 2027 投稿路线图（定位/gap/计划/时间线）|
+| [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md) | IPDPS 2027 投稿路线图（定位/gap/计划/时间线）|
 | [`docs/results/dpgen_comparison.md`](docs/results/dpgen_comparison.md) | DP-GEN 对比（Table 2，含统计+长训练）|
 | [`docs/current_project_status.md`](docs/current_project_status.md) | 项目全局状态 |
 
@@ -140,4 +140,4 @@ CCGrid 路线图见 [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md)
 
 详见 [`docs/data_and_git_policy.md`](docs/data_and_git_policy.md)。
 
-<!-- README updated 2026-07-19 (CCGrid 2027 systems paper repositioning). -->
+<!-- README updated 2026-07-19 (IPDPS 2027 systems paper repositioning). -->

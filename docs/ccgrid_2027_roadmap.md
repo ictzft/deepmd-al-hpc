@@ -1,4 +1,6 @@
-# CCGrid 2027 投稿改造路线图
+# IPDPS 2027 投稿改造路线图
+
+> ⚠️ **venue（2026-07-19 用户确定）**：投 **IPDPS 2027**（CCF-B，submit ~2026-10 / notify ~2027-01-02 / 会议 2027-06 Seattle；HPC 应用+系统对口）。时间窗口 **3 个月（紧）**，大体系（S12）须尽快补。备选 HPDC（CCF-B，notify 3-31，7 月窗口更从容）。CCGrid 是 CCF-C（曾误判，已弃）。下方早期 "CCGrid" 字段为历史，实验规划与 venue 无关仍有效。
 
 > **目标**：CCGrid 2027（CCF-B，Cluster/Cloud/Internet Computing），预计 2026-12 投稿 / 2027-02 录用。
 > **本文件**：从"方法学验证仓库"改造为"系统性能论文仓库"的 5 个月执行蓝图。
