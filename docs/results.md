@@ -402,7 +402,7 @@ Round 002: 0.196183 eV/Å
 Round 003: 0.189028 eV/Å
 ```
 
-Multi-round random baseline 已完成（2026-05-25, 2×V100）。完整汇总见 [experiments/baselines/random_round002_baseline_summary.csv](experiments/baselines/random_round002_baseline_summary.csv) 和 [random_round003_baseline_summary.csv](experiments/baselines/random_round003_baseline_summary.csv)。
+Multi-round random baseline 已完成（2026-05-25, 2×V100）。完整汇总见 [experiments/baselines/random_round002_baseline_summary.csv](../experiments/baselines/random_round002_baseline_summary.csv) 和 [random_round003_baseline_summary.csv](../experiments/baselines/random_round003_baseline_summary.csv)。
 
 ---
 
@@ -474,7 +474,7 @@ Diversity 和 trust_level 策略已完成 seed0/seed1/seed2 Round 001–003 mult
 | diversity | 2.052e-01 | 5.789e-02 | 1.738e-01 | 9.290e-03 | 1.759e-01 | 4.082e-02 |
 | trust_level | 1.353e-01 | 2.761e-02 | 1.491e-01 | 2.256e-02 | 1.782e-01 | 6.470e-03 |
 
-完整数据见 [experiments/strategy_comparison_toy_h2/strategy_summary.md](experiments/strategy_comparison_toy_h2/strategy_summary.md) 和 [experiments/baselines/aligned_comparison.md](experiments/baselines/aligned_comparison.md)。
+完整数据见 [experiments/strategy_comparison_toy_h2/strategy_summary.md](../experiments/strategy_comparison_toy_h2/strategy_summary.md) 和 [experiments/baselines/aligned_comparison.md](../experiments/baselines/aligned_comparison.md)。
 全部四策略（uncertainty / random / diversity / trust_level）均为 3-seed mean ± std（2026-05-25, 2×V100）。
 
 ---
@@ -491,7 +491,7 @@ Round 0 selection-level 对比三种策略选中帧的 H-H 键长分布：
 
 Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显著提升了选中帧的结构覆盖度（pairwise distance 从 0.038Å 增加到 0.119Å），代价是平均 force_dev_max 从 0.441 降低到 0.254。这验证了 uncertainty-diversity 策略的设计动机：在高不确定性帧中增加结构多样性，减少重复选择相似构型。
 
-完整分析见 [experiments/baselines/diversity_analysis.md](experiments/baselines/diversity_analysis.md)。
+完整分析见 [experiments/baselines/diversity_analysis.md](../experiments/baselines/diversity_analysis.md)。
 
 ---
 
@@ -555,7 +555,7 @@ Diversity (FPS) 在高不确定性候选池中通过 farthest-point sampling 显
 | 跨模型方差 | 大 | 中等 |
 | Independent test | 无（valid = candidate） | 有（10000帧独立测试集）|
 
-完整数据见 [experiments/rmd17_ethanol_summary/](experiments/rmd17_ethanol_summary/)。
+完整数据见 [experiments/rmd17_ethanol_summary/](../experiments/rmd17_ethanol_summary/)。
 
 ---
 
