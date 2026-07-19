@@ -32,6 +32,17 @@ data/processed/
 data/rmd17/
 data/real_datasets/
 
+# Seed data archive (large; already extracted into data/rmd17/)
+deepmd-al-hpc-seed-data.tar.gz
+
+# Nsight Systems traces (large profiling intermediates)
+*.nsys-rep
+*.sqlite
+*.qdstrm
+
+# GPU monitoring raw CSV (SM/power samples; aggregated in summary.json)
+experiments/**/gpu.csv
+
 # =========================
 # DeePMD / model files
 # =========================

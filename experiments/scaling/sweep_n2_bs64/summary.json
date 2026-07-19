@@ -1,0 +1,28 @@
+{
+  "n_models": 2,
+  "n_gpus": 1,
+  "n_waves": 1,
+  "total_wall_s": 28.046,
+  "throughput_models_per_s": 0.07131,
+  "mean_model_wall_s": 28.044,
+  "n_ok": 2,
+  "n_fail": 0,
+  "models": [
+    {
+      "model_id": 0,
+      "gpu_id": 0,
+      "wall_s": 28.044,
+      "rc": 0,
+      "log": "/data/zft/deepmd-al-hpc/experiments/scaling/sweep_n2_bs64/model_000/train.log",
+      "wave": 1
+    },
+    {
+      "model_id": 1,
+      "gpu_id": 0,
+      "wall_s": 28.044,
+      "rc": 0,
+      "log": "/data/zft/deepmd-al-hpc/experiments/scaling/sweep_n2_bs64/model_001/train.log",
+      "wave": 1
+    }
+  ]
+}

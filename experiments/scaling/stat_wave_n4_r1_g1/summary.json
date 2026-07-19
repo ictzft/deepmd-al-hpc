@@ -1,0 +1,44 @@
+{
+  "n_models": 4,
+  "n_gpus": 1,
+  "n_waves": 4,
+  "total_wall_s": 100.485,
+  "throughput_models_per_s": 0.03981,
+  "mean_model_wall_s": 25.119,
+  "n_ok": 4,
+  "n_fail": 0,
+  "models": [
+    {
+      "model_id": 0,
+      "gpu_id": 0,
+      "wall_s": 25.393,
+      "rc": 0,
+      "log": "/data/zft/deepmd-al-hpc/experiments/scaling/stat_wave_n4_r1_g1/model_000/train.log",
+      "wave": 1
+    },
+    {
+      "model_id": 1,
+      "gpu_id": 0,
+      "wall_s": 25.085,
+      "rc": 0,
+      "log": "/data/zft/deepmd-al-hpc/experiments/scaling/stat_wave_n4_r1_g1/model_001/train.log",
+      "wave": 2
+    },
+    {
+      "model_id": 2,
+      "gpu_id": 0,
+      "wall_s": 24.819,
+      "rc": 0,
+      "log": "/data/zft/deepmd-al-hpc/experiments/scaling/stat_wave_n4_r1_g1/model_002/train.log",
+      "wave": 3
+    },
+    {
+      "model_id": 3,
+      "gpu_id": 0,
+      "wall_s": 25.18,
+      "rc": 0,
+      "log": "/data/zft/deepmd-al-hpc/experiments/scaling/stat_wave_n4_r1_g1/model_003/train.log",
+      "wave": 4
+    }
+  ]
+}

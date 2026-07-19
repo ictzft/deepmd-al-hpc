@@ -1,10 +1,38 @@
 # Current Project Status
 
-Date: 2026-06-28 | Host: shared-v100 (2×Tesla V100-16GB) → 已迁移至 RTX-5090 (8×RTX 5090-32GB) | Branch: main
+Date: 2026-07-19 | Host: 8×RTX 5090-32GB（系统论文主平台，PyTorch 后端）+ 2×Tesla V100（历史）| Branch: main
+
+> **2026-07-19 重大更新**：项目重新定位为 **CCGrid 2027 系统性能论文**（committee AL for MLP 的 GPU 性能表征与优化）。系统实验见 §1A；下方 §2+ 为历史方法学实验（保留为论文背景/appendix）。
 
 ---
 
-## 1. One-sentence Summary
+## 1A. CCGrid 2027 系统论文进度（2026-07-19，8×5090）
+
+| # | Component | Status |
+|---|---|---|
+| S1 | 5090 容器封装 `run_in_5090.sh`（PyTorch 后端，修 uid 坑）| done |
+| S2 | `concurrent_runner.py`（wave/all 双模式，可配 N/G/batch）| done |
+| S3 | 强 scaling（N=8 ethanol, G=1/2/4/8）| done，G=8 效率 85% |
+| S4 | Nsight 根因（launch-bound）| done，cudaLaunchKernel 占 CPU 84.6% |
+| S5 | MPS 多模型共享（资源效率 ~4×）| done |
+| S6 | batch×MPS 组合（SM 4.4%→38%，8.6×）| done |
+| S7 | 统计补强（n=3 mean±std）| done，"4×" std ≤0.1s |
+| S8 | 长训练验证（2000 步）| done，MPS 239s ≈ wave 235s，"同 wall"成立 |
+| S9 | 能耗 + 红利曲线 sweep | done，per-model energy N=8 降到 N=2 的 1/3 |
+| S10 | DP-GEN 对比（Table 2，wave 代理 + 源码 `run.py:765` 佐证）| done |
+| S11 | 论文 figure（Fig.2/3/5/6）| done |
+| S12 | 大体系验证 | **pending（待数据集）** |
+| S13 | 真跑 dpgen 完整闭环 | future（需 VASP）|
+| S14 | 跨架构（V100/H100）| future |
+| S15 | 论文正文 | pending |
+
+核心数据：`experiments/scaling/`、`experiments/figures/ccgrid_2027/`、`experiments/nsight_prof/`、`docs/results/dpgen_comparison.md`。
+
+详见 [`docs/ccgrid_2027_roadmap.md`](ccgrid_2027_roadmap.md) 与 [`docs/results/dpgen_comparison.md`](results/dpgen_comparison.md)。
+
+---
+
+## 1. One-sentence Summary（历史方法学，2×V100）
 
 toy H2 四策略 multi-seed multi-round 已完成；V100 profiling baseline 已完成。rMD17 ethanol 四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 已完成，independent test evaluation 已完成，10K NVE MD stability 已完成。rMD17 benzene 四策略（uncertainty / random / diversity / trust_level）multi-seed multi-round 全部完成，independent test 已完成，10K NVE MD stability 已完成。H100 scaling 未开始。
 

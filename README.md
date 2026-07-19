@@ -1,121 +1,143 @@
 # deepmd-al-hpc
 
-`deepmd-al-hpc` 是一个面向 **DeePMD committee-based offline active learning** 的可复现实验框架，在 toy H2、rMD17 ethanol 和 rMD17 benzene 上验证了主动学习闭环，并在 2×V100 上完成 profiling baseline。
+`deepmd-al-hpc` 是一个面向 **机器学习势函数（MLP）committee-based active learning 的 GPU 性能表征与优化** 的研究框架，目标投稿 **CCGrid 2027**（CCF-B）。
+
+**核心问题**：committee AL 训练（DP-GEN 范式）在 GPU 上严重低效 —— 单模型训练 SM 利用率仅 **4–9%**。本项目用 Nsight 定位根因（**launch-bound**），并提出 MPS 多模型共享 + batch 调优：单卡利用率提升 **8.6×**、资源效率 **~4×**。
+
+> 历史：仓库早期是 DeePMD committee offline active learning 的方法学验证（toy H2 + rMD17 四策略，2×V100），现已重新定位为系统性能论文；方法学结果保留为论文 appendix 与背景。
 
 ---
 
-## 当前状态（2026-06-28）
+## 当前状态（2026-07-19）
 
-| 系统 | 状态 |
+### CCGrid 2027 系统论文（主线，8×RTX 5090）
+
+| 模块 | 状态 |
 |---|---|
-| toy H2 | 四策略 multi-seed multi-round 完成；V100 profiling 完成 |
-| rMD17 ethanol | 四策略 + independent test + 10K NVE stability 完成 |
-| rMD17 benzene | 四策略 + independent test + 2.5ps NVE stability 完成 |
-| H100 scaling | 未开始 |
-| RTX 5090 适配 | Docker 镜像 + toy H2 端到端验证完成（2026-06-28） |
+| 强 scaling（N=8 ethanol, G=1/2/4/8）| ✅ 近线性，G=8 效率 85% |
+| GPU 利用率根因（Nsight）| ✅ launch-bound（cudaLaunchKernel 占 CPU 84.6%）|
+| MPS 多模型共享优化 | ✅ 资源效率 ~4× |
+| batch×MPS 组合 | ✅ SM 4.4%→38%（8.6×）|
+| DP-GEN 对比（Table 2）| ✅ wave 代理 + 源码佐证 |
+| 论文 figure（Fig.2/3/5/6）| ✅ 定稿 |
+| 统计补强（n=3 mean±std）| ✅ 4× std ≤0.1s |
+| 长训练验证（2000 步）| ✅ MPS 239s ≈ wave 235s |
+| 能耗 + 红利曲线 sweep | ✅ 每模型能耗 N=8 降到 N=2 的 1/3 |
+| 大体系验证 | ⏳ 待补数据集 |
+| 真跑 dpgen 完整闭环 | ⏳ future work（需 VASP）|
+| 跨架构（V100/H100）| ⏳ future work |
+| 论文正文 | ⏳ 未开始 |
 
-当前仍属于 **offline active learning 原型**：使用已有 rMD17 标注数据模拟 DFT labeling，不等同于已接入实时 DFT/AIMD 标注闭环。
+### 方法学背景（历史，2×V100）
+- toy H2 + rMD17 ethanol/benzene 四策略（uncertainty/random/diversity/trust_level）multi-seed multi-round 完成
+- independent test + NVE MD stability 完成
 
-详细状态见 [`docs/current_project_status.md`](docs/current_project_status.md)。
+详见 [`docs/current_project_status.md`](docs/current_project_status.md)。
 
 ---
 
 ## 硬件环境
 
-| 环境 | GPU | 状态 |
+| 环境 | GPU | 角色 |
 |---|---|---|
-| shared-v100 | 2×Tesla V100-16GB | 全部实验已完成 |
-| RTX 5090 | 8×RTX 5090-32GB (Blackwell) | 环境就绪，实验待跑 |
+| RTX 5090 | 8×RTX 5090-32GB (Blackwell) | 系统论文主平台（PyTorch 后端）|
+| shared-v100 | 2×Tesla V100-16GB | 历史方法学实验 |
 
-RTX 5090 环境配置详见 [`docs/setup.md`](docs/setup.md) 第 5.1 节。
+5090 环境配置见 [`docs/setup.md`](docs/setup.md)。**所有 GPU 操作走容器**（`scripts/docker/run_in_5090.sh`）。
+
+---
+
+## 核心结果（系统论文）
+
+| 产出 | 内容 | 位置 |
+|---|---|---|
+| Fig.2 motivation | baseline SM 仅 4% | `experiments/figures/ccgrid_2027/` |
+| Fig.3 强 scaling | N=8, G=8 效率 85% | 同上 |
+| Fig.5 launch-bound 根因 | cudaLaunchKernel 84.6% | 同上 |
+| Fig.6 优化矩阵 | batch×MPS, SM 8.6× | 同上 |
+| Table 2 DP-GEN 对比 | 资源效率 4× | `docs/results/dpgen_comparison.md` |
+| Sweep 红利曲线 | SM 随 N/batch 单调升、未饱和 | `experiments/scaling/sweep_summary.json` |
 
 ---
 
 ## 快速开始
 
 ```bash
-cd /data/zft
-bash scripts/docker/enter_deepmd_container.sh
+# 所有 GPU 操作走 5090 容器（PyTorch 后端）
+bash scripts/docker/run_in_5090.sh 0 -- <command>
+
+# 例：MPS 多模型共享实验（4 模型共享 1 卡，batch=256）
+bash scripts/scaling/run_mps.sh 4 1 100 256
+
+# 强 scaling（N=8, 1/2/4/8 GPU）
+bash scripts/scaling/run_strong_scaling.sh 8 ethanol 200
 ```
 
-完整复现流程见 [`docs/reproduce.md`](docs/reproduce.md)。
+CCGrid 路线图见 [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md)，复现总入口见 [`docs/reproduce.md`](docs/reproduce.md)。
 
 ---
 
 ## 文档导航
 
+**系统论文（主线）**：
+
 | 文档 | 作用 |
 |---|---|
-| [`docs/current_project_status.md`](docs/current_project_status.md) | 项目全局状态、已完成/待完成清单 |
-| [`docs/results.md`](docs/results.md) | 实验结果汇总（toy H2 + rMD17 ethanol + rMD17 benzene） |
-| [`docs/paper_evidence.md`](docs/paper_evidence.md) | 论文证据清单、可支持/不可支持的结论 |
-| [`docs/claim_boundary_2026_05_28.md`](docs/claim_boundary_2026_05_28.md) | claim boundary 与论文安全表述 |
-| [`docs/reproduce.md`](docs/reproduce.md) | 复现总入口、推荐顺序与文档导航 |
-| [`docs/setup.md`](docs/setup.md) | 环境配置、Docker、DeepMD-kit 基础检查 |
-| [`docs/toy_h2_pipeline.md`](docs/toy_h2_pipeline.md) | toy H2 数据生成、单模型训练和基础流程 |
-| [`docs/uncertainty_rounds.md`](docs/uncertainty_rounds.md) | uncertainty sampling Round 0–3 多轮闭环 |
-| [`docs/random_baseline.md`](docs/random_baseline.md) | random sampling baseline、multi-seed retraining |
-| [`docs/selection_strategies.md`](docs/selection_strategies.md) | 四类 selection strategy 说明与对比 |
-| [`docs/diversity_and_trust_level_plan.md`](docs/diversity_and_trust_level_plan.md) | diversity / trust-level 实验计划与结果 |
-| [`docs/real_dataset_plan.md`](docs/real_dataset_plan.md) | 真实数据集迁移计划与 rMD17 结果 |
-| [`docs/profiling_v100.md`](docs/profiling_v100.md) | V100 profiling 方案与实测数据 |
-| [`docs/profiling_h100.md`](docs/profiling_h100.md) | H100 迁移计划（尚未执行） |
-| [`docs/data_and_git_policy.md`](docs/data_and_git_policy.md) | 数据与 Git 管理规范 |
-| [`docs/code_check.md`](docs/code_check.md) | 提交前代码检查 |
+| [`docs/ccgrid_2027_roadmap.md`](docs/ccgrid_2027_roadmap.md) | CCGrid 2027 投稿路线图（定位/gap/计划/时间线）|
+| [`docs/results/dpgen_comparison.md`](docs/results/dpgen_comparison.md) | DP-GEN 对比（Table 2，含统计+长训练）|
+| [`docs/current_project_status.md`](docs/current_project_status.md) | 项目全局状态 |
 
-推荐阅读顺序：
+**方法学背景（历史）**：
 
-```text
-docs/setup.md → docs/toy_h2_pipeline.md → docs/uncertainty_rounds.md → docs/random_baseline.md → docs/results.md → docs/reproduce.md
-```
+| 文档 | 作用 |
+|---|---|
+| [`docs/results.md`](docs/results.md) | 方法学实验结果（toy H2 + rMD17）|
+| [`docs/selection_strategies.md`](docs/selection_strategies.md) | 四类 selection strategy |
+| [`docs/paper_evidence.md`](docs/paper_evidence.md) | 方法学证据清单 |
+| [`docs/profiling_v100.md`](docs/profiling_v100.md) | V100 profiling |
+| [`docs/reproduce.md`](docs/reproduce.md) | 复现总入口 |
+| [`docs/setup.md`](docs/setup.md) | 环境配置 |
 
 ---
 
-## Claim Boundary
+## Claim Boundary（系统论文）
 
 **Can claim:**
-- Reproducible offline active learning pipeline on toy H2, rMD17 ethanol, and rMD17 benzene (2×V100)
-- Four-strategy multi-seed multi-round comparison completed on toy H2 and rMD17 ethanol
-- On rMD17 ethanol, uncertainty-based and related active selection strategies show more stable improvement trends than random sampling (Round 3: 0.354–0.362 vs random 0.607 eV/Å); however, random cross-seed variance is large (std=0.683), so strict statistical significance cannot be claimed
-- Uncertainty branch shows monotonically decreasing Force RMSE on both validation and independent test for rMD17 ethanol
-- 2×V100 model-level parallel training achieves ~1.97× speedup
+- committee AL 训练（DP-GEN 范式）GPU 利用率仅 4–9%（实测，Fig.2）
+- 根因是 launch-bound（cudaLaunchKernel 占 CPU 84.6%，Nsight，Fig.5）
+- MPS 多模型共享 + batch：单卡 SM 4.4%→38%（8.6×），资源效率 ~4×（统计 n=3 + 长训练 2000 步双验证，Fig.6 + Table 2）
+- 强 scaling 近线性（N=8, G=8 效率 85%，Fig.3）
+- 每模型能耗随 committee 规模 N 降到 1/3（sweep）
 
 **Cannot claim (yet):**
-- Results generalize broadly (only 2 rMD17 systems tested; more systems needed)
-- One active strategy consistently outperforms others (differences within 1σ on both toy H2 and ethanol)
-- High-temperature MD stability (100K+ dissociation on ethanol)
-- H100 multi-GPU scaling results
-- Online DFT/AIMD labeling
-
-详细 claim boundary 见 [`docs/claim_boundary_2026_05_28.md`](docs/claim_boundary_2026_05_28.md) 和 [`docs/paper_evidence.md`](docs/paper_evidence.md)。
+- 大体系（蛋白质/材料）结论（只 ethanol/benzene 小分子）—— 待补数据集
+- 完整 DP-GEN AL 闭环对比（无 VASP，用源码佐证的训练调度代理）
+- 单模型多卡 DDP 维度（只 model-level parallel）
+- 跨架构（V100/H100）验证
+- 高温 MD stability（方法学侧，100K+ 解离）
 
 ---
 
 ## 主要结果链接
 
-**toy H2:**
-- `experiments/al_rounds_summary.csv` — uncertainty Round 0–3
-- `experiments/baselines/aligned_comparison.csv` — 四策略统一口径对比（authoritative）
-- `experiments/figures/` — learning curve 图
+**系统论文**：
+- `experiments/figures/ccgrid_2027/` — Fig.2/3/5/6（SVG+PNG）
+- `experiments/scaling/` — scaling/MPS/wave/long/stats/sweep 原始数据
+- `experiments/nsight_prof/` — Nsight trace
+- `docs/results/dpgen_comparison.md` — Table 2
 
-**rMD17 ethanol:**
-- `experiments/rmd17_ethanol_summary/al_rounds_summary.csv` — uncertainty branch
-- `experiments/rmd17_ethanol_summary/independent_test_all_summary.csv` — independent test
-- `experiments/rmd17_ethanol_summary/four_strategy_comparison.csv` — 四策略对比
-- `experiments/rmd17_ethanol_summary/md_stability/md_summary.json` — MD stability
-
-**rMD17 benzene:**
-- `experiments/rmd17_benzene_round{000–003}_committee_prediction/selected_topk.json` — uncertainty branch
-- `docs/results/rmd17_benzene_active_learning.md` — benzene 实验说明
+**方法学（历史）**：
+- `experiments/al_rounds_summary.csv` — toy H2 uncertainty
+- `experiments/rmd17_ethanol_summary/` — ethanol 四策略
+- `experiments/rmd17_benzene_round*/` — benzene
 
 ---
 
 ## 版本管理
 
-以下内容不提交到 GitHub：`/data/`、`*.pb`、`*.npy`、`*.npz`、`model.ckpt*`、`checkpoint`、`*.log`、LAMMPS trajectory 文件。
-
-GitHub 中保留：source code、configuration files、lightweight experiment summaries（`selected_topk.json`、`summary.csv/md`）、learning curve figures、documentation。
+不提交：`/data/`、`*.pb`、`*.npy`、`*.npz`、`model.ckpt*`、`checkpoint`、`*.log`、`*.nsys-rep`、LAMMPS trajectory。
+保留：source code、configs、lightweight summaries（`summary.json` / `selected_topk.json` / `*.csv`）、figures、docs。
 
 详见 [`docs/data_and_git_policy.md`](docs/data_and_git_policy.md)。
 
-<!-- README updated on 2026-06-28 (5090 env added). -->
+<!-- README updated 2026-07-19 (CCGrid 2027 systems paper repositioning). -->
